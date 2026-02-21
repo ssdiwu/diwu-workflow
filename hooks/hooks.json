@@ -15,7 +15,7 @@
       "hooks": [
         {
           "type": "command",
-          "command": "python3 -c \"import json,sys,os; f='.claude/task.json'; d=json.load(open(f)) if os.path.exists(f) else sys.exit(0); tasks=d.get('tasks',[]); ts=[t for t in tasks if t['status'] in ('InProgress','InSpec')]; ts and print(json.dumps({'decision':'block','reason':'task.json 中还有未完成的任务，请继续执行：\\n'+chr(10).join('#'+str(t['id'])+' '+t['description']+' ['+t['status']+']' for t in ts)}))\" 2>/dev/null||true"
+          "command": "python3 -c \"import json,sys,os; f='.claude/task.json'; d=json.load(open(f)) if os.path.exists(f) else sys.exit(0); tasks=d.get('tasks',[]); sum(1 for t in tasks if t['status']=='InReview')>5 and sys.exit(0); ts=[t for t in tasks if t['status'] in ('InProgress','InSpec')]; ts and print(json.dumps({'decision':'block','reason':'task.json 中还有未完成的任务，请继续执行：\\n'+chr(10).join('#'+str(t['id'])+' '+t['description']+' ['+t['status']+']' for t in ts)}))\" 2>/dev/null||true"
         }
       ]
     }
