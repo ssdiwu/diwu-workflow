@@ -179,12 +179,15 @@ diwu-workflow/
 │   ├── dadr.md
 │   └── ddoc.md
 ├── skills/                  # Claude 自动加载的背景知识
-│   ├── diwu-init/
-│   ├── diwu-plan/
-│   ├── diwu-adr/
 │   └── diwu-doc/
+├── assets/
+│   └── dinit/               # /dinit 依赖的模板与规则
+│       └── assets/
+│           ├── *.template   # CLAUDE.md / task.json 等模板
+│           └── rules/       # core-states / core-workflow 等规则文件
 └── hooks/
-    └── hooks.json
+    ├── hooks.json
+    └── scripts/
 ```
 
 ---
