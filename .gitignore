@@ -2,3 +2,4 @@
 *.local.json
 .claude/
 .doc/
+sync-rules.sh
