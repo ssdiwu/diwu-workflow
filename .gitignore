@@ -1,2 +1,4 @@
 .DS_Store
 *.local.json
+.claude/
+.doc/
