@@ -25,17 +25,17 @@ allowed-tools: Read, Write, Edit, Bash, Glob
 ## Step 3：创建项目文件
 
 ### .claude/CLAUDE.md
-- **精简模式**：读取 `${CLAUDE_PLUGIN_ROOT}/skills/diwu-init/assets/claude-md-minimal.template`，填入项目信息
-- **便携模式**：读取 `${CLAUDE_PLUGIN_ROOT}/skills/diwu-init/assets/claude-md-portable.template`，将 `[RULES:filename.md]` 占位符替换为 `assets/rules/` 对应文件内容
+- **精简模式**：读取 `${CLAUDE_PLUGIN_ROOT}/assets/dinit/assets/claude-md-minimal.template`，填入项目信息
+- **便携模式**：读取 `${CLAUDE_PLUGIN_ROOT}/assets/dinit/assets/claude-md-portable.template`，将 `[RULES:filename.md]` 占位符替换为 `assets/rules/` 对应文件内容
 
 ### AGENTS.md（项目根目录）
-读取 `${CLAUDE_PLUGIN_ROOT}/skills/diwu-init/assets/agents-md.template` 写入项目根目录。
+读取 `${CLAUDE_PLUGIN_ROOT}/assets/dinit/assets/agents-md.template` 写入项目根目录。
 
 ### .claude/task.json
-读取 `${CLAUDE_PLUGIN_ROOT}/skills/diwu-init/assets/task.json.template`。若用户已有需求，填充初始任务（status: InDraft）；否则保持 tasks 数组为空。
+读取 `${CLAUDE_PLUGIN_ROOT}/assets/dinit/assets/task.json.template`。若用户已有需求，填充初始任务（status: InDraft）；否则保持 tasks 数组为空。
 
 ### init.sh（项目根目录）
-读取 `${CLAUDE_PLUGIN_ROOT}/skills/diwu-init/assets/init.sh.template`，根据技术栈定制安装命令和 dev server 命令，执行 `chmod +x init.sh`。
+读取 `${CLAUDE_PLUGIN_ROOT}/assets/dinit/assets/init.sh.template`，根据技术栈定制安装命令和 dev server 命令，执行 `chmod +x init.sh`。
 
 ### .claude/recording.md
 写入初始内容：
@@ -46,13 +46,13 @@ allowed-tools: Read, Write, Edit, Bash, Glob
 ```
 
 ### .claude/checks/smoke.sh
-读取 `${CLAUDE_PLUGIN_ROOT}/skills/diwu-init/assets/smoke.sh.template`，根据技术栈定制，执行 `chmod +x .claude/checks/smoke.sh`。
+读取 `${CLAUDE_PLUGIN_ROOT}/assets/dinit/assets/smoke.sh.template`，根据技术栈定制，执行 `chmod +x .claude/checks/smoke.sh`。
 
 ## Step 4：可选 — 架构约束
 
 询问用户是否需要 `.claude/rules/constraints.md`（架构复杂的项目推荐）。
 
-如需要，读取 `${CLAUDE_PLUGIN_ROOT}/skills/diwu-init/references/constraint-template.md`，引导用户用五维框架（业务/时序/跨平台/并发/感知）定义约束。
+如需要，读取 `${CLAUDE_PLUGIN_ROOT}/assets/dinit/references/constraint-template.md`，引导用户用五维框架（业务/时序/跨平台/并发/感知）定义约束。
 
 ## Step 5：Git 初始化（如需要）
 
