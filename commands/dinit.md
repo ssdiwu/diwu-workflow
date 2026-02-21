@@ -28,7 +28,7 @@ allowed-tools: Read, Write, Edit, Bash, Glob
 - **精简模式**：读取 `${CLAUDE_PLUGIN_ROOT}/skills/diwu-init/assets/claude-md-minimal.template`，填入项目信息
 - **便携模式**：读取 `${CLAUDE_PLUGIN_ROOT}/skills/diwu-init/assets/claude-md-portable.template`，将 `[RULES:filename.md]` 占位符替换为 `assets/rules/` 对应文件内容
 
-### AGENTS.md（项目根���录）
+### AGENTS.md（项目根目录）
 读取 `${CLAUDE_PLUGIN_ROOT}/skills/diwu-init/assets/agents-md.template` 写入项目根目录。
 
 ### .claude/task.json
