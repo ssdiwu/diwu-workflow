@@ -1,0 +1,10 @@
+{
+  "name": "diwu-workflow",
+  "version": "0.1.0",
+  "description": "diwu 编码工作流套件：项目初始化、任务规划、架构决策记录、产品文档",
+  "author": {
+    "name": "diwu"
+  },
+  "license": "MIT",
+  "keywords": ["workflow", "task-management", "adr", "documentation", "planning"]
+}
