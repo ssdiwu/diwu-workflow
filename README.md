@@ -33,7 +33,7 @@ Skills 与 Commands 一一对应，Claude 识别到相关场景时自动加载�
 
 ```
 /plugin marketplace add ssdiwu/diwu-workflow
-/plugin install diwu-workflow@ssdiwu
+/plugin install diwu-workflow@diwu
 ```
 
 ## 使用
