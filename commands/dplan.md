@@ -63,12 +63,12 @@ allowed-tools: Read, Write, Edit, Glob
 
 触发条件：category 为 functional/ui 且 acceptance 超过 3 条，或存在多个 blocked_by。
 
-从三个视角审查：
-- **开发视角**：步骤是否清晰可执行？有无技术风险？
-- **QA 视角**：acceptance 是否覆盖边界条件和异常路径？
-- **业务视角**：这个任务交付后，用户能感知到价值吗？
+从三个视角审查，按子代理策略（见 core-workflow.md）派发并行审查：
+- 子代理 A：**开发视角** — 步骤是否清晰可执行？有无技术风险？
+- 子代理 B：**QA 视角** — acceptance 是否覆盖边界条件和异常路径？
+- 子代理 C：**业务视角** — 这个任务交付后，用户能感知到价值吗？
 
-输出补充建议，用户确认后更新 acceptance/steps。
+三个子代理完成后，主代理汇总冲突点，输出补充建议，用户确认后更新 acceptance/steps。
 
 ## Step 7：写入后提示
 
