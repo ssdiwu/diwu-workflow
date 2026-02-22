@@ -93,6 +93,52 @@ stateDiagram-v2
     end note
 ```
 
+#### 状态说明
+
+| 状态 | 含义 | 谁可以操作 |
+|------|------|-----------|
+| `InDraft` | 需求草稿中，任务描述、验收条件、实施步骤均可自由修改 | 人工 + Agent |
+| `InSpec` | 需求已确认并锁定，只有 `status` 字段可以修改 | 人工确认后由 Agent 推进 |
+| `InProgress` | 实施中，Agent 正在按验收条件编写代码 | Agent |
+| `InReview` | 实现完成，等待验证通过 | Agent 自审或人工确认 |
+| `Done` | 验证通过，终态 | — |
+| `Cancelled` | 已取消；可重新激活为 `InSpec` | 人工 |
+
+**关键约束**：`InDraft` 任务 Agent 不会主动执行，必须由人工确认为 `InSpec` 后才会开始实施。
+
+#### 状态转移规则
+
+| 当前状态 | 触发事件 | 新状态 |
+|---------|---------|--------|
+| `InDraft` | 人工确认需求 | `InSpec` |
+| `InSpec` | Agent 开始实施 | `InProgress` |
+| `InSpec` | 发现需求问题 | 保持 `InSpec`，提交 Change Request |
+| `InProgress` | 实现完成，准备验证 | `InReview` |
+| `InProgress` | 遇到阻塞（缺环境/需求矛盾） | 退回 `InSpec`，输出 BLOCKED |
+| `InReview` | 小幅修改，Agent 自审通过 | `Done` |
+| `InReview` | 大幅修改（改 API 规范或 > 2000 行），人工确认 | `Done` |
+| `InReview` | 验证失败 | 退回 `InProgress` |
+| `Cancelled` | 需求重新激活 | `InSpec` |
+
+#### task.json 字段说明
+
+任务存储在 `.claude/task.json`，每个任务包含以下字段：
+
+| 字段 | 类型 | 说明 |
+|------|------|------|
+| `id` | 数字 | 从 1 递增，永不复用 |
+| `description` | 字符串 | 动词开头的一句话任务描述 |
+| `status` | 字符串 | 见上方状态说明 |
+| `acceptance` | 数组 | 验收条件，功能/UI/修复类必须用 `Given … When … Then …` 格式 |
+| `steps` | 数组 | 实施步骤，须自包含（含外部凭据路径、绝对路径） |
+| `category` | 字符串 | `functional` / `ui` / `bugfix` / `refactor` / `infra` |
+| `blocked_by` | 数组 | 前置任务 ID 列表；前置任务全部 Done 后当前任务才可开始 |
+
+`acceptance` 示例：
+```
+"Given 用户已登录 When 点击退出按钮 Then 清除 token 并跳转登录页"
+```
+
 ### Session 生命周期
 
 ```mermaid
