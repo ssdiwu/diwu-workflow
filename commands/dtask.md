@@ -4,7 +4,7 @@ argument-hint: [功能描述（可选）]
 allowed-tools: Read, Write, Edit, Glob
 ---
 
-# /dplan — 任务规划
+# /dtask — 任务规划
 
 ## Step 1：接收功能描述
 

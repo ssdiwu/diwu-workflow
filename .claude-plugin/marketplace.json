@@ -7,7 +7,7 @@
   "plugins": [
     {
       "name": "diwu-workflow",
-      "description": "diwu 编码工作流套件：项目初始化、任务规划、架构决策记录、产品文档",
+      "description": "diwu 编码工作流套件：项目初始化、任务规划、产品需求文档、架构决策记录、产品文档",
       "source": "./",
       "category": "productivity",
       "homepage": "https://github.com/ssdiwu/diwu-workflow"
