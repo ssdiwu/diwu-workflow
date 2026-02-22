@@ -131,8 +131,18 @@ stateDiagram-v2
 | `status` | 字符串 | 见上方状态说明 |
 | `acceptance` | 数组 | 验收条件，功能/UI/修复类必须用 `Given … When … Then …` 格式 |
 | `steps` | 数组 | 实施步骤，须自包含（含外部凭据路径、绝对路径） |
-| `category` | 字符串 | `functional` / `ui` / `bugfix` / `refactor` / `infra` |
+| `category` | 字符串 | 见下方分类说明 |
 | `blocked_by` | 数组 | 前置任务 ID 列表；前置任务全部 Done 后当前任务才可开始 |
+
+`category` 可选值：
+
+| 值 | 含义 | acceptance 格式要求 |
+|----|------|-------------------|
+| `functional` | 新增业务功能、API、核心逻辑 | 必须 Given/When/Then |
+| `ui` | 页面、组件、交互、样式 | 必须 Given/When/Then |
+| `bugfix` | 修复已知 bug | 必须 Given/When/Then |
+| `refactor` | 不改变行为的代码结构优化 | 可用简单描述 |
+| `infra` | 构建、部署、配置、脚本 | 可用简单描述 |
 
 `acceptance` 示例：
 ```
