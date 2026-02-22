@@ -22,6 +22,15 @@
 └── init.sh                        # 环境初始化脚本（可选）
 ```
 
+## .doc/ 目录结构（SDD 规范产物）
+
+```
+.doc/
+├── [domain 或分层文件]   # 见 /diwu-doc
+└── adr/                  # 架构决策记录，见 /diwu-adr
+    └── ADR-NNN-kebab-case-title.md
+```
+
 ## 文件说明
 
 | 路径 | 用途 | 读写方 |
