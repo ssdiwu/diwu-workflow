@@ -141,6 +141,14 @@ stateDiagram-v2
 
 ### Session 生命周期
 
+每次启动 Agent 时，工作流强制按以下顺序执行，不允许跳过：
+
+1. **Preflight 检查**：运行 `.claude/checks/smoke.sh`（若存在）验证基线环境；检查 `recording.md` 是否有待处理的 Change Request；执行 `git status` 确认工作区干净。
+2. **上下文恢复**：读取 `recording.md` 了解上次进度，`git log -20` 了解最近代码变更。
+3. **任务选择**：优先恢复 `InProgress` 任务（中断续作）；否则选第一个无阻塞的 `InSpec` 任务；`InDraft` 任务一律跳过，必须先由人工确认。
+4. **实施与验证**：按 `acceptance` 条件实现，完成后逐条验证——**未验证 = 未完成**，验证通过才能标记 `InReview`。
+5. **提交时机**：只有任务到达 `Done` 时才创建 git commit，内容包含代码变更 + `task.json` + `recording.md` 三者合一。
+
 ```mermaid
 flowchart TD
     Start([Session 启动]) --> Preflight[1. Preflight 检查]
@@ -228,6 +236,47 @@ flowchart TD
     H --> E
     G -->|否| Out
 ```
+
+### 异常处理
+
+工作流内置三种异常机制，用于处理实施过程中的意外情况。
+
+#### BLOCKED — 遇到阻塞时
+
+当 Agent 遇到以下情况时，会**停止任务**并输出 BLOCKED 信息，等待人工介入：
+
+- 缺少环境配置（API 密钥、数据库连接）
+- 外部依赖不可用（第三方服务宕机、需人工授权）
+- 验证无法进行（需真实账号、依赖未部署的外部系统）
+- 需求存在矛盾或无法实现
+
+BLOCKED 时的行为约束：
+- 任务状态退回 `InSpec`（不是 Done，不是 InProgress）
+- **禁止**创建 git commit
+- **禁止**将任务标记为 Done
+- 在 `recording.md` 记录阻塞原因和已完成的工作
+
+人工介入（提供配置/权限/需求修订）后，Agent 从 `InSpec` 恢复继续实施。
+
+#### Change Request — 发现需求问题时
+
+当执行 `InSpec` 任务时发现验收条件无法实现或存在矛盾，Agent 会提交 Change Request，而不是强行实施：
+
+1. 任务状态**保持** `InSpec`（不退回 InDraft）
+2. 输出 CR 说明：原因、建议的 acceptance 修改、影响评估
+3. 等待人工批准
+4. 批准后更新 `task.json` 中的 acceptance，继续实施
+
+CR 与 BLOCKED 的区别：BLOCKED 是环境/依赖问题，CR 是需求本身的问题。
+
+#### 超前实施 — 前置任务还在 InReview 时
+
+当前任务被某个 `InReview` 状态的任务阻塞时，Agent 可以超前执行后续任务，而不是空等：
+
+- 允许最多超前 5 个任务
+- 超前任务完成时标记 `InReview` 并立即创建 commit（标注为超前实施）
+- 超前 5 个后暂停，等待阻塞任务验收通过
+- 若阻塞任务验收失败，评估受影响的超前任务并协商回退方式（`git revert` / 保留修改 / `git reset`）
 
 ---
 
