@@ -20,7 +20,7 @@ AI 擅长执行，不擅长决策。diwu-workflow 的核心主张是：**人负�
 在此之上，用**强约束状态机**控制任务流转：
 
 ```
-InDraft → InSpec → InProgress → InReview → Done
+InDraft（草稿）→ InSpec（已锁定）→ InProgress（实施中）→ InReview（待验证）→ Done（完成）
 ```
 
 每一步的推进条件和禁止行为都有明确规则。Agent 遇到阻塞不能假装完成，遇到需求问题不能自行变更，需求未确认（InDraft）不能开始实施。**所有需要判断的决策节点，都由人来把关**——Agent 负责的是把确认过的事情做完、做对。
