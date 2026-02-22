@@ -8,7 +8,7 @@ diwu 编码工作流套件 — Claude Code 插件。提供项目初始化、任�
 
 ## 设计理念
 
-AI 擅长执行，不擅长决策。diwu-workflow 的核心主张是：**人负责决策，AI 负责操作**。
+AI 擅长执行，不擅长决策。diwu-workflow 的核心主张是：**人负责决策，AI 负责操作**。所有需要判断的决策节点由人把关，Agent 只负责把确认过的事情做完、做对——它不能在需求草稿时开始写代码，不能在验证没过时提交 commit，也不能在遇到阻塞时假装完成。
 
 工作流基于四个规范驱动开发的实践：
 
@@ -23,9 +23,7 @@ AI 擅长执行，不擅长决策。diwu-workflow 的核心主张是：**人负�
 InDraft（草稿）→ InSpec（已锁定）→ InProgress（实施中）→ InReview（待验证）→ Done（完成）
 ```
 
-状态机是一种编程思路：系统在任意时刻只能处于**一个明确的状态**，且只有满足特定条件才能转移到下一个状态，所有不合法的转移直接被忽略。用在 AI 工作流上，好处是：AI 无法通过「自行判断」跳过某个状态——它不能在需求还是草稿时就开始写代码，不能在验证没过时提交 commit，也不能在遇到阻塞时假装任务完成。每个状态的边界由规则定义，不依赖 AI 的自我约束。
-
-每一步的推进条件和禁止行为都有明确规则。Agent 遇到阻塞不能假装完成，遇到需求问题不能自行变更，需求未确认（InDraft）不能开始实施。**所有需要判断的决策节点，都由人来把关**——Agent 负责的是把确认过的事情做完、做对。
+状态机的核心约束是：系统在任意时刻只能处于一个明确的状态，且只有满足特定条件才能转移，所有不合法的转移直接被忽略。每个状态的边界由规则定义，不依赖 AI 的自我约束。
 
 ---
 
@@ -135,7 +133,7 @@ stateDiagram-v2
 | `InSpec` | Agent 开始实施 | `InProgress` |
 | `InSpec` | 发现需求问题 | 保持 `InSpec`，提交 Change Request |
 | `InProgress` | 实现完成，准备验证 | `InReview` |
-| `InProgress` | 遇到阻塞（缺环境/需求矛盾） | 退回 `InSpec`，输出 BLOCKED |
+| `InProgress` | 遇到阻塞（缺环境/依赖不可用） | 退回 `InSpec`，输出 BLOCKED |
 | `InReview` | 小幅修改，Agent 自审通过 | `Done` |
 | `InReview` | 大幅修改（改 API 规范或 > 2000 行），人工确认 | `Done` |
 | `InReview` | 验证失败 | 退回 `InProgress` |
@@ -171,14 +169,6 @@ stateDiagram-v2
 ```
 
 ### Session 生命周期
-
-每次启动 Agent 时，工作流强制按以下顺序执行，不允许跳过：
-
-1. **Preflight 检查**：运行 `.claude/checks/smoke.sh`（若存在）验证基线环境；检查 `recording.md` 是否有待处理的 Change Request；执行 `git status` 确认工作区干净。
-2. **上下文恢复**：读取 `recording.md` 了解上次进度，`git log -20` 了解最近代码变更。
-3. **任务选择**：优先恢复 `InProgress` 任务（中断续作）；否则选第一个无阻塞的 `InSpec` 任务；`InDraft` 任务一律跳过，必须先由人工确认。
-4. **实施与验证**：按 `acceptance` 条件实现，完成后逐条验证——**未验证 = 未完成**，验证通过才能标记 `InReview`。
-5. **提交时机**：只有任务到达 `Done` 时才创建 git commit，内容包含代码变更 + `task.json` + `recording.md` 三者合一。
 
 ```mermaid
 flowchart TD
@@ -230,16 +220,40 @@ flowchart TD
     SetInSpec --> End([Session 结束])
 ```
 
+### 异常处理
+
+#### BLOCKED — 环境或依赖问题
+
+当 Agent 遇到以下情况时，会停止任务并输出 BLOCKED，等待人工介入：
+
+- 缺少环境配置（API 密钥、数据库连接）
+- 外部依赖不可用（第三方服务宕机、需人工授权）
+- 验证无法进行（需真实账号、依赖未部署的外部系统）
+
+BLOCKED 时：任务退回 `InSpec`，禁止创建 commit，禁止标记 Done，在 `recording.md` 记录阻塞原因。人工介入后从 `InSpec` 恢复继续。
+
+#### Change Request — 需求本身有问题
+
+当执行 `InSpec` 任务时发现验收条件无法实现或存在矛盾，Agent 提交 Change Request：任务保持 `InSpec`，输出 CR 说明（原因、建议修改、影响评估），等待人工批准后更新 acceptance 继续实施。
+
+#### 超前实施 — 前置任务还在 InReview
+
+当前任务的前置任务处于 `InReview` 时，Agent 可超前执行后续任务（最多 5 个），超前任务完成时标记 `InReview` 并立即 commit。超前 5 个后暂停等待验收；若前置任务验收失败，协商回退方式（`git revert` / 保留修改 / `git reset`）。
+
+---
+
+## 命令参考
+
 ### /dtask 任务规划流程
 
 ```mermaid
 flowchart TD
-    A[接收功能描述] --> B[澄清问题<br/>目标 / 边界 / 成功标准]
-    B --> C[确定新任务 ID<br/>task.json + archive 取最大值+1]
-    C --> D[生成任务列表<br/>写入 .claude/task.json]
-    D --> E[质量检查<br/>GWT格式 / 可验证 / 垂直切片]
+    A[接收功能描述] --> B[澄清问题<br>目标 / 边界 / 成功标准]
+    B --> C[确定新任务 ID<br>task.json + archive 取最大值+1]
+    C --> D[生成任务列表<br>写入 .claude/task.json]
+    D --> E[质量检查<br>GWT格式 / 可验证 / 垂直切片]
     E --> F{复杂任务?}
-    F -->|functional/ui 且 acceptance>3| G[三视角审查<br/>开发 / QA / 业务]
+    F -->|functional/ui 且 acceptance>3| G[三视角审查<br>开发 / QA / 业务]
     F -->|否| H[写入后提示]
     G --> H
 ```
@@ -260,54 +274,13 @@ flowchart TD
     C6 --> Out[输出到 .doc/]
 
     B -->|逆向：代码→文档| D[读取代码库]
-    D --> E[AI1：写文档 + 自审]
+    D --> E[写文档 + 自审]
     E --> F[两层完整性检查]
     F --> G{有缺口?}
-    G -->|是| H[逆向 Spec 验证]
+    G -->|是| H[补充后重新检查]
     H --> E
     G -->|否| Out
 ```
-
-### 异常处理
-
-工作流内置三种异常机制，用于处理实施过程中的意外情况。
-
-#### BLOCKED — 遇到阻塞时
-
-当 Agent 遇到以下情况时，会**停止任务**并输出 BLOCKED 信息，等待人工介入：
-
-- 缺少环境配置（API 密钥、数据库连接）
-- 外部依赖不可用（第三方服务宕机、需人工授权）
-- 验证无法进行（需真实账号、依赖未部署的外部系统）
-- 需求存在矛盾或无法实现
-
-BLOCKED 时的行为约束：
-- 任务状态退回 `InSpec`（不是 Done，不是 InProgress）
-- **禁止**创建 git commit
-- **禁止**将任务标记为 Done
-- 在 `recording.md` 记录阻塞原因和已完成的工作
-
-人工介入（提供配置/权限/需求修订）后，Agent 从 `InSpec` 恢复继续实施。
-
-#### Change Request — 发现需求问题时
-
-当执行 `InSpec` 任务时发现验收条件无法实现或存在矛盾，Agent 会提交 Change Request，而不是强行实施：
-
-1. 任务状态**保持** `InSpec`（不退回 InDraft）
-2. 输出 CR 说明：原因、建议的 acceptance 修改、影响评估
-3. 等待人工批准
-4. 批准后更新 `task.json` 中的 acceptance，继续实施
-
-CR 与 BLOCKED 的区别：BLOCKED 是环境/依赖问题，CR 是需求本身的问题。
-
-#### 超前实施 — 前置任务还在 InReview 时
-
-当前任务被某个 `InReview` 状态的任务阻塞时，Agent 可以超前执行后续任务，而不是空等：
-
-- 允许最多超前 5 个任务
-- 超前任务完成时标记 `InReview` 并立即创建 commit（标注为超前实施）
-- 超前 5 个后暂停，等待阻塞任务验收通过
-- 若阻塞任务验收失败，评估受影响的超前任务并协商回退方式（`git revert` / 保留修改 / `git reset`）
 
 ---
 
