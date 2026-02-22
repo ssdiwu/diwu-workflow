@@ -4,45 +4,7 @@
 [![GitHub License](https://img.shields.io/github/license/ssdiwu/diwu-workflow)](https://github.com/ssdiwu/diwu-workflow/blob/main/LICENSE)
 [![Claude Code Plugin](https://img.shields.io/badge/Claude%20Code-Plugin-orange)](https://github.com/ssdiwu/diwu-workflow)
 
-diwu 编码工作流套件 — Claude Code 插件。提供项目初始化、任务规划、产品需求文档、架构决策记录、产品文档五个工具，通过 Commands 主动触发，通过 Skills 自动激活，通过 Hooks 防止目标漂移。
-
-## 设计理念
-
-AI 擅长执行，不擅长决策。diwu-workflow 的核心主张是：**人负责决策，AI 负责操作**。所有需要判断的决策节点由人把关，Agent 只负责把确认过的事情做完、做对——它不能在需求草稿时开始写代码，不能在验证没过时提交 commit，也不能在遇到阻塞时假装完成。
-
-工作流基于四个规范驱动开发的实践：
-
-- **BDD**（行为驱动）：所有任务的验收条件用 Given/When/Then 格式写死，Agent 按此实现，不得自行解释需求
-- **TDD**（测试驱动）：验证先于完成——未通过验收条件的任务不允许标记 Done，不允许提交 commit
-- **SDD**（规范驱动）：产品文档（`/ddoc`）和架构决策（`/dadr`）在实施前落地，代码跟着规范走，不是规范跟着代码补
-- **DDD**（领域驱动）：`/ddoc` 按功能域组织文档（`auth.md` / `billing.md` / …），每个任务只需加载对应域的文档，而不是整个代码库——遵循关注点分离原则，让 AI 读最少的上下文完成当前任务，同时降低跨域污染的风险
-
-在此之上，用**强约束状态机**控制任务流转：
-
-```
-InDraft（草稿）→ InSpec（已锁定）→ InProgress（实施中）→ InReview（待验证）→ Done（完成）
-```
-
-状态机的核心约束是：系统在任意时刻只能处于一个明确的状态，且只有满足特定条件才能转移，所有不合法的转移直接被忽略。每个状态的边界由规则定义，不依赖 AI 的自我约束。
-
----
-
-## 安装
-
-```
-/plugin marketplace add ssdiwu/diwu-workflow
-/plugin install diwu-workflow@ssdiwu
-```
-
-## 使用
-
-| 命令 | 作用 | 自动触发场景 |
-|------|------|------------|
-| `/dinit` | 初始化项目工作流结构 | 新建项目、创建 CLAUDE.md |
-| `/dprd` | 生成产品需求文档（PRD） | 写 PRD、产品方案 |
-| `/dadr` | 记录架构决策（ADR） | 技术选型、不可逆约束 |
-| `/ddoc` | 产品文档（正向/逆向两种模式） | 写文档、还原文档 |
-| `/dtask` | 将功能描述拆解为任务列表 | 规划功能、分解需求 |
+diwu 编码工作流套件 — Claude Code 插件。让 AI 按照你确认的需求执行开发任务，而不是自行发挥。
 
 ---
 
@@ -70,6 +32,25 @@ InDraft（草稿）→ InSpec（已锁定）→ InProgress（实施中）→ InR
 ```
 
 > 示例：接手一个老项目 → 先 `/ddoc`（逆向模式）从代码还原文档，再用 `/dprd` 讨论要加的新功能，后续流程同「新需求」。
+
+---
+
+## 安装
+
+```
+/plugin marketplace add ssdiwu/diwu-workflow
+/plugin install diwu-workflow@ssdiwu
+```
+
+## 使用
+
+| 命令 | 作用 | 自动触发场景 |
+|------|------|------------|
+| `/dinit` | 初始化项目工作流结构 | 新建项目、创建 CLAUDE.md |
+| `/dprd` | 生成产品需求文档（PRD） | 写 PRD、产品方案 |
+| `/dadr` | 记录架构决策（ADR） | 技术选型、不可逆约束 |
+| `/ddoc` | 产品文档（正向/逆向两种模式） | 写文档、还原文档 |
+| `/dtask` | 将功能描述拆解为任务列表 | 规划功能、分解需求 |
 
 ---
 
@@ -239,6 +220,27 @@ BLOCKED 时：任务退回 `InSpec`，禁止创建 commit，禁止标记 Done，
 #### 超前实施 — 前置任务还在 InReview
 
 当前任务的前置任务处于 `InReview` 时，Agent 可超前执行后续任务（最多 5 个），超前任务完成时标记 `InReview` 并立即 commit。超前 5 个后暂停等待验收；若前置任务验收失败，协商回退方式（`git revert` / 保留修改 / `git reset`）。
+
+---
+
+## 设计理念
+
+AI 擅长执行，不擅长决策。diwu-workflow 的核心主张是：**人负责决策，AI 负责操作**。所有需要判断的决策节点由人把关，Agent 只负责把确认过的事情做完、做对——它不能在需求草稿时开始写代码，不能在验证没过时提交 commit，也不能在遇到阻塞时假装完成。
+
+工作流基于四个规范驱动开发的实践：
+
+- **BDD**（行为驱动）：所有任务的验收条件用 Given/When/Then 格式写死，Agent 按此实现，不得自行解释需求
+- **TDD**（测试驱动）：验证先于完成——未通过验收条件的任务不允许标记 Done，不允许提交 commit
+- **SDD**（规范驱动）：产品文档（`/ddoc`）和架构决策（`/dadr`）在实施前落地，代码跟着规范走，不是规范跟着代码补
+- **DDD**（领域驱动）：`/ddoc` 按功能域组织文档（`auth.md` / `billing.md` / …），每个任务只需加载对应域的文档，而不是整个代码库——遵循关注点分离原则，让 AI 读最少的上下文完成当前任务，同时降低跨域污染的风险
+
+在此之上，用**强约束状态机**控制任务流转：
+
+```
+InDraft（草稿）→ InSpec（已锁定）→ InProgress（实施中）→ InReview（待验证）→ Done（完成）
+```
+
+状态机的核心约束是：系统在任意时刻只能处于一个明确的状态，且只有满足特定条件才能转移，所有不合法的转移直接被忽略。每个状态的边界由规则定义，不依赖 AI 的自我约束。
 
 ---
 
