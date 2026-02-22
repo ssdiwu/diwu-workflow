@@ -163,7 +163,7 @@ flowchart TD
 | Hook | 触发时机 | 作用 |
 |------|---------|------|
 | `PreToolUse` (Bash) | 每次执行 Bash 前 | 输出当前 InProgress 任务的 acceptance 条件，防止目标漂移 |
-| `Stop` | 回合结束时 | 检查是否有未完成任务（InReview > 5 时豁免），防止遗漏 |
+| `Stop` | 回合结束时 | 三优先级任务循环：① 有 InProgress → block 继续；② InReview > 5 → 放行并通知人工验收；③ 有未阻塞 InSpec → block 投喂下一任务；④ 全部完成 → 放行并通知完工。通知支持 macOS（系统通知+铃声）、Linux（notify-send）、终端铃声保底 |
 
 ---
 
