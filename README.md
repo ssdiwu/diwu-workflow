@@ -290,7 +290,9 @@ flowchart TD
 
 | Hook | 触发时机 | 作用 |
 |------|---------|------|
+| `SessionStart` | session 启动时 | 将主代理 session ID 写入 `/tmp/.claude_main_session`，供 SubagentStop 过滤 stale 通知 |
 | `PreToolUse` (Bash) | 每次执行 Bash 前 | 输出当前 InProgress 任务的 acceptance 条件，防止目标漂移 |
+| `SubagentStop` | 子代理完成时 | 比对 session ID 过滤 stale（旧 session 残留）通知；当前 session 子代理完成后立即触发写 recording.md |
 | `Stop` | 回合结束时 | 四分支任务循环：① 有 InProgress → block 继续当前任务；② InReview 积压 > 5 → 放行并通知人工验收；③ 有未阻塞的 InSpec → block 投喂下一任务；④ 全部完成 → 放行并通知完工。通知支持 macOS（系统通知+铃声）、Linux（notify-send）、终端铃声保底 |
 
 ---
