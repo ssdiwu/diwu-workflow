@@ -53,36 +53,10 @@ CR 编号使用全局递增(跨任务连续),方便追踪。
 4. 任务状态保持 InSpec → InProgress
 5. 按新 acceptance 继续实施
 
-## 超前实施
-
-### 触发条件
-当前任务的 blocked_by 中存在状态为 InReview 的任务时,可以超前实施。
-
-### 超前规则
-- **允许**: 最多超前 5 个任务
-- **任务状态**: 超前完成的任务标记为 **InReview**
-- **提交规则**: 超前任务完成时**立即创建 git commit**
-- **标记**: 在 recording.md 中记录 "Task#N (blocked_by Task#M, 超前 X/5, commit: abc123)"
-- **暂停**: 完成第 5 个超前任务后,输出 PENDING REVIEW,等待阻塞任务验收
-
-超前暂停格式见 templates.md。
-
 ## 回退处理
 
 ### 触发条件
 阻塞任务验收失败,已超前完成的任务可能受影响。
 
-**阻塞任务验收通过后**:
-1. 将阻塞任务标记 Done
-2. 逐个将超前任务标记 Done(InReview → Done)
-3. 在 recording.md 记录阻塞解除
-
-**阻塞任务验收失败时**:
-1. Agent 评估已超前完成的任务是否受影响
-2. 在 recording.md 记录回退计划和选择的方式
-3. **选择回退方式**(人工决定):
-   - **方式 A**: `git revert` 超前 commit(完全不可复用)
-   - **方式 B**: 保留 commit,在此基础上修改(部分可复用)
-   - **方式 C**: `git reset --soft HEAD~N` 回退后重新实施
-4. 修复阻塞任务并验收通过
-5. 重新验证超前任务(如使用方式 B/C)
+**验收通过**：阻塞任务 → Done，超前任务逐个 InReview → Done，recording.md 记录解除。
+**验收失败**：人工决定回退方式（revert / 修改 / reset --soft），Agent 执行并重新验证超前任务。

@@ -99,10 +99,8 @@ InDraft 自由修改；InSpec 可改但需在 recording.md 记录原因；InProg
 ### 合法性检查
 
 Agent 修改 blocked_by 时必须验证：
-1. **引用存在**：blocked_by 中的 ID 必须存在于 task.json 或 task_archive.json
-2. **无循环依赖**：不存在 A→B→C→A 的循环
-3. **非自引用**：任务不能阻塞自己
-4. **状态合理**：
+1. **无循环依赖**：不存在 A→B→C→A 的循环
+2. **状态合理**：
    - ✅ InSpec/InProgress/InReview
    - ⚠️ InDraft → 警告并提示先确认前置任务
    - ❌ Done → 提示在任务描述中说明即可

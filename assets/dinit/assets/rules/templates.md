@@ -130,20 +130,6 @@ Task#2: 密码重置功能
 ---
 ```
 
-## Git 规范
-
-**提交时机**:
-- 只有当任务状态到达 Done 时才提交
-- 超前实施例外:超前任务完成时标记 InReview 且立即提交 commit(最多 3 次),阻塞解除后标记 Done
-
-**commit message 格式**:
-- 常规: `[Task#N] 任务描述 - completed`
-- 超前: `[Task#N] 任务描述 - completed (超前实施 X/3, blocked_by Task#M)`
-
-**提交内容**: 代码变更 + `.claude/task.json` 更新 + `.claude/recording.md` 更新,同一个 commit。
-
-**force push 前置检查**: 执行 `git push --force` 前必须先 `git fetch origin` 并确认远端无未合并的变更（`git diff HEAD origin/<branch>`），有差异须先与用户确认再操作。
-
 ## 可调参数
 
 | 参数 | 默认值 | 说明 |
@@ -151,6 +137,10 @@ Task#2: 密码重置功能
 | 超前上限 | 5 | 最多同时超前实施的任务数 |
 | 归档阈值 | 20 | task.json 中 Done/Cancelled 任务超过此数触发归档 |
 | 子代理并发数 | 3 | 0=禁用子代理，1=串行子代理，N≥2=最多N个并发子代理 |
+
+**子代理并发数读取优先级**（从高到低）：
+1. 项目 `.claude/CLAUDE.md` 中的「子代理并发数」字段
+2. 本文件可调参数表（默认 3）
 
 ## 验证脚本模板
 

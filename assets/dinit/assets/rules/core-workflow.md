@@ -19,7 +19,10 @@
 - 否则选择第一个 `status: "InSpec"` 的任务，并检查 blocked_by：
   - **blocked_by 为空或不存在** → 无阻塞，可开始
   - **blocked_by 全部 Done** → 阻塞已解除，可开始
-  - **blocked_by 存在 InReview 且超前<3** → 可超前实施（标记为超前）
+  - **blocked_by 存在 InReview 且超前<5** → 可超前实施（标记为超前）
+    - 超前完成的任务标记为 **InReview**，立即创建 git commit
+    - recording.md 记录："Task#N (blocked_by Task#M, 超前 X/5, commit: abc123)"
+    - 完成第 5 个超前任务后输出 PENDING REVIEW，等待阻塞任务验收
   - **其他情况** → 跳过，选择下一个任务
 - **禁止选择** `status: "InDraft"` 的任务（需人工先确认）
 - 选择优先级：无 blocked_by 的任务优先，基础功能优先
@@ -73,8 +76,6 @@
 - category 可选值：functional / ui / bugfix / refactor / infra
 - 如果 `.claude/task.json` 已有任务，新任务追加到列表末尾
 - 必须包含 `acceptance` 字段（验收条件数组，格式规范见 core-states.md）
-- `functional`/`ui`/`bugfix` 类任务的 acceptance 必须使用 Given/When/Then 格式
-- `infra`/`refactor` 类任务的 acceptance 可使用简单描述
 - 如有依赖关系，使用 `blocked_by` 字段标注（可选）
 
 - steps 必须自包含：外部系统凭据写明来源文件路径（如"凭据见 `doc/runbook.md §1.1`"），代码路径写绝对路径，不依赖会话上下文
@@ -105,6 +106,18 @@ InSpec → InProgress → InReview → Done 完整流程：
 3. **停止实施**：输出 CHANGE_REQUEST 信息，等待批准
 4. **批准后**：更新 task.json 中的验收条件，继续实施
 
+### 提交规范
+
+**提交时机**：只有任务状态到达 Done 时才提交；超前任务完成时标记 InReview 并立即提交（最多 5 次），阻塞解除后标记 Done。
+
+**commit message 格式**：
+- 常规：`[Task#N] 任务描述 - completed`
+- 超前：`[Task#N] 任务描述 - completed (超前实施 X/5, blocked_by Task#M)`
+
+**提交内容**：代码变更 + `.claude/task.json` + `.claude/recording.md`，同一个 commit。
+
+**force push**：执行前必须先 `git fetch origin` 并确认远端无未合并变更，有差异须先与用户确认。
+
 ### 子代理策略
 
 **并行条件**（同时满足才可并行）：
@@ -121,14 +134,7 @@ InSpec → InProgress → InReview → Done 完整流程：
 1. 读取 `.claude/recording.md`（关注 pending CR、历史阻塞、回退记录）
 2. 读取相关 task 的 description、acceptance、steps
 
-**子代理并发数**（读取优先级从高到低）：
-1. 项目 `.claude/CLAUDE.md` 中的「子代理并发数」字段
-2. `~/.claude/rules/templates.md` 中的全局默认值
-3. 以上均未配置时，默认为 3
-
-- 并发数 = 0 → 禁用子代理，主代理 inline 执行
-- 并发数 = 1 → 串行派发子代理（保留上下文隔离和启动仪式的好处，无需并发 API）
-- 并发数 ≥ 2 → 并行派发，最多同时执行 N 个
+**子代理并发数**：读取优先级与行为定义见 templates.md 可调参数。
 
 ---
 
@@ -174,7 +180,6 @@ Agent 完成实现和验证后输出 REVIEW 请求，等待人工确认。
 - context window 会在接近上限时自动压缩，允许无限期继续工作
 - 不要因为 token 预算担忧而提前停止任务
 - **Context ≥ 80%**：派出下一批子代理前，必须先写入 recording.md（当前进度、已完成任务、下一步），防止中断后进度丢失
-- 在感觉接近上限时，优先保存进度到 .claude/recording.md
 - 始终保持最大程度的自主性，完整完成任务
 
 归档触发条件与执行步骤见 `file-layout.md`。
