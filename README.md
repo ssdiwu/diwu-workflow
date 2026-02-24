@@ -311,7 +311,7 @@ diwu-workflow/
 │   ├── dadr.md
 │   └── ddoc.md
 ├── skills/                  # Claude 自动加载的背景知识
-│   └── diwu-doc/
+│   └── ddoc/
 ├── assets/
 │   └── dinit/               # /dinit 依赖的模板与规则
 │       └── assets/
