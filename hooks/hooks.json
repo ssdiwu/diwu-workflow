@@ -1,5 +1,15 @@
 {
   "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 -c \"import json,sys; d=json.load(sys.stdin); sid=d.get('session_id',''); open('/tmp/.claude_main_session','w').write(sid) if sid else None\" 2>/dev/null||true"
+          }
+        ]
+      }
+    ],
     "PreToolUse": [
       {
         "matcher": "Bash",
@@ -7,6 +17,16 @@
           {
             "type": "command",
             "command": "python3 -c \"import json,sys,os; f='.claude/task.json'; d=json.load(open(f)) if os.path.exists(f) else sys.exit(0); t=next((x for x in d['tasks'] if x['status']=='InProgress'),None); t and print('[diwu] Task#'+str(t['id'])+': '+t['description']+chr(10)+chr(10).join('  - '+a for a in t['acceptance']))\" 2>/dev/null||true"
+          }
+        ]
+      }
+    ],
+    "SubagentStop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 -c \"import json,sys,os,subprocess; d=json.load(sys.stdin); sid=d.get('session_id',''); main=open('/tmp/.claude_main_session').read().strip() if os.path.exists('/tmp/.claude_main_session') else ''; sys.exit(0) if sid!=main or not sid else None; f='.claude/task.json'; tasks=json.load(open(f)).get('tasks',[]) if os.path.exists(f) else sys.exit(0); t=next((x for x in tasks if x['status']=='InProgress'),None); sys.exit(0) if not t else None; now=subprocess.check_output(['date','+%Y-%m-%d %H:%M:%S']).decode().strip(); print(json.dumps({'continue':True,'additionalSystemPrompt':'子代理已完成，请立即将当前进度写入 .claude/recording.md。时间戳直���使用：'+now+'（禁止伪造）。任务：Task#'+str(t['id'])+' '+t['description']+'。格式遵循 templates.md Session 格式。只写 recording.md，完成后停止。'}))\" 2>/dev/null||true"
           }
         ]
       }
