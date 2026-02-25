@@ -37,7 +37,7 @@
 | `description` | 任务描述 | 字符串 | 背景 + 关键约束（为什么做、边界是什么） |
 | `status` | 任务状态 | 字符串 | 见下方状态定义章节 |
 | `acceptance` | 验收条件 | 数组 | Given/When/Then 格式的验收场景，见下方 acceptance 格式规范 |
-| `steps` | 实施步骤 | 数组 | 实施过程的关键步骤 |
+| `steps` | 实施步骤 | 数组 | 实施过程的关键步骤，必须写绝对路径 |
 | `category` | 任务分类 | 字符串 | 见下方任务分类说明 |
 | `blocked_by` | 前置任务 | 数组 | (可选) 见下方 blocked_by 规范章节 |
 
@@ -59,6 +59,24 @@
 - 多个条件或结果用"且"连接：`"Then 页面跳转到首页且显示欢迎语"`
 - 单条 acceptance 中"且"超过 3 个时，应拆分为多条
 - `infra`/`refactor` 任务可使用简单描述：`"构建产物不超过 500KB"`
+
+**好的示例**（可证据化，每个 Then 子句 = 一个 `expect()` 断言）：
+```
+Given 用户在 /login 页面输入正确的 email+password
+When 点击提交按钮
+Then 跳转到 /dashboard，localStorage 中存在 auth_token，有效期 7 天
+```
+
+**坏的示例**（无法验证）：
+```
+Given 用户登录
+When 提交表单
+Then 登录成功
+```
+
+坏在哪里：Given 没有具体页面和数据状态；Then 是主观描述，不是可断言的系统状态。
+
+**Then 子句自检**：能否直接写成 `expect(actual).toBe(expected)` 或 `assert actual == expected`？不能则需要细化。
 
 ---
 
@@ -93,6 +111,20 @@
 
 **非法转移一律忽略**。例如 Done 状态下收到任何事件，保持 Done 不变。
 
+## 状态判断锚点
+
+### 判断锚点：InProgress → InSpec（真实阻塞）
+- 正例：缺少凭据、外部授权或关键环境配置，导致 acceptance 无法继续验证。结论：退回 InSpec，并输出 BLOCKED。
+- 反例：单元测试失败由当前代码缺陷引起。结论：保持 InProgress 修复，不得伪装成阻塞。
+- 边界例：第三方接口偶发超时，但 acceptance 可通过 mock 或替代验证完成。结论：保持 InProgress，记录风险并继续。
+- 结论输出：使用 `DECISION TRACE` 记录阻塞证据、不可继续的原因和下一步动作。
+
+### 判断锚点：InReview → Done 是否需人工确认
+- 正例：存在 API/字段契约变更，或单任务改动超过 2000 行。结论：先输出 REVIEW，人工确认后再 Done。
+- 反例：小幅度修改且 acceptance 全部通过。结论：可自审后直接 Done。
+- 边界例：改动行数未超 2000，但字段默认值变化会影响调用方行为。结论：按大幅度处理，走人工确认。
+- 结论输出：使用 `DECISION TRACE` 记录契约变化证据、改动规模和最终状态决策。
+
 ## blocked_by 规范
 
 ### 语义
@@ -104,6 +136,12 @@ InDraft 自由修改；InSpec 可改但需在 recording.md 记录原因；InProg
 ### 何时使用
 前置任务未完成（InSpec/InProgress/InReview）且当前任务依赖其输出时使用。前置任务已 Done 或仅是代码调用关系时不使用。
 
+### 判断锚点：blocked_by 何时不该写
+- 正例（应该写）：Task#9 依赖 Task#8 生成的迁移文件，Task#8 未 Done。结论：写入 `blocked_by=[8]`。
+- 反例（不该写）：当前任务只是调用已稳定函数，且前置任务已 Done。结论：不写 blocked_by，在 description 说明即可。
+- 边界例：前置任务为 InReview，当前任务只依赖其稳定接口。结论：可不写 blocked_by，但需在 description 明确假设；若接口仍可能变动则写入。
+- 结论输出：使用 `DECISION TRACE` 记录依赖关系、前置状态和是否写入 blocked_by。
+
 ### 合法性检查
 
 Agent 修改 blocked_by 时必须验证：
@@ -114,28 +152,14 @@ Agent 修改 blocked_by 时必须验证：
    - ❌ Done → 提示在任务描述中说明即可
    - ❌ Cancelled → 拒绝
 
+### 判断锚点：循环依赖识别
+- 正例：新增依赖后形成 A→B→C→A。结论：拒绝写入并提示重排任务顺序。
+- 反例：依赖链为 A→B→C（无回边）。结论：允许写入。
+- 边界例：A→B 与 B→A 藏在不同描述中。结论：仍按循环处理并拒绝写入。
+- 结论输出：使用 `DECISION TRACE` 记录完整依赖链和合法性检查结果。
+
 ### 自动清理
 
 当 blocked_by 中的任务变为 Done：
 - Agent 自动从 blocked_by 中移除该 ID
 - 在 recording.md 记录："Task#10 阻塞解除：Task#8 已完成"
-
-## acceptance GWT 好/坏对比
-
-**好的示例**（可证据化，每个 Then 子句 = 一个 `expect()` 断言）：
-```
-Given 用户在 /login 页面输入正确的 email+password
-When 点击提交按钮
-Then 跳转到 /dashboard，localStorage 中存在 auth_token，有效期 7 天
-```
-
-**坏的示例**（无法验证）：
-```
-Given 用户登录
-When 提交表单
-Then 登录成功
-```
-
-坏在哪里：Given 没有具体页面和数据状态；Then 是主观描述，不是可断言的系统状态。
-
-**Then 子句自检**：能否直接写成 `expect(actual).toBe(expected)` 或 `assert actual == expected`？不能则需要细化。

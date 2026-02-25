@@ -26,7 +26,7 @@
 
 ```
 .doc/
-├── [domain 或分层文件]   # 见 /ddoc
+├── [domain 或分层文件]   # 见 /diwu-doc
 └── adr/                  # 架构决策记录，见 /diwu-adr
     └── ADR-NNN-kebab-case-title.md
 ```

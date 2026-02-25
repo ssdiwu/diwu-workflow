@@ -83,6 +83,28 @@ Task#5: 用户权限中间件
 等待: 人工确认后将标记为 Done
 ```
 
+## DECISION TRACE 格式（判断过程模板）
+
+关键判断场景（如任务选择、CR/BLOCKED、并行与串行、大幅度修改判定）必须先输出此模板。
+
+```
+DECISION TRACE
+
+结论: [BLOCKED | CHANGE REQUEST | CONTINUE | REVIEW | SKIP]
+
+规则命中:
+- [命中的规则条目，例如 core-workflow.md §任务选择策略]
+
+证据:
+- [task.json 状态、blocked_by 明细、测试日志、git diff --stat、配置检查结果]
+
+排除项:
+- [为什么不是其他结论；例如“非需求矛盾，故不是 CHANGE REQUEST”]
+
+下一步:
+- [立即执行的动作；例如“输出 BLOCKED 模板并等待人工配置”]
+```
+
 ## recording.md Session 格式
 
 ```markdown
@@ -147,10 +169,8 @@ Task#2: 密码重置功能
 | 超前上限 | 5 | 最多同时超前实施的任务数 |
 | 归档阈值 | 20 | task.json 中 Done/Cancelled 任务超过此数触发归档 |
 | 子代理并发数 | 3 | 0=禁用子代理，1=串行子代理，N≥2=最多N个并发子代理 |
-
-**子代理并发数读取优先级**（从高到低）：
-1. 项目 `.claude/CLAUDE.md` 中的「子代理并发数」字段
-2. 本文件可调参数表（默认 3）
+| 探索/搜索类子代理模型 | haiku | 只读操作，降低成本 |
+| 实施类子代理模型 | 继承主模型 | 写代码保持主模型质量 |
 
 ## 验证脚本模板
 

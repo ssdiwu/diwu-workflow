@@ -27,10 +27,22 @@
 - **禁止选择** `status: "InDraft"` 的任务（需人工先确认）
 - 选择优先级：无 blocked_by 的任务优先，基础功能优先
 
+### 判断锚点：任务选择与超前实施
+- 正例：Task#21 为 InSpec，`blocked_by=[20]`；Task#20 为 InReview，当前超前计数 2/5。结论：可超前实施 Task#21，完成后标记 InReview 并提交，计数更新为 3/5。
+- 反例：Task#21 为 InSpec，`blocked_by=[20]`；Task#20 为 InProgress，或当前已超前 5/5。结论：跳过 Task#21，选择下一个可执行任务。
+- 边界例：`blocked_by=[18,20]`，其中 Task#18 已 Done、Task#20 为 InReview，当前超前 4/5。结论：先清理已 Done 依赖，再允许超前至 5/5；达到上限后输出 PENDING REVIEW。
+- 结论输出：使用 `DECISION TRACE` 记录 task.json 状态、blocked_by 明细和超前计数。
+
 ### 4. 环境初始化（可选）
 - 运行 `.claude/init.sh` 启动开发环境（如需要）
 - 运行项目的基线测试（build/lint），确认系统处于正常状态
 - 如果基线测试失败，优先修复，然后再开始新任务
+
+### 判断锚点：基线失败时先修基线还是继续
+- 正例：`smoke.sh` 中定义的 build 或 lint 失败。结论：先修复基线，再开始新任务。
+- 反例：明知 build/lint 失败仍直接将任务设为 InProgress 并继续开发。结论：违规。
+- 边界例：失败项来自不在 `smoke.sh` 范围内的可选集成测试。结论：可记录风险后继续，但不得声称“基线通过”。
+- 结论输出：使用 `DECISION TRACE` 记录失败命令、日志证据、继续或暂停的理由。
 
 ---
 
@@ -75,7 +87,7 @@
 - ID 递增，不复用已有 ID
 - category 可选值：functional / ui / bugfix / refactor / infra
 - 如果 `.claude/task.json` 已有任务，新任务追加到列表末尾
-- 必须包含 `acceptance` 字段（验收条件数组，格式规范见 core-states.md）
+- 必须包含 `acceptance` 字段（验收条件数组，GWT 格式，格式规范与示例见 core-states.md）
 - 如有依赖关系，使用 `blocked_by` 字段标注（可选）
 
 - steps 必须自包含：外部系统凭据写明来源文件路径（如"凭据见 `/absolute/path/to/project/doc/runbook.md §1.1`"），代码路径写绝对路径，不依赖会话上下文
@@ -97,6 +109,12 @@ InSpec → InProgress → InReview → Done 完整流程：
    - 大幅度修改：输出 REVIEW 请求，等待人工确认
 
 **大幅度修改判定**：满足以下任一条件即为大幅度修改：修改了原有 API 规范或字段定义；单次任务修改代码行数超过 2000 行。其余 Agent 自审即可。
+
+### 判断锚点：大幅度修改判定
+- 正例：接口响应字段发生变更，或单任务代码改动超过 2000 行。结论：大幅度修改，必须输出 REVIEW 请求并等待人工确认。
+- 反例：只修复内部实现 bug，API/字段不变，改动 120 行。结论：小幅度修改，可自审后 Done。
+- 边界例：改动 600 行但跨多个核心模块并引入兼容层。结论：若 API/字段无变化可按小幅度执行；只要契约变化即强制按大幅度处理。
+- 结论输出：使用 `DECISION TRACE` 记录 API 变更证据与 `git diff --stat` 数据。
 
 **自审原则**：只实现了 acceptance 要求的，不多不少；没有引入技术债或安全问题。
 - ❌ 顺手重构了周边函数、添加了未要求的日志、提取了"以后可能用到"的工具函数
@@ -130,6 +148,12 @@ InSpec → InProgress → InReview → Done 完整流程：
 **串行条件**（满足任一则串行）：
 - 后一步依赖前一步的输出
 - 需要积累上下文的实施类任务
+
+### 判断锚点：并行与串行选择
+- 正例：子代理 A 仅修改 `src/auth/`，子代理 B 仅修改 `src/payment/`，无共享写文件。结论：可并行。
+- 反例：两个子代理都要修改 `src/models/user.ts` 或同一迁移文件。结论：必须串行。
+- 边界例：代码目录不同，但都依赖同一个生成产物（如 `openapi.json`）。结论：先串行生成共享产物，再并行执行剩余步骤。
+- 结论输出：使用 `DECISION TRACE` 记录模块边界、共享写文件检查结果和执行顺序。
 
 **Coordinator Pattern**：task.json 的状态更新始终由主代理负责，子代理通过返回值把结果传回主代理。
 
