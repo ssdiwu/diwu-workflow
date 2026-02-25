@@ -59,17 +59,21 @@ allowed-tools: Read, Write, Glob
 | 6  | 调整现有列表页样式           | 可预期      | 改 CSS，确定性操作                      | 不需要     |
 | 7  | 对接第三方推送服务           | 不确定      | 文档描述和实际行为是否一致？未验证过       | 需要 ✦     |
 | 8  | 监听已有消息队列的新事件类型   | 可预期      | 已有监听模式，加一个事件类型              | 不需要     |
+| 9  | 认证、消息、推送三模块首次串联 | 不确定      | 各模块独立可跑，组合后数据流未测过        | 需要 ✦     |
+| 10 | 消息增删改查               | 可预期      | demo-message-crud 已验证，直接复用      | 不需要     |
+| 11 | 认证+用户服务集成           | 可预期      | v2.x 已验证该数据流，结果可预期          | 不需要     |
 
-结论：8 件事中，4 件直接做，4 件需要 Demo。
+结论：11 件事中，6 件直接做，5 件需要 Demo。
 
-| Demo 名称                    | 解决什么问题              | 验证标准                      | 依赖关系          |
-|------------------------------|--------------------------|------------------------------|------------------|
-| demo-ai-reply-prompt         | AI 回复 Prompt 格式稳定性  | 准确率 > 90%，幻觉率 < 5%     | 无               |
-| demo-stream-chunk-parser     | 流式输出跨 chunk 解析      | 拼接结果与预期一致             | 依赖 A 确定输出格式 |
-| demo-interactive-overlay     | 前端可交互浮层组件          | 交互回调正常触发               | 无               |
-| demo-push-service-integration| 第三方推送服务对接          | 消息送达率 > 99%，延迟 < 500ms | 无               |
+| Demo 名称                        | 解决什么问题              | 验证标准                      | 依赖关系              |
+|----------------------------------|--------------------------|------------------------------|---------------------|
+| demo-ai-reply-prompt             | AI 回复 Prompt 格式稳定性  | 准确率 > 90%，幻觉率 < 5%     | 无                   |
+| demo-stream-chunk-parser         | 流式输出跨 chunk 解析      | 拼接结果与预期一致             | 依赖 A 确定输出格式    |
+| demo-interactive-overlay         | 前端可交互浮层组件          | 交互回调正常触发               | 无                   |
+| demo-push-service-integration    | 第三方推送服务对接          | 消息送达率 > 99%，延迟 < 500ms | 无                   |
+| demo-auth-msg-push-integration   | 认证+消息+推送三模块集成验证 | 数据流经三模块后结果正确        | 依赖推送 Demo 完成     |
 
-执行顺序：demo-ai-reply-prompt → demo-stream-chunk-parser（串行）；demo-interactive-overlay 和 demo-push-service-integration 可并行
+执行顺序：demo-ai-reply-prompt → demo-stream-chunk-parser（串行）；demo-interactive-overlay、demo-push-service-integration 可并行；demo-auth-msg-push-integration 最后
 ```
 
 ### 分析模板
