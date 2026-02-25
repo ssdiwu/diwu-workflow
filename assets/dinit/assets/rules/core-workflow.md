@@ -52,7 +52,7 @@
 2. **拆分**：每个任务一句话可描述、一个 session 可完成
 3. **定义验收**：为每个任务明确验收条件（可验证的标准）
 4. **排序**：识别依赖关系，基础功能排前面
-5. **展示**：展示分解结果，包含任务描述、验收条件、实施步骤
+5. **展示**：展示分解结果，包含任务标题（title）、任务描述（description）、验收条件、实施步骤
 6. **写入**：写入 `.claude/task.json`，状态为 `InDraft`
 
 **锁定阶段（InSpec）**：
@@ -78,7 +78,7 @@
 - 必须包含 `acceptance` 字段（验收条件数组，格式规范见 core-states.md）
 - 如有依赖关系，使用 `blocked_by` 字段标注（可选）
 
-- steps 必须自包含：外部系统凭据写明来源文件路径（如"凭据见 `doc/runbook.md §1.1`"），代码路径写绝对路径，不依赖会话上下文
+- steps 必须自包含：外部系统凭据写明来源文件路径（如"凭据见 `/absolute/path/to/project/doc/runbook.md §1.1`"），代码路径写绝对路径，不依赖会话上下文
 
 ---
 
@@ -99,6 +99,7 @@ InSpec → InProgress → InReview → Done 完整流程：
 **大幅度修改判定**：满足以下任一条件即为大幅度修改：修改了原有 API 规范或字段定义；单次任务修改代码行数超过 2000 行。其余 Agent 自审即可。
 
 **自审原则**：只实现了 acceptance 要求的，不多不少；没有引入技术债或安全问题。
+- ❌ 顺手重构了周边函数、添加了未要求的日志、提取了"以后可能用到"的工具函数
 
 **Change Request 流程**（执行 InSpec 任务时发现需求问题）：
 1. **创建 CR**：在 recording.md 中记录 Change Request
@@ -111,8 +112,8 @@ InSpec → InProgress → InReview → Done 完整流程：
 **提交时机**：只有任务状态到达 Done 时才提交；超前任务完成时标记 InReview 并立即提交（最多 5 次），阻塞解除后标记 Done。
 
 **commit message 格式**：
-- 常规：`[Task#N] 任务描述 - completed`
-- 超前：`[Task#N] 任务描述 - completed (超前实施 X/5, blocked_by Task#M)`
+- 常规：`[Task#N] 任务标题 - completed`
+- 超前：`[Task#N] 任务标题 - completed (超前实施 X/5, blocked_by Task#M)`
 
 **提交内容**：代码变更 + `.claude/task.json` + `.claude/recording.md`，同一个 commit。
 
@@ -122,6 +123,8 @@ InSpec → InProgress → InReview → Done 完整流程：
 
 **并行条件**（同时满足才可并行）：
 - 问题域不相交（不读写同一业务模块）
+  - ✓ 子代理A 实现 `src/auth/`，子代理B 实现 `src/payment/`（不同域）
+  - ❌ 两个子代理都需要修改 `src/models/user.ts`（共享写文件）
 - 无共享写文件（子代理永远不写 task.json，只写自己的产出文件）
 
 **串行条件**（满足任一则串行）：
@@ -132,7 +135,7 @@ InSpec → InProgress → InReview → Done 完整流程：
 
 **启动仪式**（所有子代理，强约束）：
 1. 读取 `.claude/recording.md`（关注 pending CR、历史阻塞、回退记录）
-2. 读取相关 task 的 description、acceptance、steps
+2. 读取相关 task 的 title、description、acceptance、steps
 
 **子代理并发数**：读取优先级与行为定义见 templates.md 可调参数。
 

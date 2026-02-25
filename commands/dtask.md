@@ -8,7 +8,40 @@ allowed-tools: Read, Write, Edit, Glob
 
 ## Step 1：接收功能描述
 
-若用户已在命令参数中描述功能，直接进入 Step 2。否则询问用户想要实现什么功能。
+若用户已在命令参数中描述功能，直接进入 Step 1.5。否则询问用户想要实现什么功能。
+
+## Step 1.5：示范（先看目标产物）
+
+生成任务前，先参考以下完整示例的思维粒度：
+
+```json
+{
+  "id": 3,
+  "title": "实现邮件验证码发送",
+  "category": "functional",
+  "status": "InDraft",
+  "description": "用户注册后需要验证邮箱。调用 SMTP 服务发送 6 位验证码，验证码有效期 10 分钟，存储在 Redis 中；SMTP 不可用时必须返回明确错误而非静默失败。",
+  "acceptance": [
+    "Given 新用户完成注册表单提交 When 系统调用 sendVerification(email) Then Redis 中存在 key=verify:{email}，value=6位数字，TTL=600s",
+    "Given SMTP 服务不可用 When 调用 sendVerification() Then 抛出 EmailServiceError，不写入 Redis",
+    "Given 同一邮箱 10 分钟内重复请求 When 调用 sendVerification() Then 覆盖旧验证码，重置 TTL"
+  ],
+  "steps": [
+    "1. 在 /absolute/path/to/project/src/services/email.ts 实现 sendVerification(email: string): Promise<void>",
+    "2. 在 /absolute/path/to/project/src/lib/redis.ts 添加 setVerifyCode(email, code, ttl) 方法",
+    "3. 凭据见 /absolute/path/to/project/doc/runbook.md §2.1（SMTP 配置）",
+    "4. 运行 /absolute/path/to/project/.claude/checks/task_3_verify.sh 验证"
+  ],
+  "blocked_by": [2]
+}
+```
+
+说明：示例中的 `/absolute/path/to/project` 是占位写法，实际使用时必须替换为当前项目真实绝对路径（如 `/Users/xxx/project`）。
+
+示例中的思维粒度要点：
+- `title` 是一句话任务名（做什么），`description` 说明背景和约束（为什么 + 关键边界）
+- `acceptance` 的 Given 有具体函数名/页面路径，Then 有可断言的系统状态（key 名、TTL 值、错误类型）
+- `steps` 必须写真实绝对路径，不依赖隐式上下文
 
 ## Step 2：澄清问题
 
@@ -29,35 +62,7 @@ allowed-tools: Read, Write, Edit, Glob
 ## Step 4：生成并写入任务
 
 根据澄清结果生成任务列表，追加到 `.claude/task.json`。
-
-每个任务必须包含所有字段，参考以下示例的思维粒度：
-
-```json
-{
-  "id": 3,
-  "title": "实现邮件验证码发送",
-  "category": "functional",
-  "status": "InDraft",
-  "description": "用户注册后需要验证邮箱。调用 SMTP 服务发送 6 位验证码，验证码有效期 10 分钟，存储在 Redis 中。",
-  "acceptance": [
-    "Given 新用户完成注册表单提交 When 系统调用 sendVerification(email) Then Redis 中存在 key=verify:{email}，value=6位数字，TTL=600s",
-    "Given SMTP 服务不可用 When 调用 sendVerification() Then 抛出 EmailServiceError，不写入 Redis",
-    "Given 同一邮箱 10 分钟内重复请求 When 调用 sendVerification() Then 覆盖旧验证码，重置 TTL"
-  ],
-  "steps": [
-    "1. 在 src/services/email.ts 实现 sendVerification(email: string): Promise<void>",
-    "2. 在 src/lib/redis.ts 添加 setVerifyCode(email, code, ttl) 方法",
-    "3. 凭据见 doc/runbook.md §2.1（SMTP 配置）",
-    "4. 运行 .claude/checks/task_3_verify.sh 验证"
-  ],
-  "blocked_by": [2]
-}
-```
-
-示例中的思维粒度要点：
-- `acceptance` 的 Given 有具体函数名/页面路径，Then 有可断言的系统状态（key 名、TTL 值、错误类型）
-- `steps` 有具体文件路径，不依赖隐式上下文
-- `description` 说明背景（为什么）+ 技术约束（怎么做），不只是功能描述
+每个任务必须包含所有字段，字段粒度参照 Step 1.5 示例。
 
 边界情况：
 - `.claude/task.json` 不存在：创建 `{"tasks": []}` 再追加
@@ -92,7 +97,7 @@ allowed-tools: Read, Write, Edit, Glob
 
 ## Step 7：写入后提示
 
-1. 列出已写入的任务（id + description）
+1. 列出已写入的任务（id + title）
 2. 若存在 blocked_by 引用，提示：前置任务也是 InDraft，需人工先将其确认为 InSpec，依赖关系才生效
 3. 提示用户：确认需求后，告知 Agent 将任务状态改为 InSpec 即可开始实施
 

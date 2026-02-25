@@ -42,6 +42,7 @@ allowed-tools: Read, Write, Edit, Bash, Glob
 
 ### .claude/task.json
 读取 `${CLAUDE_PLUGIN_ROOT}/assets/dinit/assets/task.json.template`。若用户已有需求，填充初始任务（status: InDraft）；否则保持 tasks 数组为空。
+若填充初始任务，字段语义遵循：`title` = 一句话任务标题（做什么），`description` = 背景与关键约束（为什么做、边界是什么）。
 
 ### init.sh（项目根目录）
 读取 `${CLAUDE_PLUGIN_ROOT}/assets/dinit/assets/init.sh.template`，根据技术栈定制安装命令和 dev server 命令，执行 `chmod +x init.sh`。

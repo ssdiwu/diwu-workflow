@@ -6,16 +6,23 @@
 {
   "tasks": [
     {
-      "id": 1,
-      "description": "实现用户登录功能",
+      "id": 3,
+      "title": "实现邮件验证码发送",
+      "description": "用户注册后需要验证邮箱。调用 SMTP 服务发送 6 位验证码，验证码有效期 10 分钟，存储在 Redis 中；SMTP 不可用时必须返回明确错误而非静默失败。",
       "status": "InDraft",
       "acceptance": [
-        "Given 用户在登录页面且未登录 When 输入正确用户名密码并点击登录 Then 页面跳转到首页且 localStorage 存储 token",
-        "Given 用户在登录页面 When 输入错误密码并点击登录 Then 页面停留在登录页且显示'用户名或密码错误'"
+        "Given 新用户完成注册表单提交 When 系统调用 sendVerification(email) Then Redis 中存在 key=verify:{email}，value=6位数字，TTL=600s",
+        "Given SMTP 服务不可用 When 调用 sendVerification() Then 抛出 EmailServiceError，不写入 Redis",
+        "Given 同一邮箱 10 分钟内重复请求 When 调用 sendVerification() Then 覆盖旧验证码，重置 TTL"
       ],
-      "steps": ["实现登录 API 调用", "添加错误处理逻辑"],
+      "steps": [
+        "1. 在 /absolute/path/to/project/src/services/email.ts 实现 sendVerification(email: string): Promise<void>",
+        "2. 在 /absolute/path/to/project/src/lib/redis.ts 添加 setVerifyCode(email, code, ttl) 方法",
+        "3. 凭据见 /absolute/path/to/project/doc/runbook.md §2.1（SMTP 配置）",
+        "4. 运行 /absolute/path/to/project/.claude/checks/task_3_verify.sh 验证"
+      ],
       "category": "functional",
-      "blocked_by": [2, 3]
+      "blocked_by": [2]
     }
   ]
 }
@@ -26,7 +33,8 @@
 | 键名 | 中文含义 | 类型 | 说明 |
 |------|---------|------|------|
 | `id` | 任务编号 | 数字 | 从 1 开始递增，永不复用 |
-| `description` | 任务描述 | 字符串 | 一句话描述任务内容 |
+| `title` | 任务标题 | 字符串 | 一句话描述任务做什么（动词开头） |
+| `description` | 任务描述 | 字符串 | 背景 + 关键约束（为什么做、边界是什么） |
 | `status` | 任务状态 | 字符串 | 见下方状态定义章节 |
 | `acceptance` | 验收条件 | 数组 | Given/When/Then 格式的验收场景，见下方 acceptance 格式规范 |
 | `steps` | 实施步骤 | 数组 | 实施过程的关键步骤 |
@@ -58,7 +66,7 @@
 
 | 状态 | 含义 |
 |------|------|
-| InDraft | 需求草稿中，Agent 可修改任务描述、验收条件、实施步骤 |
+| InDraft | 需求草稿中，Agent 可修改任务标题、任务描述、验收条件、实施步骤 |
 | InSpec | 需求已确认，锁定（Agent 只能修改 status 字段） |
 | InProgress | 实施中，Agent 正在实现 |
 | InReview | 验证中，实现完成，等待验证 |
@@ -69,7 +77,7 @@
 
 | 当前状态 | 事件 | 新状态 | 规则 |
 |---------|------|--------|------|
-| InDraft | 人工确认需求 | InSpec | Agent 不可再修改 acceptance |
+| InDraft | 人工确认需求 | InSpec | Agent 不可再修改 title/description/acceptance/steps |
 | InDraft | 需求取消 | Cancelled | - |
 | InSpec | Agent 开始实施 | InProgress | - |
 | InSpec | 发现需求问题 | (保持 InSpec) | 提交 Change Request，等人工批准 |
@@ -111,3 +119,23 @@ Agent 修改 blocked_by 时必须验证：
 当 blocked_by 中的任务变为 Done：
 - Agent 自动从 blocked_by 中移除该 ID
 - 在 recording.md 记录："Task#10 阻塞解除：Task#8 已完成"
+
+## acceptance GWT 好/坏对比
+
+**好的示例**（可证据化，每个 Then 子句 = 一个 `expect()` 断言）：
+```
+Given 用户在 /login 页面输入正确的 email+password
+When 点击提交按钮
+Then 跳转到 /dashboard，localStorage 中存在 auth_token，有效期 7 天
+```
+
+**坏的示例**（无法验证）：
+```
+Given 用户登录
+When 提交表单
+Then 登录成功
+```
+
+坏在哪里：Given 没有具体页面和数据状态；Then 是主观描述，不是可断言的系统状态。
+
+**Then 子句自检**：能否直接写成 `expect(actual).toBe(expected)` 或 `assert actual == expected`？不能则需要细化。

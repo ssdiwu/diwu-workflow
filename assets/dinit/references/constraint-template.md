@@ -1,82 +1,78 @@
-# 架构约束模板
+# 架构约束示范（用于 `.claude/rules/constraints.md`）
 
-用于 `.claude/rules/constraints.md` 的模块设计模板。指导用户完成每个部分。
+先看一份已填充样例，再替换成你的项目信息。目标是让 Agent 先学到分析粒度，再填你自己的内容。
 
-## 模板
+## 已填充样例（消息通知模块）
 
-```markdown
-# [Module Name] Architecture Constraints
+````markdown
+# Message Notification Architecture Constraints
 
 ## Constraints
 
 | Dimension | Constraint | Verification |
-|-----------|-----------|--------------|
-| Business | ... | "100 年后还成立吗？" |
-| Temporal | ... | "能绕过这个状态转移吗？" |
-| Cross-platform | ... | "两端不同是 bug 吗？" |
-| Concurrency | ... | "两个线程同时做会出问题吗？" |
-| Perception | ... | "超过阈值用户会注意到吗？" |
+|-----------|------------|--------------|
+| Business | 同一 message_id 最多成功投递一次（幂等） | 重试同一 message_id 不会产生第二条成功投递记录 |
+| Temporal | 消息仅允许 `pending -> delivered` 或 `pending -> expired`，禁止回退 | 状态机转移表无 `delivered -> pending` |
+| Cross-platform | Web/iOS/Android 对消息状态枚举值完全一致 | 三端 SDK 枚举值集合与后端 schema 比对一致 |
+| Concurrency | 同一用户多端并发确认已读时，最终状态一致 | 并发写入后 DB 只保留一个最终状态 |
+| Perception | 通知到达延迟 P95 < 500ms，未读列表查询 P95 < 200ms | APM 监控面板满足阈值 |
 
-## State Machines (if applicable)
+## State Machines
 
 | Current State | Event | New State |
-|--------------|-------|-----------|
-| ... | ... | ... |
+|---------------|-------|-----------|
+| pending | push_ok | delivered |
+| pending | timeout_24h | expired |
+| delivered | any | delivered (ignore) |
+| expired | any | expired (ignore) |
 
 ## Boundaries
 
 | Type | Internal | External | Crossing Method |
 |------|----------|----------|-----------------|
-| Domain | ... | ... | Event / API |
-| Platform | ... | ... | Interface / Adapter |
-| Time | ... | ... | Projection function |
+| Domain | MessageService, DeliveryPolicy | NotificationAPI | REST / domain events |
+| Platform | PushAdapter 接口 | APNs / FCM | Adapter 实现 |
+| Time | Message 表（事实） | UnreadBadge 投影 | Projection function + cache refresh |
 
 ## Degradation Paths
 
 | Dependency | Failure | Fallback | User Perception |
-|-----------|---------|----------|-----------------|
-| ... | ... | ... | ... |
+|------------|---------|----------|-----------------|
+| Push Provider | APNs/FCM 不可用 | 写入消息中心未读列表，用户下次打开可见 | 可能无即时提醒，但消息不丢失 |
+| Redis Cache | 缓存不可用 | 直接查询 DB 返回未读列表 | 首屏可能变慢，功能可用 |
+| Profile Service | 用户画像超时 | 使用默认通知策略（全量推送） | 精准度下降，不影响可达性 |
 
 ## Data Ownership
 
-Source of Truth → Projection chain → Local cache
-Conflict strategy: [Server-wins / Last-write-wins / ...]
-```
+Source of Truth: PostgreSQL `messages`
+Projection chain: `messages` -> `unread_counts` -> client local badge
+Conflict strategy: Server-wins
+````
 
-## 约束五维度发现问题
+## 替换指引（把样例改成你的模块）
 
-使用这些问题帮助用户发现约束:
+1. 把模块名替换成你的真实模块（如 Billing、Auth、Search）。
+2. 每个维度至少写 1 条可验证约束，不要写“合理处理”这类模糊词。
+3. 状态机必须写出非法转移如何处理（通常是 ignore 或 reject）。
+4. 降级路径必须写“依赖失败后用户会看到什么”。
+5. Data Ownership 必须明确 Source of Truth 和冲突策略。
 
-1. **业务约束**: "这条规则 100 年后还成立吗？" — 区分本质约束和实现选择
-2. **时序约束**: "有没有执行路径可以绕过？" — 如果无路径可绕过,就是时序约束
-3. **跨平台约束**: "如果两个端不同,这是 bug 吗？" — 如果是,定义就是跨平台约束
-4. **并发约束**: "两个线程同时做这件事会出问题吗？" — 必须在架构层面保证
-5. **感知约束**: "超过这个阈值,用户会注意到吗？" — 不是优化目标,而是设计约束
+## 快速检查清单
 
-## 检查清单
-
-```
+```text
 约束:
-  □ 业务约束已识别(百年测试)
-  □ 时序约束编码为状态机(无非法状态组合)
-  □ 跨平台概念有单一定义
-  □ 并发状态有序列化保护
-  □ 感知阈值已定义
+  □ 五个维度都有可验证描述（不是口号）
+  □ 每条约束都能映射到代码或监控
 
-原子:
-  □ 每个原子可用一句话描述,< 100 行
-  □ 状态使用 sealed class/enum,不用布尔组合
-
-组合:
-  □ Pipeline 有统一流通货币
-  □ 独立状态机正交
-  □ 不同变化率分开存储
+状态机:
+  □ 只有合法状态和合法转移
+  □ 非法转移有明确策略（ignore/reject）
 
 边界:
-  □ 共享逻辑不 import 平台类
-  □ 事实和投影区分
+  □ 领域、平台、时间边界已区分
+  □ 事实和投影没有混写
 
 降级:
-  □ 每个关键依赖有定义的回退方案
-  □ 回退在代码中显式表达(不是 try/catch + print)
+  □ 每个关键依赖都有 fallback
+  □ fallback 的用户感知已写明
 ```

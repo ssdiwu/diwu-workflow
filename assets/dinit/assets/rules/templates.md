@@ -5,16 +5,21 @@
 ```
 BLOCKED - 需要人工介入
 
-当前任务: Task#N - [任务描述]
+当前任务: Task#3 - 邮件验证码发送
+任务描述: 用户注册后需要验证邮箱，SMTP 不可用时必须返回明确错误而非静默失败
 
 已完成的工作:
-- [已完成的代码/配置]
+- src/services/email.ts 的 sendVerification() 函数已实现
+- 单元测试通过（mock SMTP，3/3 passed）
 
 阻塞原因:
-- [具体说明为什么无法继续]
+- 调用 sendVerification() 时 SMTP_HOST 环境变量未设置
+- 已确认 .env.example 中有该字段，但 .env 中缺失
+- 无法在本地验证真实邮件发送，acceptance 条件 #1 无法证据化
 
 需人工帮助:
-1. [具体的步骤]
+1. 在 .env 中配置 SMTP_HOST、SMTP_PORT、SMTP_USER、SMTP_PASS
+2. 或提供测试用 SMTP 服务（如 Mailtrap）凭据，见 doc/runbook.md §2.1
 
 解除阻塞后:
 - 任务将从 InSpec 恢复到 InProgress
@@ -25,7 +30,8 @@ BLOCKED - 需要人工介入
 ```
 CHANGE REQUEST - 需要修改需求
 
-当前任务: Task#N - [任务描述]
+当前任务: Task#N - [任务标题]
+任务描述: [背景与关键约束]
 当前状态: InSpec (保持)
 
 已完成的工作:
@@ -66,9 +72,13 @@ PENDING REVIEW - 超前实施已达上限
 ```
 REVIEW - 请求人工审查
 
-Task#N: [任务名称]
-修改范围: [改动了哪些文件/功能]
-验收验证: [逐条 acceptance 验证结果]
+Task#5: 用户权限中间件
+修改范围: src/middleware/auth.ts（新增 89 行），src/routes/api.ts（修改 3 处），tests/middleware/auth.test.ts（新增 67 行）
+
+验收验证:
+- [x] Given 未登录用户访问 /api/profile When 发送 GET 请求 Then 返回 401 + {"error":"Unauthorized"} — auth.test.ts:23 passed
+- [x] Given 携带有效 JWT 的请求 When 中间件验证 Then req.user 被注入用户对象 — auth.test.ts:45 passed
+- [x] Given 过期 JWT When 中间件验证 Then 返回 401 + {"error":"Token expired"} — auth.test.ts:67 passed
 
 等待: 人工确认后将标记为 Done
 ```
