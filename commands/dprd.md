@@ -8,7 +8,7 @@ allowed-tools: Read, Write, Edit, Glob, Bash
 
 ## 模式判定
 
-- 用户输入 `/dprd full` → **完整模式**（输出第 1-9 节）
+- 用户输入 `/dprd full` → **完整模式**（输出第 1-9 节；需求涉及 iOS 或 Android 时追加 §10）
 - 用户输入 `/dprd` → **产品模式**（输出第 1-5 节）
 
 ## Step 1：接收产品描述
@@ -118,6 +118,22 @@ allowed-tools: Read, Write, Edit, Glob, Bash
 - 核心实现要点（后端/客户端分别列出关键文件和改动）
 - 格式/协议定义（如有自定义标记、事件、API）
 - **流式/增量场景处理**（若数据通过 SSE/WebSocket 等流式推送）：必须描述标记被截断时的 buffer 策略，用 mermaid flowchart 展示 chunk 处理逻辑
+- **透传职责表**（新增字段穿越多个服务层时必须输出）：逐层标注透传/校验/消费。示范：
+
+  | 层 | 职责 | 说明 |
+  |----|------|------|
+  | Gateway | 透传 | 原样转发，不读取 |
+  | Core | 校验 | 验证字段合法性 |
+  | Orchestrator | 透传 | 原样转发至 Executor |
+  | Executor | 消费 | 读取并用于模板渲染 |
+
+  > 判断锚点：`context.template_card_id` 穿越 Gateway/Core/Orchestrator/Executor → 必须输出此表；单层内部字段 → 不需要。
+
+- **流式两阶段渲染语义**（SSE/WebSocket + 装饰元素并存时必须声明）：
+  1. 状态变量线程归属：明确 buffer/index/map 等共享状态在哪个队列读写
+  2. done 后装饰挂载策略：文本 token 实时追加渲染；引用编号、横幅等装饰元素在收到 done 事件后统一判断并挂载，不在流式阶段中途回滚
+
+  > 判断锚点：SSE 流式 + 引用编号/横幅并存 → 采用两阶段；纯文本流式无装饰 → 不需要。
 
 #### 7. 数据模型
 - 核心数据结构（代码块，使用项目对应语言）
@@ -164,6 +180,60 @@ allowed-tools: Read, Write, Edit, Glob, Bash
   | 引用标记解析器 | Layer 2 上线后仍保留 [cite:] 解析逻辑作为 fallback，不可删除 | Layer 1 → Layer 2 |
   | 引用编号分配规则 | 按首次出现顺序分配，不可改为按时间或相关度排序 | Layer 1 → Layer 3 |
 
+- **跨 PRD 一致性收口**（多 PRD 并行时必须输出）：每份 PRD 末尾附一致性清单，统一核对常量名、字段命名、ID 生成职责、验收口径。示范：
+
+  | 约束项 | 值 | 所属 PRD |
+  |--------|-----|---------|
+  | CardType 枚举值 | `template` / `dynamic` | PRD-A, PRD-B |
+  | block_id 格式 | `{type}_{uuid}` | PRD-A, PRD-C |
+  | template_card_id 生成方 | 后端 Executor | PRD-A, PRD-B, PRD-C |
+
+#### 10. 双端落地（涉及 iOS 或 Android 时必须输出）
+
+##### 端侧映射表（每端一张）
+
+**iOS**
+
+| 需求点 | 推荐改动文件 | 说明 / 验收 |
+|--------|------------|------------|
+| SSE 解析器 | `ChatViewModel.swift` | Given 收到 SSE chunk When 解析 Then buffer 在串行队列读写 |
+| 引用编号挂载 | `MessageRenderer.swift` | Given done 事件 When 渲染 Then 引用编号统一挂载，不回滚 |
+
+**Android**
+
+| 需求点 | 推荐改动文件 | 说明 / 验收 |
+|--------|------------|------------|
+| SSE 订阅管理 | `ChatViewModel.kt` | Given 订阅创建 When ViewModel 销毁 Then CompositeDisposable 已清理 |
+| 引用编号挂载 | `MessageAdapter.kt` | Given done 事件 When 渲染 Then 引用编号统一挂载，不回滚 |
+
+> 以上为示范行，实际按需求点填写。
+
+##### 平台陷阱 checklist
+
+**iOS**
+- `@State` 不能安全持有 `Timer`（struct 销毁时泄漏）→ 必须用 `@StateObject class` 包装，`deinit` 中清理
+- SSE 解析中的共享可变状态（如 `parsedCitations`、`nextCitationIndex`）→ 必须约束在同一串行队列读写，不可跨线程
+
+**Android**
+- `@SuppressLint("CheckResult")` 是订阅泄漏的信号 → 必须用 `CompositeDisposable` 管理
+- 伪代码 `compositeDisposable.remove(/* 当前 disposable */)` 无法编译 → 需要 `var selfDisposable: Disposable? = null` 在 `subscribe` 前声明
+
+##### Demo 阶段约束
+
+明确不做的事（防止架构重构耦合）：
+- 不重构现有网络层
+- 不引入新的依赖管理框架
+- 不修改与本需求无关的 ViewModel / Adapter
+
+##### 双端验收补充
+
+补充端侧行为的 Given/When/Then，与 §3 验收条件分组：
+
+| 端 | Given | When | Then |
+|----|-------|------|------|
+| iOS | 收到 SSE done 事件 | 渲染引用编号 | 编号统一挂载，无中途回滚 |
+| Android | ViewModel onCleared() | 订阅清理 | CompositeDisposable.clear() 已调用 |
+
 ## Step 4：确定输出路径
 
 询问用户 PRD 输出位置（给出推荐）：
@@ -178,6 +248,32 @@ allowed-tools: Read, Write, Edit, Glob, Bash
 2. 提示：如需将 PRD 拆解为可执行任务，可使用 `/dtask`
 3. 产品模式下提示：如需补充技术方案细节，可使用 `/dprd full` 重新生成
 
+## Step 6：交付前自检
+
+写入文件后运行扫描，全部 0 命中才可交付：
+
+```bash
+rg -n '[""]' <prd-files>              # 智能引号
+rg -n '/Users/|[A-Z]:\\' <prd-files>  # 绝对路径
+rg -n $'\xef\xbf\xbd' <prd-files>     # 乱码字符（U+FFFD）
+```
+
+逐项确认：
+- [ ] 流式方案已声明状态变量线程归属
+- [ ] done 后装饰挂载策略已与文本渲染分开描述
+- [ ] 示例代码无伪代码占位（如 `remove(/* 当前 disposable */)`，必须给可编译写法）
+- [ ] 后端状态机行为写在后端章节，端侧章节只写消费和渲染
+
+交付回报格式（多任务并行时）：
+
+```
+任务 #N：已完成 / 未完成
+- 文件：path/to/file.md:行号
+- 智能引号扫描：0 命中
+- 绝对路径扫描：0 命中
+- 乱码字符扫描：0 命中
+```
+
 ## 不做的事
 
 - 不自动写入 task.json（任务拆解由 `/dtask` 负责）
@@ -188,3 +284,9 @@ allowed-tools: Read, Write, Edit, Glob, Bash
 - 结论先行：每节开头说结论，细节后面展开
 - 图表优于文字：流程用 mermaid，规格用表格，示例用代码块
 - 具体优于抽象：避免"合理处理"、"适当优化"等模糊表述，写具体的值和行为
+
+## 写作门禁
+
+- **ASCII 引号**：全文件仅允许 `"` (U+0022)，禁止 `"` `"` (U+201C/U+201D)，否则代码无法编译
+- **禁止绝对路径**：只写仓库相对路径或文件名，不写 `/Users/...` 或 `C:\...`
+- **API 响应必含顶层包装**：iOS/Android 数据模型必须包含 envelope 层（如 `ApiResponse<Data>`），不能只定义内层数据类型
