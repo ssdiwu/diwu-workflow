@@ -5,7 +5,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "python3 -c \"import json,sys; d=json.load(sys.stdin); sid=d.get('session_id',''); open('/tmp/.claude_main_session','w').write(sid) if sid else None\" 2>/dev/null||true"
+            "command": "python3 -c \"import json,sys,os,subprocess; d=json.load(sys.stdin); sid=d.get('session_id',''); cwd=d.get('cwd','.'); (open('/tmp/.claude_main_session','w').write(sid) if sid else None); rec=os.path.join(cwd,'.claude/recording.md'); sys.exit(0) if not os.path.exists(os.path.dirname(rec)) else None; now=subprocess.check_output(['date','+%Y-%m-%d %H:%M:%S']).decode().strip(); f=os.path.join(cwd,'.claude/task.json'); tasks=(json.load(open(f)).get('tasks',[]) if os.path.exists(f) else []); lines=[('- '+t['status']+': Task#'+str(t['id'])+' '+t.get('title',t.get('description',''))[:40]) for t in tasks if t['status'] not in ('Done','Cancelled')]; dc=sum(1 for t in tasks if t['status']=='Done'); (lines.append('- Done: '+str(dc)+' 个') if dc else None); snap=(chr(10).join(lines) if lines else '- 无进行中任务'); open(rec,'a').write(chr(10)+'---'+chr(10)+'## Session Start '+now+chr(10)+chr(10)+snap+chr(10))\" 2>/dev/null||true"
           }
         ]
       }
@@ -36,7 +36,8 @@
         "hooks": [
           {
             "type": "command",
-            "command": "python3 -c \"import json,sys,os,time; d=json.load(sys.stdin); sid=d.get('session_id',''); LOCK='/tmp/.claude_recording_lock'; now_e=int(time.time()); raw=open(LOCK).read().strip() if os.path.exists(LOCK) else ''; parts=raw.rsplit(':',1); last_sid,last_t=(parts[0],int(parts[1])) if len(parts)==2 and parts[1].isdigit() else ('',0); last=last_t if last_sid==sid else 0; sys.exit(0) if now_e-last<60 else None; f='.claude/task.json'; tasks=json.load(open(f)).get('tasks',[]) if os.path.exists(f) else sys.exit(0); t=next((x for x in tasks if x['status']=='InProgress'),None); sys.exit(0) if not t else None; import subprocess; now=subprocess.check_output(['date','+%Y-%m-%d %H:%M:%S']).decode().strip(); open(LOCK,'w').write(sid+':'+str(now_e)); print(json.dumps({'continue':True,'additionalSystemPrompt':'请立即将当前进度写入 .claude/recording.md。时间戳直接使用：'+now+'（禁止伪造）。任务：Task#'+str(t['id'])+' '+t.get('title',t.get('description',''))+'。任务描述：'+t.get('description','')+'。格式遵循 templates.md Session 格式。只写 recording.md，完成后停止。'}))\" 2>/dev/null||true"
+            "command": "python3 -c \"import json,sys,os,subprocess; d=json.load(sys.stdin); cwd=d.get('cwd','.'); rec=os.path.join(cwd,'.claude/recording.md'); sys.exit(0) if not os.path.exists(os.path.dirname(rec)) else None; now=subprocess.check_output(['date','+%Y-%m-%d %H:%M:%S']).decode().strip(); f=os.path.join(cwd,'.claude/task.json'); tasks=(json.load(open(f)).get('tasks',[]) if os.path.exists(f) else []); lines=[('- '+t['status']+': Task#'+str(t['id'])+' '+t.get('title',t.get('description',''))[:40]) for t in tasks if t['status'] not in ('Done','Cancelled')]; dc=sum(1 for t in tasks if t['status']=='Done'); (lines.append('- Done: '+str(dc)+' 个') if dc else None); snap=(chr(10).join(lines) if lines else '- 无进行中任务'); open(rec,'a').write(chr(10)+'## Session End '+now+chr(10)+chr(10)+snap+chr(10))\" 2>/dev/null||true",
+            "run_in_background": true
           }
         ]
       },
