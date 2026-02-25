@@ -30,18 +30,34 @@ allowed-tools: Read, Write, Edit, Glob
 
 根据澄清结果生成任务列表，追加到 `.claude/task.json`。
 
-每个任务必须包含所有字段：
+每个任务必须包含所有字段，参考以下示例的思维粒度：
+
 ```json
 {
-  "id": 1,
-  "description": "动词开头的一句话描述",
+  "id": 3,
+  "title": "实现邮件验证码发送",
+  "category": "functional",
   "status": "InDraft",
-  "acceptance": ["Given ... When ... Then ..."],
-  "steps": ["实施步骤"],
-  "category": "functional | ui | bugfix | refactor | infra",
-  "blocked_by": []
+  "description": "用户注册后需要验证邮箱。调用 SMTP 服务发送 6 位验证码，验证码有效期 10 分钟，存储在 Redis 中。",
+  "acceptance": [
+    "Given 新用户完成注册表单提交 When 系统调用 sendVerification(email) Then Redis 中存在 key=verify:{email}，value=6位数字，TTL=600s",
+    "Given SMTP 服务不可用 When 调用 sendVerification() Then 抛出 EmailServiceError，不写入 Redis",
+    "Given 同一邮箱 10 分钟内重复请求 When 调用 sendVerification() Then 覆盖旧验证码，重置 TTL"
+  ],
+  "steps": [
+    "1. 在 src/services/email.ts 实现 sendVerification(email: string): Promise<void>",
+    "2. 在 src/lib/redis.ts 添加 setVerifyCode(email, code, ttl) 方法",
+    "3. 凭据见 doc/runbook.md §2.1（SMTP 配置）",
+    "4. 运行 .claude/checks/task_3_verify.sh 验证"
+  ],
+  "blocked_by": [2]
 }
 ```
+
+示例中的思维粒度要点：
+- `acceptance` 的 Given 有具体函数名/页面路径，Then 有可断言的系统状态（key 名、TTL 值、错误类型）
+- `steps` 有具体文件路径，不依赖隐式上下文
+- `description` 说明背景（为什么）+ 技术约束（怎么做），不只是功能描述
 
 边界情况：
 - `.claude/task.json` 不存在：创建 `{"tasks": []}` 再追加
@@ -56,6 +72,10 @@ allowed-tools: Read, Write, Edit, Glob
 - steps 是否自包含（外部凭据有来源路径，无隐式上下文依赖）
 - 粒度是否合理（预估是否超过 2000 行，如是提示拆分）
 - 是否垂直切片（端到端打通，非按技术层横切）
+
+**acceptance 坏→好对比**：
+- ❌ `Given 用户登录 When 提交表单 Then 登录成功`（Then 无法断言，Given 无具体状态）
+- ✓ `Given 新用户完成注册表单提交 When 系统调用 sendVerification(email) Then Redis 中存在 key=verify:{email}，value=6位数字，TTL=600s`
 
 发现问题时：列出具体问题 + 建议修正，等用户确认后继续。
 

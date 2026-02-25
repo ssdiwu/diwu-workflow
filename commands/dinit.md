@@ -14,6 +14,15 @@ allowed-tools: Read, Write, Edit, Bash, Glob
 - **常用命令**：dev、build、lint、test
 - **关键目录**：项目结构概览
 
+**示例（填写完整的项目信息）**：
+- 项目名称：diwu-workflow
+- 描述：Claude Code 插件仓库，提供 diwu 编码工作流套件
+- 技术栈：Node.js，无框架，无数据库
+- 常用命令：`npm run lint`（lint），`npm test`（test），无 dev server
+- 关键目录：`commands/`（用户命令），`assets/`（模板文件），`skills/`（技能文件）
+
+收集到的信息要达到这个粒度才能生成有效的 CLAUDE.md 和 smoke.sh。
+
 ## Step 2：选择配置模式
 
 检查 `~/.claude/rules/` 是否存在：
