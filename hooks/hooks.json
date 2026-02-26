@@ -5,7 +5,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "python3 -c \"import json,sys,os,subprocess; d=json.load(sys.stdin); sid=d.get('session_id',''); cwd=d.get('cwd','.'); (open('/tmp/.claude_main_session','w').write(sid) if sid else None); rec=os.path.join(cwd,'.claude/recording.md'); sys.exit(0) if not os.path.exists(os.path.dirname(rec)) else None; now=subprocess.check_output(['date','+%Y-%m-%d %H:%M:%S']).decode().strip(); f=os.path.join(cwd,'.claude/task.json'); tasks=(json.load(open(f)).get('tasks',[]) if os.path.exists(f) else []); lines=[('- '+t['status']+': Task#'+str(t['id'])+' '+t.get('title',t.get('description',''))[:40]) for t in tasks if t['status'] not in ('Done','Cancelled')]; dc=sum(1 for t in tasks if t['status']=='Done'); (lines.append('- Done: '+str(dc)+' 个') if dc else None); snap=(chr(10).join(lines) if lines else '- 无进行中任务'); open(rec,'a').write(chr(10)+'---'+chr(10)+'## Session Start '+now+chr(10)+chr(10)+snap+chr(10))\" 2>/dev/null||true"
+            "command": "python3 -c \"import json,sys,os; d=json.load(sys.stdin); sid=d.get('session_id',''); (open('/tmp/.claude_main_session','w').write(sid) if sid else None)\" 2>/dev/null||true"
           }
         ]
       }
@@ -36,7 +36,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "python3 -c \"import json,sys,os,subprocess; d=json.load(sys.stdin); cwd=d.get('cwd','.'); rec=os.path.join(cwd,'.claude/recording.md'); sys.exit(0) if not os.path.exists(os.path.dirname(rec)) else None; now=subprocess.check_output(['date','+%Y-%m-%d %H:%M:%S']).decode().strip(); f=os.path.join(cwd,'.claude/task.json'); tasks=(json.load(open(f)).get('tasks',[]) if os.path.exists(f) else []); lines=[('- '+t['status']+': Task#'+str(t['id'])+' '+t.get('title',t.get('description',''))[:40]) for t in tasks if t['status'] not in ('Done','Cancelled')]; dc=sum(1 for t in tasks if t['status']=='Done'); (lines.append('- Done: '+str(dc)+' 个') if dc else None); snap=(chr(10).join(lines) if lines else '- 无进行中任务'); open(rec,'a').write(chr(10)+'## Session End '+now+chr(10)+chr(10)+snap+chr(10))\" 2>/dev/null||true",
+            "command": "python3 -c \"import json,sys,os,subprocess; d=json.load(sys.stdin); cwd=d.get('cwd','.'); rec=os.path.join(cwd,'.claude/recording.md'); sys.exit(0) if not os.path.exists(os.path.dirname(rec)) else None; f=os.path.join(cwd,'.claude/task.json'); tasks=(json.load(open(f)).get('tasks',[]) if os.path.exists(f) else []); active=[t for t in tasks if t['status'] not in ('Done','Cancelled')]; sys.exit(0) if not active else None; now=subprocess.check_output(['date','+%Y-%m-%d %H:%M:%S']).decode().strip(); lines=[('- '+t['status']+': Task#'+str(t['id'])+' '+t.get('title',t.get('description',''))[:40]) for t in active]; dc=sum(1 for t in tasks if t['status']=='Done'); (lines.append('- Done: '+str(dc)+' 个') if dc else None); snap=chr(10).join(lines); open(rec,'a').write(chr(10)+'## Session End '+now+chr(10)+chr(10)+snap+chr(10))\" 2>/dev/null||true",
             "run_in_background": true
           }
         ]

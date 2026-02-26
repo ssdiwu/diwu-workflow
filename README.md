@@ -205,6 +205,15 @@ flowchart TD
     SetInSpec --> End([Session 结束])
 ```
 
+**分层记忆**：Session 上下文由两个文件分工维护：
+
+| 文件 | 回答的问题 | 写入时机 |
+|------|-----------|---------|
+| `recording.md` | 发生了什么（session 流水、任务进度、下一步） | 每次 session 结束时 |
+| `decisions.md` | 为什么这样设计（方案选择、边界定义、设计方向） | 有重大设计决策时 |
+
+两者检索意图不同，不混用。`/dinit` 初始化时会创建 `decisions.md` 模板。
+
 ### 异常处理
 
 #### BLOCKED — 环境或依赖问题
@@ -297,7 +306,8 @@ flowchart TD
 | `SessionStart` | session 启动时 | 将主代理 session ID 写入 `/tmp/.claude_main_session`，供 SubagentStop 过滤 stale 通知 |
 | `PreToolUse` (Bash) | 每次执行 Bash 前 | 输出当前 InProgress 任务的 acceptance 条件，防止目标漂移 |
 | `SubagentStop` | 子代理完成时 | 比对 session ID 过滤 stale（旧 session 残留）通知；当前 session 子代理完成后立即触发写 recording.md |
-| `Stop` | 回合结束时 | 四分支任务循环：① 有 InProgress → block 继续当前任务；② InReview 积压 > 5 → 放行并通知人工验收；③ 有未阻塞的 InSpec → block 投喂下一任务；④ 全部完成 → 放行并通知完工。通知支持 macOS（系统通知+铃声）、Linux（notify-send）、终端铃声保底 |
+| `Stop` (background) | 回合结束时（后台） | 条件触发快照：仅当存在活跃任务（非 Done/Cancelled）时，将任务状态追加写入 recording.md |
+| `Stop` (blocking) | 回合结束时 | 四分支任务循环：① 有 InProgress → block 继续当前任务；② InReview 积压 > 5 → 放行并通知人工验收；③ 有未阻塞的 InSpec → block 投喂下一任务；④ 全部完成 → 放行并通知完工。通知支持 macOS（系统通知+铃声）、Linux（notify-send）、终端铃声保底 |
 
 ---
 

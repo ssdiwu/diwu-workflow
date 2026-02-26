@@ -11,6 +11,10 @@
 
 ### 2. 上下文恢复
 - 读取 `.claude/recording.md`，了解上一个 session 的工作和注意事项
+  - 统计完整 session 记录数（`## Session YYYY-MM-DD HH:MM:SS` 格式，不含 Start/End 快照）
+  - 超过 5 条时，立即执行 recording.md 归档（见 file-layout.md 归档执行步骤）
+- 检查 `.claude/task.json` 中 Done/Cancelled 任务数，超过 20 条时执行 task.json 归档
+- 读取 `.claude/decisions.md`（如存在），了解历史设计决策
 - 运行 `git log --oneline -20`，了解最近的代码变更历史
 
 ### 3. 任务选择策略
@@ -203,7 +207,20 @@ Agent 完成实现和验证后输出 REVIEW 请求，等待人工确认。
    - 验收验证结果
    - Change Request（如有）
    - 下次应该做什么
-3. 确保 `.claude/task.json` 反映最新的任务状态
+3. 如有重大设计决策，追加到 `.claude/decisions.md`（文件不存在时创建）：
+   ```markdown
+   ## DEC-NNN YYYY-MM-DD 决策标题
+   **背景**：[触发这个决策的问题]
+   **决策**：[选择了什么]
+   **备选方案**：[考虑过但未选的]
+   **理由**：[为什么选这个]
+   ```
+4. 确保 `.claude/task.json` 反映最新的任务状态
+
+### 判断锚点：何时写 decisions.md
+- 正例：从多个方案中选定设计方向（如"引入 README 索引层"代替全量 glob 扫描）。结论：写 decisions.md。
+- 反例：记录本次 session 做了什么、下一步计划。结论：写 recording.md，不写 decisions.md。
+- 边界例：重构某命令的定位（如"/ddemo 从分析报告改为落地文档生成器"）。结论：写 decisions.md（定位变更是设计决策）。
 
 ### Context Window 管理
 - context window 会在接近上限时自动压缩，允许无限期继续工作

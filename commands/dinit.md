@@ -55,6 +55,9 @@ allowed-tools: Read, Write, Edit, Bash, Glob
 (Sessions will be recorded here)
 ```
 
+### .claude/decisions.md（可选）
+询问用户是否需要创建决策记录文件（有明确设计方向或技术选型的项目推荐）。如需要，读取 `${CLAUDE_PLUGIN_ROOT}/assets/dinit/assets/decisions.md.template` 写入。
+
 ### .claude/checks/smoke.sh
 读取 `${CLAUDE_PLUGIN_ROOT}/assets/dinit/assets/smoke.sh.template`，根据技术栈定制，执行 `chmod +x .claude/checks/smoke.sh`。
 
@@ -82,4 +85,5 @@ git commit -m "Initial project setup with Claude Code workflow"
 - [ ] `init.sh` 可执行
 - [ ] `.claude/recording.md` 存在
 - [ ] `.claude/checks/smoke.sh` 可执行
+- [ ] （可选）`.claude/decisions.md`
 - [ ] （可选）`.claude/rules/constraints.md`
