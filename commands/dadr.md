@@ -17,9 +17,28 @@ allowed-tools: Read, Write, Glob, Bash
 - 有哪些约束条件（时间、团队能力、现有技术栈）？
 - 各方案的核心取舍是什么？
 
-## Step 3：确定 ADR 编号
+## Step 3：读取索引，确定新建或更新
 
-检查 `.doc/adr/` 目录下已有文件，取最大编号 + 1。`.doc/adr/` 不存在时先创建目录。
+读取 `.doc/adr/README.md`（不存在则跳过）：
+
+```markdown
+# ADR 索引
+
+| 编号 | 标题 | 状态 | 摘要（一句话） |
+|------|------|------|--------------|
+| ADR-001 | 消息通知使用 WebSocket | Accepted | 峰值 3000 QPS 超短轮询承载上限，团队有 Socket.io 经验 |
+```
+
+- **相同或高度相关的决策已存在** → 找到对应文件，直接更新（通常只改 Status 行或补 Consequences），**不新建**
+- **新决策** → 取 README 中最大编号 + 1，新建文件
+
+**判断锚点：新建 vs 更新**
+
+- 正例（更新）：README 中已有"消息通知使用 WebSocket"，用户现在要记录"WebSocket 方案已上线"。结论：更新 ADR-001 的 Status 为 Accepted，不新建。
+- 反例（新建）：README 中已有"消息通知使用 WebSocket"，用户现在要记录"用户头像存储使用 OSS"。结论：两个决策无关，新建 ADR-002。
+- 边界例（更新）：README 中已有"消息通知使用 WebSocket"，用户现在要记录"WebSocket 连接数达到上限，引入 Redis Adapter"。结论：是原决策 Consequences 的后续，更新 ADR-001 补充 Consequences，不新建。
+
+`.doc/adr/` 不存在时先创建目录。
 
 ## Step 4：生成并写入 ADR
 
@@ -55,7 +74,20 @@ ADR 格式参考以下示例的思维粒度：
 - Options 的缺点是具体的技术风险和触发条件，不是"复杂度高"
 - Consequences 的 ⚠️ 有触发条件（DAU 超过 3 万）和解决路径（Redis Adapter）
 
-## Step 5：写入后提示
+## Step 5：更新 README.md
+
+写入或更新 ADR 文件后，同步维护 `.doc/adr/README.md`：
+
+**首次创建 README（兼容旧版本）**：
+- 如果 `.doc/adr/` 目录存在但 README.md 不存在，先 glob 扫描 `ADR-*.md` 文件
+- 读取每个 ADR 的标题、Status、Context 首句（作为摘要），生成完整索引表
+- 再追加当前新建的 ADR
+
+**日常维护**：
+- 新建 ADR → 在表格末尾追加一行
+- 更新 ADR → 修改对应行的状态和摘要
+
+## Step 6：写入后提示
 
 - 显示生成的文件路径
 - 提示：如需关联到某个任务，可在 task.json 对应任务的 steps 中注明 "参见 .doc/adr/ADR-NNN"
