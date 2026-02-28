@@ -4,25 +4,11 @@
 
 本项目内嵌完整的 diwu 工作流规则，无需依赖全局配置。
 
-### 任务状态机与字段定义
-
-[RULES:core-states.md]
-
-### Session 工作流
-
-[RULES:core-workflow.md]
-
-### 异常处理
-
-[RULES:exceptions.md]
-
-### 格式模板
-
-[RULES:templates.md]
-
-### 文件布局
-
-[RULES:file-layout.md]
+@rules/core-states.md
+@rules/core-workflow.md
+@rules/exceptions.md
+@rules/templates.md
+@rules/file-layout.md
 
 ---
 

@@ -35,7 +35,10 @@ allowed-tools: Read, Write, Edit, Bash, Glob
 
 ### .claude/CLAUDE.md
 - **精简模式**：读取 `${CLAUDE_PLUGIN_ROOT}/assets/dinit/assets/claude-md-minimal.template`，填入项目信息
-- **便携模式**：读取 `${CLAUDE_PLUGIN_ROOT}/assets/dinit/assets/claude-md-portable.template`，将 `[RULES:filename.md]` 占位符替换为 `assets/rules/` 对应文件内容
+- **便携模式**：
+  1. 读取 `${CLAUDE_PLUGIN_ROOT}/assets/dinit/assets/claude-md-portable.template`，填入项目信息，写入 `.claude/CLAUDE.md`（保留 `@rules/` 引用，不展开）
+  2. 将 `${CLAUDE_PLUGIN_ROOT}/assets/dinit/assets/rules/` 下的五个文件逐一复制到 `.claude/rules/`：`core-states.md`、`core-workflow.md`、`exceptions.md`、`templates.md`、`file-layout.md`
+  3. **不得**创建 `.claude/assets/rules/` 或其他子目录
 
 ### AGENTS.md（项目根目录）
 读取 `${CLAUDE_PLUGIN_ROOT}/assets/dinit/assets/agents-md.template` 写入项目根目录。
@@ -80,6 +83,7 @@ git commit -m "Initial project setup with Claude Code workflow"
 
 确认以下文件均已创建：
 - [ ] `.claude/CLAUDE.md` 已填充项目信息
+- [ ] 便携模式：`.claude/rules/` 下有五个 rules 文件
 - [ ] 项目根目录有 `AGENTS.md`
 - [ ] `.claude/task.json` 是有效 JSON
 - [ ] `init.sh` 可执行
