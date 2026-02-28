@@ -34,7 +34,7 @@ DECISION TRACE
 结论: [BLOCKED|CHANGE REQUEST|CONTINUE|REVIEW|SKIP]
 规则命中: - [规则条目]
 证据: - [状态/日志/git diff]
-排除项: - [为何不是其��结论]
+排除项: - [为何不是其他结论]
 下一步: - [立即执行的动作]
 ```
 
