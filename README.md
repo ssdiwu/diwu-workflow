@@ -214,6 +214,21 @@ flowchart TD
 
 两者检索意图不同，不混用。`/dinit` 初始化时会创建 `decisions.md` 模板。
 
+### 通用货币：README 索引
+
+命令之间通过 README 索引传递信息，而不是直接扫描对方的输出文件。每个命令：
+1. 先读相关 README，根据摘要决定精读哪些文件（定向读取，不全量扫描）
+2. 写入产出文件后，同步更新 README
+
+```
+.doc/README.md        ← /ddoc 维护，/dprd /ddemo 读取
+.doc/prd/README.md    ← /dprd 维护，/ddemo /dtask 读取
+.doc/demo/README.md   ← /ddemo 维护，/dtask 读取
+.doc/adr/README.md    ← /dadr 维护，/dprd 读取
+```
+
+这是系统的"通用货币"——所有命令都认识的公共格式，使命令间解耦：新增命令只需遵循"先读 README，后更新 README"的约定，无需了解其他命令的内部实现。各 README 的列格式定义见 `.doc/schema.md`。
+
 ### 异常处理
 
 #### BLOCKED — 环境或依赖问题
@@ -258,6 +273,64 @@ InDraft（草稿）→ InSpec（已锁定）→ InProgress（实施中）→ InR
 ---
 
 ## 命令参考
+
+每个命令的约束表说明该命令"必须同时为真的约束集合"——违反任一约束，输出即不可信。
+
+### /dinit
+
+| 维度 | 约束 |
+|-----|------|
+| 业务 | 已存在的文件不覆盖（幂等）；便携模式规则文件写入 `.claude/rules/`，不内联到 CLAUDE.md |
+| 时序 | 收集信息 → 选择模式 → 创建文件 → 验证清单；不可跳过模式选择直接创建文件 |
+| 跨命令 | 创建的 `.claude/task.json` 结构必须与 `/dtask` 写入格式兼容 |
+| 感知 | 验证清单全部通过才算完成；缺少任一文件不算初始化成功 |
+
+### /dprd
+
+| 维度 | 约束 |
+|-----|------|
+| 业务 | Layer 0 未通过时 Layer 1 不得开始；不写 task.json；不生成代码；Demo 需求名称必须用 kebab-case（直接作为 `/ddemo` 的输入参数） |
+| 时序 | 确认定位 → Q1-Q8 逐问（每次只问一个）→ 检查已有 PRD → 生成 → 写入 → 自检；Q 顺序不可颠倒 |
+| 跨命令 | PRD README 的 Demo 需求列是 `/ddemo` 的输入；`.doc/README.md` 和 `.doc/adr/README.md` 是 Q5 的前置读取 |
+| 感知 | 交付前自检：智能引号 0 命中、绝对路径 0 命中、乱码 0 命中；否则不可交付 |
+
+### /dadr
+
+| 维度 | 约束 |
+|-----|------|
+| 业务 | 同一决策只有一个 ADR（更新不新建）；Context 必须有具体数字；Consequences 的 ⚠️ 必须有触发条件和解决路径 |
+| 时序 | 先读 README 判断新建/更新 → 写文件 → 更新 README；不可先写文件再判断 |
+| 跨命令 | ADR README 是 `/dprd` Q5 的输入；ADR 编号格式 `ADR-NNN` 是 `/dtask` steps 引用的依据 |
+| 感知 | 备选方案的缺点必须是具体技术风险和触发条件，不允许"复杂度高"等模糊描述 |
+
+### /ddoc
+
+| 维度 | 约束 |
+|-----|------|
+| 业务 | 代码是锚点，无法确认的内容标注 `[待确认]`，不编造；逆向模式不写 task.json（大范围除外） |
+| 时序 | 写文档 → 自审 → gap 分析（两层）→ 补充缺口 → 再次 gap 分析；gap 分析必须在自审之后 |
+| 跨命令 | `.doc/README.md` 是所有命令的入口；每次写入文档后必须同步更新 README（通用货币维护义务） |
+| 感知 | 有状态实体必须有 stateDiagram；核心业务流程必须有 flowchart；数据实体关系必须有 erDiagram |
+
+### /ddemo
+
+| 维度 | 约束 |
+|-----|------|
+| 业务 | 每次只处理一个 Demo；核心验证资产篇幅 > 50%；不写生产架构（DDL、多服务 API 契约）；不写 task.json |
+| 时序 | 先读 README（不全量扫描）→ 建立上下文 → 生成 → 写入 → 更新 Demo README |
+| 跨命令 | Demo 文件路径格式 `DEMO-{kebab-case}-prd.md` 是 `/dtask` 的查找依据；通过标准必须可量化（供 `/dtask` acceptance 引用） |
+| 感知 | 核心验证资产必须可直接运行（Prompt 全文 / 测试矩阵 / 测试脚本），不允许伪代码占位 |
+
+### /dtask
+
+| 维度 | 约束 |
+|-----|------|
+| 业务 | task ID 永不复用（跨 task.json 和 archive）；functional/ui/bugfix 类 acceptance 必须 GWT 格式；steps 必须自包含（绝对路径，无隐式上下文依赖） |
+| 时序 | 先确定最大 ID → 澄清问题 → 生成 → 质量检查 → 可选三视角审查 → 写入；ID 确定必须在生成之前 |
+| 跨命令 | 写入的 task.json 是工作流引擎（hooks + Session 启动）的输入；blocked_by 引用的 ID 必须存在于 task.json 或 archive |
+| 感知 | 质量检查发现问题时必须列出具体问题 + 建议修正，不可静默写入 |
+
+---
 
 ### /dtask 任务规划流程
 

@@ -11,17 +11,13 @@
 ├── decisions.md                   # 设计决策记录（可选，有重大决策时创建）
 ├── recording_archive/             # 归档记录目录（归档后生成）
 │   └── YYYY-MM-DD.md
-├── rules/                         # 规则文件目录
-│   ├── core-states.md
-│   ├── core-workflow.md
-│   ├── exceptions.md
-│   ├── templates.md
-│   └── file-layout.md
 ├── checks/                        # 验证脚本目录
 │   ├── smoke.sh
 │   └── task_<id>_verify.sh
 └── init.sh                        # 环境初始化脚本（可选）
 ```
+
+> 规则文件由插件 UserPromptSubmit hook 注入，不在项目 .claude/ 目录中。
 
 ## .doc/ 目录结构（SDD 规范产物）
 
@@ -40,7 +36,7 @@
 | `.claude/task.json` | 当前所有任务的状态和内容 | Agent 读写 |
 | `.claude/task_archive_YYYY-MM.json` | 按月归档的 Done/Cancelled 任务，保留 id 序列 | Agent 写 |
 | `.claude/recording.md` | Session 进度记录，每次追加 | Agent 写 |
-| `.claude/decisions.md` | 重大设计决策记录，供 Agent 快速检索历史决策理由 | Agent 写 |
+| `.claude/decisions.md` | 重大设计决策记录（影响范围 ≥2 模块，或引入新约束），供 Agent 快速检索历史决策理由 | Agent 写 |
 | `.claude/recording_archive/YYYY-MM-DD.md` | 按天归档的历史 session 记录 | Agent 写 |
 | `.claude/checks/smoke.sh` | 基线环境验证，session 启动时运行 | Agent 提供方案，人工确认后实施 |
 | `.claude/checks/task_<id>_verify.sh` | 任务专属验证脚本，id 对应 task.json | Agent 创建并执行 |
@@ -48,8 +44,8 @@
 
 ## 归档触发条件
 
-- **task_archive_YYYY-MM.json**：`task.json` 中 Done/Cancelled 任务超过 20 个时触发
-- **recording_archive/YYYY-MM-DD.md**：recording.md 中 session 数超过 5 条时自动触发，无需人工确认，按天归档
+- **task_archive_YYYY-MM.json**：`task.json` 中 Done/Cancelled 任务超过归档阈值时触发（阈值见 templates.md 可调参数）
+- **recording_archive/YYYY-MM-DD.md**：recording.md 中 session 数超过归档阈值时自动触发，无需人工确认，按天归档（阈值见 templates.md 可调参数）
 
 ## 归档执行步骤
 

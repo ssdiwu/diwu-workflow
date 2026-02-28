@@ -82,14 +82,14 @@ Then 登录成功
 
 ## 状态定义
 
-| 状态 | 含义 |
-|------|------|
-| InDraft | 需求草稿中，Agent 可修改任务标题、任务描述、验收条件、实施步骤 |
-| InSpec | 需求已确认，锁定（Agent 只能修改 status 字段） |
-| InProgress | 实施中，Agent 正在实现 |
-| InReview | 验证中，实现完成，等待验证 |
-| Done | 已完成，验证通过 |
-| Cancelled | 已取消，任务不再需要 |
+| 状态 | 含义 | 修改权限 |
+|------|------|----------|
+| InDraft | 需求草稿中，Agent 可修改任务标题、任务描述、验收条件、实施步骤 | 主代理可修改 title/description/acceptance/steps，子代理只读 |
+| InSpec | 需求已确认，锁定（Agent 只能修改 status 字段） | 主代理只能修改 status，子代理只读 |
+| InProgress | 实施中，Agent 正在实现 | 主代理可修改 status，子代理只读 |
+| InReview | 验证中，实现完成，等待验证 | 主代理可修改 status，子代理只读 |
+| Done | 已完成，验证通过 | 主代理可修改 status，子代理只读 |
+| Cancelled | 已取消，任务不再需要 | 主代理可修改 status，子代理只读 |
 
 ## 状态转移表
 

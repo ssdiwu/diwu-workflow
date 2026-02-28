@@ -85,7 +85,7 @@ Task#5: 用户权限中间件
 
 ## DECISION TRACE 格式（判断过程模板）
 
-关键判断场景（如任务选择、CR/BLOCKED、并行与串行、大幅度修改判定）必须先输出此模板。
+以下场景必须先输出 DECISION TRACE：任务选择、CR/BLOCKED 判定、并行与串行选择、大幅度修改判定、blocked_by 写入判定、循环依赖识别、InProgress→InSpec 判定、InReview→Done 判定。
 
 ```
 DECISION TRACE

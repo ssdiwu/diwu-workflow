@@ -76,6 +76,15 @@ allowed-tools: Read, Write, Edit, Glob
 - **成功标准**：怎么算完成？
 - **具体例子**：能举一个典型操作的完整例子吗？（用来直接推导 Given/When/Then）
 
+## Step 2.5：读取文档上下文（如存在）
+
+读取以下 README（不存在则跳过），提取相关信息用于生成 acceptance：
+
+- `.doc/prd/README.md` — 列格式：`| 文件 | 摘要 | demos | 状态(draft|review|approved) |`
+  → 了解已有 PRD 的功能背景
+- `.doc/demo/README.md` — 列格式：`| 文件 | 摘要 | 通过标准摘要 | 状态(pending|passed|failed) |`
+  → 提取相关 Demo 的通过标准，作为 acceptance 量化依据（通过标准格式：`指标 > 阈值`，多条用 `;` 分隔）
+
 ## Step 3：确定新任务 ID
 
 写入前必须：

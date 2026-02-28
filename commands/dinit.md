@@ -23,22 +23,16 @@ allowed-tools: Read, Write, Edit, Bash, Glob
 
 收集到的信息要达到这个粒度才能生成有效的 CLAUDE.md 和 smoke.sh。
 
-## Step 2：选择配置模式
+## Step 2：复制规则文件
 
-检查 `~/.claude/rules/` 是否存在：
-- 存在 → 默认推荐**精简模式**（引用全局规则，不复制）
-- 不存在 → 默认推荐**便携模式**（规则内嵌，项目自包含）
+将 `${CLAUDE_PLUGIN_ROOT}/assets/dinit/assets/rules/` 下的五个文件逐一复制到 `.claude/rules/`：`core-states.md`、`core-workflow.md`、`exceptions.md`、`templates.md`、`file-layout.md`。
 
-询问用户确认模式选择。
+> 规则来源唯一：插件 `assets/dinit/assets/rules/`。
 
 ## Step 3：创建项目文件
 
 ### .claude/CLAUDE.md
-- **精简模式**：读取 `${CLAUDE_PLUGIN_ROOT}/assets/dinit/assets/claude-md-minimal.template`，填入项目信息
-- **便携模式**：
-  1. 读取 `${CLAUDE_PLUGIN_ROOT}/assets/dinit/assets/claude-md-portable.template`，填入项目信息，写入 `.claude/CLAUDE.md`（保留 `@rules/` 引用，不展开）
-  2. 将 `${CLAUDE_PLUGIN_ROOT}/assets/dinit/assets/rules/` 下的五个文件逐一复制到 `.claude/rules/`：`core-states.md`、`core-workflow.md`、`exceptions.md`、`templates.md`、`file-layout.md`
-  3. **不得**创建 `.claude/assets/rules/` 或其他子目录
+读取 `${CLAUDE_PLUGIN_ROOT}/assets/dinit/assets/claude-md-portable.template`，填入项目信息，写入 `.claude/CLAUDE.md`（保留 `@rules/` 引用，不展开）。**不得**创建 `.claude/assets/rules/` 或其他子目录。
 
 ### AGENTS.md（项目根目录）
 读取 `${CLAUDE_PLUGIN_ROOT}/assets/dinit/assets/agents-md.template` 写入项目根目录。
@@ -57,6 +51,9 @@ allowed-tools: Read, Write, Edit, Bash, Glob
 
 (Sessions will be recorded here)
 ```
+
+### .claude/lessons.md
+读取 `${CLAUDE_PLUGIN_ROOT}/assets/dinit/assets/lessons.md.template` 写入。
 
 ### .claude/decisions.md（可选）
 询问用户是否需要创建决策记录文件（有明确设计方向或技术选型的项目推荐）。如需要，读取 `${CLAUDE_PLUGIN_ROOT}/assets/dinit/assets/decisions.md.template` 写入。
@@ -88,6 +85,7 @@ git commit -m "Initial project setup with Claude Code workflow"
 - [ ] `.claude/task.json` 是有效 JSON
 - [ ] `init.sh` 可执行
 - [ ] `.claude/recording.md` 存在
+- [ ] `.claude/lessons.md` 存在
 - [ ] `.claude/checks/smoke.sh` 可执行
 - [ ] （可选）`.claude/decisions.md`
 - [ ] （可选）`.claude/rules/constraints.md`

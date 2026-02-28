@@ -12,8 +12,8 @@
 ### 2. 上下文恢复
 - 读取 `.claude/recording.md`，了解上一个 session 的工作和注意事项
   - 统计完整 session 记录数（`## Session YYYY-MM-DD HH:MM:SS` 格式，不含 Start/End 快照）
-  - 超过 5 条时，立即执行 recording.md 归档（见 file-layout.md 归档执行步骤）
-- 检查 `.claude/task.json` 中 Done/Cancelled 任务数，超过 20 条时执行 task.json 归档
+  - 归档触发条件与执行步骤见 file-layout.md
+- 检查 `.claude/task.json` 中 Done/Cancelled 任务数，归档触发条件见 file-layout.md
 - 读取 `.claude/decisions.md`（如存在），了解历史设计决策
 - 运行 `git log --oneline -20`，了解最近的代码变更历史
 
@@ -41,6 +41,11 @@
 - 运行 `.claude/init.sh` 启动开发环境（如需要）
 - 运行项目的基线测试（build/lint），确认系统处于正常状态
 - 如果基线测试失败，优先修复，然后再开始新任务
+
+### 执行顺序约束
+- Step 1-3 必须串行执行（Preflight 失败则停止，上下文恢复和任务选择依赖 Preflight 通过）
+- Step 4 可选（仅当 init.sh 存在时执行）
+- Step 2 和 Step 3 的 task.json 读取可合并为一次
 
 ### 判断锚点：基线失败时先修基线还是继续
 - 正例：`smoke.sh` 中定义的 build 或 lint 失败。结论：先修复基线，再开始新任务。
@@ -123,11 +128,7 @@ InSpec → InProgress → InReview → Done 完整流程：
 **自审原则**：只实现了 acceptance 要求的，不多不少；没有引入技术债或安全问题。
 - ❌ 顺手重构了周边函数、添加了未要求的日志、提取了"以后可能用到"的工具函数
 
-**Change Request 流程**（执行 InSpec 任务时发现需求问题）：
-1. **创建 CR**：在 recording.md 中记录 Change Request
-2. **保持状态**：任务状态保持 InSpec（不退回 InDraft）
-3. **停止实施**：输出 CHANGE_REQUEST 信息，等待批准
-4. **批准后**：更新 task.json 中的验收条件，继续实施
+**Change Request 流程**（执行 InSpec 任务时发现需求问题）：见 exceptions.md。
 
 ### 提交规范
 
@@ -153,6 +154,12 @@ InSpec → InProgress → InReview → Done 完整流程：
 - 后一步依赖前一步的输出
 - 需要积累上下文的实施类任务
 
+**专业化分工**（可选，适用于复杂任务）：
+- 探索类：只读文件/grep，不写任何文件，用 haiku
+- 验证类：只运行测试/检查 acceptance，不写代码
+- 实施类：只写代码，不做验收判断，继承主模型
+- 同一任务可同时派出探索类 + 实施类，但实施类必须等探索类返回结果后再启动
+
 ### 判断锚点：并行与串行选择
 - 正例：子代理 A 仅修改 `src/auth/`，子代理 B 仅修改 `src/payment/`，无共享写文件。结论：可并行。
 - 反例：两个子代理都要修改 `src/models/user.ts` 或同一迁移文件。结论：必须串行。
@@ -161,9 +168,12 @@ InSpec → InProgress → InReview → Done 完整流程：
 
 **Coordinator Pattern**：task.json 的状态更新始终由主代理负责，子代理通过返回值把结果传回主代理。
 
+**超前计数器所有权**：超前计数器由主代理维护，子代理完成超前任务后通过返回值通知主代理，主代理串行更新计数。超前任务完成顺序以主代理接收返回值的时间为准，不以子代理完成时间为准。
+
 **启动仪式**（所有子代理，强约束）：
 1. 读取 `.claude/recording.md`（关注 pending CR、历史阻塞、回退记录）
 2. 读取相关 task 的 title、description、acceptance、steps
+3. 读取 `.claude/decisions.md`（如存在），了解历史设计决策
 
 **子代理并发数**：读取优先级与行为定义见 templates.md 可调参数。
 
@@ -218,7 +228,7 @@ Agent 完成实现和验证后输出 REVIEW 请求，等待人工确认。
 4. 确保 `.claude/task.json` 反映最新的任务状态
 
 ### 判断锚点：何时写 decisions.md
-- 正例：从多个方案中选定设计方向（如"引入 README 索引层"代替全量 glob 扫描）。结论：写 decisions.md。
+- 正例：从多个方案中选定设计方向（如"引入 README 索引层"代替全量 glob 扫描），**且影响范围 ≥2 个命令/模块**。结论：写 decisions.md。
 - 反例：记录本次 session 做了什么、下一步计划。结论：写 recording.md，不写 decisions.md。
 - 边界例：重构某命令的定位（如"/ddemo 从分析报告改为落地文档生成器"）。结论：写 decisions.md（定位变更是设计决策）。
 

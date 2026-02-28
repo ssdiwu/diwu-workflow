@@ -1,5 +1,25 @@
 {
   "hooks": {
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 -c \"import json,sys,os; root=os.environ.get('CLAUDE_PLUGIN_ROOT',''); sys.exit(0) if not root else None; rd=os.path.join(root,'assets','dinit','assets','rules'); fs=['core-states.md','core-workflow.md','exceptions.md','templates.md','file-layout.md']; content=''.join(open(os.path.join(rd,f)).read()+chr(10)+chr(10) for f in fs if os.path.exists(os.path.join(rd,f))); d=json.load(sys.stdin); cwd=d.get('cwd','.'); lp=os.path.join(cwd,'.claude','lessons.md'); lc=open(lp).read().strip() if os.path.exists(lp) else ''; content+=(chr(10)+chr(10)+'# Agent 错误模式记录'+chr(10)+chr(10)+lc if lc else ''); (print(json.dumps({'additionalSystemPrompt':content})) if content else None)\" 2>/dev/null||true"
+          }
+        ]
+      }
+    ],
+    "SubagentStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 -c \"import json,sys,os; root=os.environ.get('CLAUDE_PLUGIN_ROOT',''); sys.exit(0) if not root else None; sp=os.path.join(root,'assets','rules','subagent-context.md'); content=open(sp).read() if os.path.exists(sp) else ''; d=json.load(sys.stdin); cwd=d.get('cwd','.'); lp=os.path.join(cwd,'.claude','lessons.md'); lc=open(lp).read().strip() if os.path.exists(lp) else ''; content+=(chr(10)+chr(10)+'# Agent 错误模式记录'+chr(10)+chr(10)+lc if lc else ''); (print(json.dumps({'additionalSystemPrompt':content})) if content else None)\" 2>/dev/null||true"
+          }
+        ]
+      }
+    ],
     "SessionStart": [
       {
         "hooks": [
