@@ -1,6 +1,6 @@
 {
   "name": "diwu-workflow",
-  "version": "0.3.7",
+  "version": "0.3.8",
   "description": "diwu 编码工作流套件：项目初始化、任务规划、产品需求文档、架构决策记录、产品文档",
   "author": {
     "name": "ssdiwu"
