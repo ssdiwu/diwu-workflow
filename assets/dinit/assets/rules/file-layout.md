@@ -55,9 +55,10 @@
 3. 在 recording.md 记录归档操作
 
 **recording.md 归档**：
-1. 将最旧的 session 移入 recording_archive/YYYY-MM-DD.md（按天）
-2. recording.md 始终保留最近 5 条 session
-3. 无需人工确认，session 启动时自动执行
+1. 将最旧的 session 移入 recording_archive/YYYY-MM-DD.md（按天，YYYY-MM-DD 为 session 所在日期）
+2. 同一天的所有归档 session 追加到**同一个** YYYY-MM-DD.md 文件，禁止使用 batch1/batch2 等后缀
+3. recording.md 始终保留最近 5 条 session
+4. 无需人工确认，session 启动时自动执行
 
 ## 查找历史
 
