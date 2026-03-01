@@ -10,16 +10,6 @@
         ]
       }
     ],
-    "SubagentStart": [
-      {
-        "hooks": [
-          {
-            "type": "command",
-            "command": "python3 -c \"import json,sys,os; home=os.path.expanduser('~'); ip=os.path.join(home,'.claude','plugins','installed_plugins.json'); pdata=json.load(open(ip)) if os.path.exists(ip) else {}; entries=pdata.get('plugins',{}).get('diwu-workflow@ssdiwu',[]); root=(entries[0].get('installPath','') if entries else '') or os.environ.get('CLAUDE_PLUGIN_ROOT',''); sys.exit(0) if not root else None; sp=os.path.join(root,'assets','rules','subagent-context.md'); content=open(sp).read() if os.path.exists(sp) else ''; sys.exit(0) if not content else None; d=json.load(sys.stdin); cwd=d.get('cwd','.'); lp=os.path.join(cwd,'.claude','lessons.md'); lc=open(lp).read().strip() if os.path.exists(lp) else ''; content+=(chr(10)+chr(10)+'# Agent 错误模式记录'+chr(10)+chr(10)+lc if lc else ''); print(json.dumps({'additionalSystemPrompt':content}))\" 2>/dev/null||true"
-          }
-        ]
-      }
-    ],
     "SessionStart": [
       {
         "hooks": [

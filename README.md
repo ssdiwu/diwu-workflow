@@ -280,7 +280,7 @@ InDraft（草稿）→ InSpec（已锁定）→ InProgress（实施中）→ InR
 
 | 维度 | 约束 |
 |-----|------|
-| 业务 | 已存在的文件不覆盖（幂等）；便携模式规则文件写入 `.claude/rules/`，不内联到 CLAUDE.md |
+| 业务 | 已存在的文件不覆盖（幂等）；规则文件写入 `.claude/rules/`，不内联到 CLAUDE.md |
 | 时序 | 收集信息 → 选择模式 → 创建文件 → 验证清单；不可跳过模式选择直接创建文件 |
 | 跨命令 | 创建的 `.claude/task.json` 结构必须与 `/dtask` 写入格式兼容 |
 | 感知 | 验证清单全部通过才算完成；缺少任一文件不算初始化成功 |
@@ -380,7 +380,7 @@ flowchart TD
 | `PreToolUse` (Bash) | 每次执行 Bash 前 | 输出当前 InProgress 任务的 acceptance 条件，防止目标漂移 |
 | `SubagentStop` | 子代理完成时 | 比对 session ID 过滤 stale（旧 session 残留）通知；当前 session 子代理完成后立即触发写 recording.md |
 | `Stop` (background) | 回合结束时（后台） | 条件触发快照：仅当存在活跃任务（非 Done/Cancelled）时，将任务状态追加写入 recording.md |
-| `Stop` (blocking) | 回合结束时 | 四分支任务循环：① 有 InProgress → block 继续当前任务；② InReview 积压 > 5 → 放行并通知人工验收；③ 有未阻塞的 InSpec → block 投喂下一任务；④ 全部完成 → 放行并通知完工。通知支持 macOS（系统通知+铃声）、Linux（notify-send）、终端铃声保底 |
+| `Stop` (blocking) | 回合结束时 | 三分支任务循环：① 有 InProgress → block 继续当前任务；② InReview 积压 > 5 → 放行并通知人工验收；③ 有未阻塞的 InSpec → block 投喂下一任务。无活跃任务时：10分钟内有 session 记录 → block 要求追加写入 recording.md；否则 → block 要求新建 session 记录 |
 
 ---
 
