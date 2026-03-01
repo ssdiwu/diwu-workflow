@@ -85,7 +85,13 @@ Task#5: 用户权限中间件
 
 ## DECISION TRACE 格式（判断过程模板）
 
-以下场景必须先输出 DECISION TRACE：任务选择、CR/BLOCKED 判定、并行与串行选择、大幅度修改判定、blocked_by 写入判定、循环依赖识别、InProgress→InSpec 判定、InReview→Done 判定。
+以下场景必须先输出 DECISION TRACE：任务选择、CR/BLOCKED判定、并行与串行选择、大幅度修改判定、blocked_by写入判定、循环依赖识别、InProgress→InSpec判定、InReview→Done判定。
+
+### 判断锚点：何时触发 DECISION TRACE
+- 正例：准备将任务从 InProgress 退回 InSpec，理由是缺少 SMTP 配置。结论：必须先输出 DECISION TRACE 记录阻塞证据，再输出 BLOCKED 模板。
+- 正例：两个子代理都需要写入同一文件，决定串行还是并行。结论：必须先输出 DECISION TRACE 记录共享写文件证据，再执行串行。
+- 反例：执行固定步骤（如读 recording.md、运行 smoke.sh），无需判断。结论：不触发 DECISION TRACE，直接执行。
+- 边界例：任务验证全部通过，改动仅 80 行且无 API 变更，准备标 Done。结论：属于 InReview→Done 判定，仍需输出 DECISION TRACE（内容可简短，记录”小幅度修改，自审通过”即可）。
 
 ```
 DECISION TRACE
@@ -99,10 +105,10 @@ DECISION TRACE
 - [task.json 状态、blocked_by 明细、测试日志、git diff --stat、配置检查结果]
 
 排除项:
-- [为什么不是其他结论；例如“非需求矛盾，故不是 CHANGE REQUEST”]
+- [为什么不是其他结论；例如”非需求矛盾，故不是 CHANGE REQUEST”]
 
 下一步:
-- [立即执行的动作；例如“输出 BLOCKED 模板并等待人工配置”]
+- [立即执行的动作；例如”输出 BLOCKED 模板并等待人工配置”]
 ```
 
 ## recording.md Session 格式

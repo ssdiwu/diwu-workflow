@@ -231,6 +231,7 @@ Agent 完成实现和验证后输出 REVIEW 请求，等待人工确认。
 - 正例：从多个方案中选定设计方向（如"引入 README 索引层"代替全量 glob 扫描），**且影响范围 ≥2 个命令/模块**。结论：写 decisions.md。
 - 反例：记录本次 session 做了什么、下一步计划。结论：写 recording.md，不写 decisions.md。
 - 边界例：重构某命令的定位（如"/ddemo 从分析报告改为落地文档生成器"）。结论：写 decisions.md（定位变更是设计决策）。
+- 结论输出：不需要 DECISION TRACE，直接按判断写入对应文件。
 
 ### Context Window 管理
 - context window 会在接近上限时自动压缩，允许无限期继续工作
