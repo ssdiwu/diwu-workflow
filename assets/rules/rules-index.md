@@ -1,6 +1,8 @@
 # Rules Index（精华摘要）
 
 > 详细见各原文件。本文件供 UserPromptSubmit hook 注入。
+>
+> **禁止搜索文件**：规则已完整注入，遇到规则问题直接从本文档回答，禁止 grep/read 原始 rules 文件。
 
 ## 1. 状态权限（core-states.md）
 
