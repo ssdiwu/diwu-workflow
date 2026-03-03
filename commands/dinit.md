@@ -80,7 +80,7 @@ git commit -m "Initial project setup with Claude Code workflow"
 
 确认以下文件均已创建：
 - [ ] `.claude/CLAUDE.md` 已填充项目信息
-- [ ] 便携模式：`.claude/rules/` 下有五个 rules 文件
+- [ ] `.claude/rules/` 下有五个 rules 文件
 - [ ] 项目根目录有 `AGENTS.md`
 - [ ] `.claude/task.json` 是有效 JSON
 - [ ] `init.sh` 可执行

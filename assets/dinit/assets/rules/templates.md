@@ -5,21 +5,19 @@
 ```
 BLOCKED - 需要人工介入
 
-当前任务: Task#3 - 邮件验证码发送
-任务描述: 用户注册后需要验证邮箱，SMTP 不可用时必须返回明确错误而非静默失败
+当前任务: Task#N - [任务标题]
+任务描述: [背景与关键约束]
 
 已完成的工作:
-- src/services/email.ts 的 sendVerification() 函数已实现
-- 单元测试通过（mock SMTP，3/3 passed）
+- [已实现的部分]
 
 阻塞原因:
-- 调用 sendVerification() 时 SMTP_HOST 环境变量未设置
-- 已确认 .env.example 中有该字段，但 .env 中缺失
-- 无法在本地验证真实邮件发送，acceptance 条件 #1 无法证据化
+- [具体阻塞原因]
+- [环境/依赖缺失详情]
 
 需人工帮助:
-1. 在 .env 中配置 SMTP_HOST、SMTP_PORT、SMTP_USER、SMTP_PASS
-2. 或提供测试用 SMTP 服务（如 Mailtrap）凭据，见 doc/runbook.md §2.1
+1. [具体操作步骤]
+2. [配置/凭据来源]
 
 解除阻塞后:
 - 任务将从 InSpec 恢复到 InProgress
@@ -59,12 +57,12 @@ CHANGE REQUEST - 需要修改需求
 ```
 PENDING REVIEW - 超前实施已达上限
 
-等待验收: Task#10
-已超前完成: Task#11, Task#12, Task#13 (3/3)
+等待验收: Task#N
+已超前完成: Task#X, Task#Y, Task#Z (N/5)
 
-请验收 Task#10:
-- 通过 → 可继续超前实施 Task#14-16
-- 失败 → 需评估 Task#11-13 的影响并修复
+请验收 Task#N:
+- 通过 → 可继续超前实施
+- 失败 → 需评估已超前任务的影响并修复
 ```
 
 ## REVIEW 请求格式
@@ -72,26 +70,18 @@ PENDING REVIEW - 超前实施已达上限
 ```
 REVIEW - 请求人工审查
 
-Task#5: 用户权限中间件
-修改范围: src/middleware/auth.ts（新增 89 行），src/routes/api.ts（修改 3 处），tests/middleware/auth.test.ts（新增 67 行）
+Task#N: [任务标题]
+修改范围: [文件路径（行数变更）]
 
 验收验证:
-- [x] Given 未登录用户访问 /api/profile When 发送 GET 请求 Then 返回 401 + {"error":"Unauthorized"} — auth.test.ts:23 passed
-- [x] Given 携带有效 JWT 的请求 When 中间件验证 Then req.user 被注入用户对象 — auth.test.ts:45 passed
-- [x] Given 过期 JWT When 中间件验证 Then 返回 401 + {"error":"Token expired"} — auth.test.ts:67 passed
+- [x] [acceptance 条目] — [验证方法/测试结果]
 
 等待: 人工确认后将标记为 Done
 ```
 
 ## DECISION TRACE 格式（判断过程模板）
 
-以下场景必须先输出 DECISION TRACE：任务选择、CR/BLOCKED判定、并行与串行选择、大幅度修改判定、blocked_by写入判定、循环依赖识别、InProgress→InSpec判定、InReview→Done判定。
-
-### 判断锚点：何时触发 DECISION TRACE
-- 正例：准备将任务从 InProgress 退回 InSpec，理由是缺少 SMTP 配置。结论：必须先输出 DECISION TRACE 记录阻塞证据，再输出 BLOCKED 模板。
-- 正例：两个子代理都需要写入同一文件，决定串行还是并行。结论：必须先输出 DECISION TRACE 记录共享写文件证据，再执行串行。
-- 反例：执行固定步骤（如读 recording.md、运行 smoke.sh），无需判断。结论：不触发 DECISION TRACE，直接执行。
-- 边界例：任务验证全部通过，改动仅 80 行且无 API 变更，准备标 Done。结论：属于 InReview→Done 判定，仍需输出 DECISION TRACE（内容可简短，记录”小幅度修改，自审通过”即可）。
+以下场景必须先输出 DECISION TRACE：任务选择、CR/BLOCKED 判定、并行与串行选择、大幅度修改判定、blocked_by 写入判定、循环依赖识别、InProgress→InSpec 判定、InReview→Done 判定。
 
 ```
 DECISION TRACE
@@ -105,41 +95,30 @@ DECISION TRACE
 - [task.json 状态、blocked_by 明细、测试日志、git diff --stat、配置检查结果]
 
 排除项:
-- [为什么不是其他结论；例如”非需求矛盾，故不是 CHANGE REQUEST”]
+- [为什么不是其他结论；例如“非需求矛盾，故不是 CHANGE REQUEST”]
 
 下一步:
-- [立即执行的动作；例如”输出 BLOCKED 模板并等待人工配置”]
+- [立即执行的动作；例如“输出 BLOCKED 模板并等待人工配置”]
 ```
 
 ## recording.md Session 格式
 
 ```markdown
 ---
-## Session 2026-02-17 14:30:22
+## Session YYYY-MM-DD HH:MM:SS
 
-### 上下文恢复
-- 上次任务: Task#1 (InProgress)
-- Git 状态: clean
-- 待批准 CR: 无
-
-### Task#1: 用户登录功能 → Done
+### Task#N: [任务标题] → [状态]
 
 **实施内容**:
-- 完成 src/auth/login.ts 核心逻辑
-- 添加错误处理和 token 存储
-- 添加单元测试
+- [完成的工作]
 
-**验收验证** (自动化):
-- [x] 输入正确密码后跳转首页 (npm test passed)
-- [x] 错误密码显示提示 (npm test passed)
-- [x] 登录状态保持 7 天 (手动验证通过)
+**验收验证**:
+- [x] [acceptance 条目] ([验证方法])
 
-**验证方法**: 运行 .claude/checks/task_1_verify.sh
-
-**提交**: commit abc123f
+**提交**: commit [hash]
 
 ### 下一步
-Task#2: 密码重置功能
+[下一步计划]
 
 ---
 ```
@@ -148,22 +127,18 @@ Task#2: 密码重置功能
 
 ```markdown
 ---
-## Session 2026-02-18 10:00:35
+## Session YYYY-MM-DD HH:MM:SS
 
-### Task#2: 密码重置 → BLOCKED
+### Task#N: [任务标题] → BLOCKED
 
-**Change Request #2**:
-- **原因**: 发现邮件服务依赖不稳定
-- **建议**: 增加"手机验证码重置"作为备选方案
-- **详细修改**:
-  - [删除] "通过邮件发送重置链接"
-  - [新增] "通过手机验证码验证身份"
-  - [新增] "支持邮件和手机两种方式"
-- **影响**: acceptance 需新增 2 条,预计额外 1 天工作量
+**Change Request #N**:
+- **原因**: [发现的问题]
+- **建议**: [修改建议]
+- **影响**: [影响评估]
 - **状态**: pending
 
 **需人工介入**:
-请批准 CR#2,或提供稳定的邮件服务配置
+[具体需求]
 
 ---
 ```
@@ -173,28 +148,8 @@ Task#2: 密码重置功能
 | 参数 | 默认值 | 说明 |
 |------|--------|------|
 | 超前上限 | 5 | 最多同时超前实施的任务数 |
-| 归档阈值 | 20 | task.json 中 Done/Cancelled 任务超过此数触发归档 |
+| task.json 归档阈值 | 20 | task.json 中 Done/Cancelled 任务超过此数触发归档 |
+| recording.md 归档阈值 | 10 | recording.md 中 session 数超过此数触发归档 |
 | 子代理并发数 | 3 | 0=禁用子代理，1=串行子代理，N≥2=最多N个并发子代理 |
 | 探索/搜索类子代理模型 | haiku | 只读操作，降低成本 |
 | 实施类子代理模型 | 继承主模型 | 写代码保持主模型质量 |
-
-## 验证脚本模板
-
-**task_\<id\>_verify.sh**：
-```bash
-#!/bin/bash
-npm run build || exit 1
-npm test -- <test-file> || exit 1
-echo "Task#N 验证通过"
-exit 0
-```
-
-**smoke.sh**：
-```bash
-#!/bin/bash
-[ -d "node_modules" ] || npm install
-npm run build || exit 1
-npm run lint || exit 1
-echo "基线验证通过"
-exit 0
-```

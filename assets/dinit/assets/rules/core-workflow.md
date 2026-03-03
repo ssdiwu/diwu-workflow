@@ -1,6 +1,13 @@
 # Session 工作流
 
+> **规则约束级别说明**：本文件定义 Session 工作流的核心规则。除非特别标注 `[建议]`，否则都是必须遵守的约束。
+
 ## Session 启动（必须按顺序执行）
+
+**执行顺序约束**：
+- Step 1-3 必须串行执行（Preflight 失败则停止，上下文恢复和任务选择依赖 Preflight 通过）
+- Step 4 可选（仅当 init.sh 存在时执行）
+- Step 2 和 Step 3 的 task.json 读取可合并为一次
 
 每个新 session 必须先完成以下步骤，然后才能开始实现任务：
 
@@ -11,9 +18,7 @@
 
 ### 2. 上下文恢复
 - 读取 `.claude/recording.md`，了解上一个 session 的工作和注意事项
-  - 统计完整 session 记录数（`## Session YYYY-MM-DD HH:MM:SS` 格式，不含 Start/End 快照）
-  - 归档触发条件与执行步骤见 file-layout.md
-- 检查 `.claude/task.json` 中 Done/Cancelled 任务数，归档触发条件见 file-layout.md
+- 检查 `.claude/task.json` 中 Done/Cancelled 任务数
 - 读取 `.claude/decisions.md`（如存在），了解历史设计决策
 - 运行 `git log --oneline -20`，了解最近的代码变更历史
 
@@ -37,15 +42,18 @@
 - 边界例：`blocked_by=[18,20]`，其中 Task#18 已 Done、Task#20 为 InReview，当前超前 4/5。结论：先清理已 Done 依赖，再允许超前至 5/5；达到上限后输出 PENDING REVIEW。
 - 结论输出：使用 `DECISION TRACE` 记录 task.json 状态、blocked_by 明细和超前计数。
 
+### 超前实施验收失败：回退方式
+
+**验收通过**：阻塞任务 → Done，超前任务逐个 InReview → Done，recording.md 记录解除。
+**验收失败**：人工决定回退方式，Agent 执行并重新验证超前任务：
+- `revert`：超前任务已 push 到远端，需要撤销公开提交
+- `reset --soft`：超前任务只在本地，保留代码改动但撤销 commit，便于修改后重新提交
+- `修改`：超前任务代码仍然有效，只需调整以适配阻塞任务的新实现
+
 ### 4. 环境初始化（可选）
 - 运行 `.claude/init.sh` 启动开发环境（如需要）
 - 运行项目的基线测试（build/lint），确认系统处于正常状态
 - 如果基线测试失败，优先修复，然后再开始新任务
-
-### 执行顺序约束
-- Step 1-3 必须串行执行（Preflight 失败则停止，上下文恢复和任务选择依赖 Preflight 通过）
-- Step 4 可选（仅当 init.sh 存在时执行）
-- Step 2 和 Step 3 的 task.json 读取可合并为一次
 
 ### 判断锚点：基线失败时先修基线还是继续
 - 正例：`smoke.sh` 中定义的 build 或 lint 失败。结论：先修复基线，再开始新任务。
@@ -64,7 +72,7 @@
 
 ### 分解流程
 
-**需求精炼（任务描述模糊时触发）**：
+**需求精炼（任务描述模糊时触发）** `[建议]`：
 - 每次只问一个问题，理解目的、约束、成功标准
 - 提出 2-3 个方案并给出推荐，获得确认后再写 task.json
 
@@ -80,10 +88,6 @@
 - **确认**：等人工确认后，Agent 将状态改为 `InSpec`
 - **锁定**：从此刻起，Agent 只能修改 status 字段
 - **变更**：如需修改需求，走 Change Request 流程
-
-**SDD 规范驱动开发**：
-- `.doc/` 存在时，实施前必须先补充或更新对应规范文档，不可先实施后补文档
-- 架构决策同步记录到 `.doc/adr/`（调用 `/diwu-adr`）
 
 ### 任务粒度标准
 - 预估修改代码 < 2000 行（超过则继续拆分）
@@ -129,8 +133,9 @@ InSpec → InProgress → InReview → Done 完整流程：
 
 1. 将选定任务状态改为 `InProgress`
 2. 仔细阅读任务的任务描述、验收条件、实施步骤
-3. 按照项目既有的代码模式实现功能（如有测试框架，建议顺序：先写验收测试框架 → 单元测试 → 实现）
-4. 文件路径修改后必须 grep 验证无残留再继续
+3. [建议] 按照项目既有的代码模式实现功能
+4. [建议] 如有测试框架，推荐顺序：先写验收测试框架 → 单元测试 → 实现
+5. 文件路径修改后必须 grep 验证无残留再继续
 5. 实现完成后，按本文件"验证要求"章节进行验证
 6. 验证通过后，将状态改为 `InReview`
 7. 根据分层审查规则：
@@ -145,7 +150,7 @@ InSpec → InProgress → InReview → Done 完整流程：
 - 边界例：改动 600 行但跨多个核心模块并引入兼容层。结论：若 API/字段无变化可按小幅度执行；只要契约变化即强制按大幅度处理。
 - 结论输出：使用 `DECISION TRACE` 记录 API 变更证据与 `git diff --stat` 数据。
 
-**自审原则**：只实现了 acceptance 要求的，不多不少；没有引入技术债或安全问题。
+**自审原则** `[建议]`：只实现了 acceptance 要求的，不多不少；没有引入技术债或安全问题。
 - ❌ 顺手重构了周边函数、添加了未要求的日志、提取了"以后可能用到"的工具函数
 
 **Change Request 流程**（执行 InSpec 任务时发现需求问题）：见 exceptions.md。
@@ -215,7 +220,7 @@ Agent 完成实现和验证后输出 REVIEW 请求，等待人工确认。
 ### 基线验证（smoke.sh）
 位置：`.claude/checks/smoke.sh`，验证基线环境（依赖/构建/lint）。模板见 templates.md。
 
-### 测试分层
+### 测试分层 `[建议]`
 - 大幅度修改：浏览器测试工具（Playwright/Puppeteer MCP）验证功能和 UI
 - 小幅度修改：lint/build/单元测试
 
@@ -251,7 +256,6 @@ Agent 完成实现和验证后输出 REVIEW 请求，等待人工确认。
 - 正例：从多个方案中选定设计方向（如"引入 README 索引层"代替全量 glob 扫描），**且影响范围 ≥2 个命令/模块**。结论：写 decisions.md。
 - 反例：记录本次 session 做了什么、下一步计划。结论：写 recording.md，不写 decisions.md。
 - 边界例：重构某命令的定位（如"/ddemo 从分析报告改为落地文档生成器"）。结论：写 decisions.md（定位变更是设计决策）。
-- 结论输出：不需要 DECISION TRACE，直接按判断写入对应文件。
 
 ### Context Window 管理
 - context window 会在接近上限时自动压缩，允许无限期继续工作

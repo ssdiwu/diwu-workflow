@@ -1,5 +1,7 @@
 # 异常处理
 
+> **规则约束级别说明**：本文件定义异常处理的核心规则。除非特别标注 `[建议]`，否则都是必须遵守的约束。
+
 ## `<private>` 标签约定
 
 用户用 `<private>...</private>` 包裹的内容（密码、密钥、个人敏感信息）不得写入 recording.md 和 task.json。该内容仅在当前对话上下文中使用，不得持久化。
@@ -23,18 +25,6 @@
 - 边界例：外部服务宕机但 acceptance 可通过 mock/回放证据化验证。结论：`CONTINUE`，不升级为 BLOCKED。
 - 结论输出：使用 `DECISION TRACE` 记录命中规则、证据和排除项，再输出对应模板。
 
-### 案例：SMTP 凭据缺失
-- 场景：acceptance 要求发邮件，代码实现完成，但 `.env` 缺少 SMTP 配置。
-- 结论：`BLOCKED`。理由是实现路径成立，阻塞来自环境配置，不是需求定义错误。
-
-### 案例：acceptance 互相矛盾
-- 场景：同一任务同时要求“无需登录可访问”和“必须 JWT 验证后返回数据”。
-- 结论：`CHANGE REQUEST`。理由是规则冲突，必须先修改需求再继续实施。
-
-### 案例：外部服务宕机但可 mock 验证
-- 场景：第三方服务临时不可用，但关键 acceptance 可由 mock/录制回放完成证据化验证。
-- 结论：`CONTINUE`（不进入 BLOCKED）。仅当 acceptance 无法证据化时才升级为 BLOCKED。
-
 ## 阻塞时的规则
 
 **禁止**:
@@ -45,12 +35,8 @@
 **必须**:
 - 在 `.claude/recording.md` 中记录当前进度和阻塞原因
 - 将 `.claude/task.json` 任务状态退回 **InSpec**(不是 InDraft)
-- 输出阻塞信息,说明需要人工做什么
+- 输出 DECISION TRACE 后输出 BLOCKED 模板（见 templates.md），说明需要人工做什么
 - 停止任务,等待人工介入
-
-## 阻塞信息格式
-
-环境/依赖问题时先输出 `DECISION TRACE`，再输出 BLOCKED 格式。完整格式见 templates.md。
 
 ## Change Request 流程
 
@@ -82,21 +68,3 @@ CR 编号使用全局递增(跨任务连续),方便追踪。
 3. 在 recording.md 记录 CR approved
 4. 任务状态保持 InSpec → InProgress
 5. 按新 acceptance 继续实施
-
-## 回退处理
-
-### 触发条件
-阻塞任务验收失败,已超前完成的任务可能受影响。
-
-**验收通过**：阻塞任务 → Done，超前任务逐个 InReview → Done，recording.md 记录解除。
-**验收失败**：人工决定回退方式，Agent 执行并重新验证超前任务：
-- `revert`：超前任务已 push 到远端，需要撤销公开提交
-- `reset --soft`：超前任务只在本地，保留代码改动但撤销 commit，便于修改后重新提交
-- `修改`：超前任务代码仍然有效，只需调整以适配阻塞任务的新实现
-
-### 判断锚点：回退方式选择
-- 正例（revert）：超前任务 Task#11 已 push 到远端分支，远端有其他人基于此提交继续工作。结论：使用 `revert` 撤销公开提交，不改写历史。
-- 正例（reset --soft）：超前任务 Task#11 只有本地 commit，未 push，代码改动需要调整后重新提交。结论：使用 `reset --soft` 保留工作区改动，撤销 commit。
-- 正例（修改）：超前任务 Task#11 代码逻辑本身正确，只需在入参或接口适配层做小调整。结论：直接修改代码，不需要撤销 commit。
-- 边界例：超前任务已 push 但确认没有人基于此提交继续工作，可 force push。结论：与用户确认后才可 force push，不得自行决定。
-- 结论输出：回退方式由人工决定，Agent 执行并记录到 recording.md。

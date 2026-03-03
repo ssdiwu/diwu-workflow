@@ -1,7 +1,39 @@
 # 任务状态机
 
+> **规则约束级别说明**：本文件定义任务状态机的核心规则。除非特别标注 `[建议]`，否则都是必须遵守的约束。
+
+## acceptance 格式规范（Given/When/Then）
+
+`functional`、`ui`、`bugfix` 类任务**必须**使用 GWT 格式，`infra`、`refactor` 类任务**可选** `[建议]`。
+
+格式：`"Given [前置条件] When [用户动作] Then [预期结果]"`
+- 多个条件或结果用"且"连接：`"Then 页面跳转到首页且显示欢迎语"`
+- 单条 acceptance 中"且"超过 3 个时，应拆分为多条
+- `infra`/`refactor` 任务可使用简单描述：`"构建产物不超过 500KB"`
+
+**好的示例**（可证据化，每个 Then 子句 = 一个 `expect()` 断言）：
+```
+Given 用户在 /login 页面输入正确的 email+password
+When 点击提交按钮
+Then 跳转到 /dashboard，localStorage 中存在 auth_token，有效期 7 天
+```
+
+**坏的示例**（无法验证）：
+```
+Given 用户登录
+When 提交表单
+Then 登录成功
+```
+
+坏在哪里：Given 没有具体页面和数据状态；Then 是主观描述，不是可断言的系统状态。
+
+**Then 子句自检**：能否直接写成 `expect(actual).toBe(expected)` 或 `assert actual == expected`？不能则需要细化。
+
+---
+
 ## task.json 结构
 
+**示例**：
 ```json
 {
   "tasks": [
@@ -36,12 +68,12 @@
 | `title` | 任务标题 | 字符串 | 一句话描述任务做什么（动词开头） |
 | `description` | 任务描述 | 字符串 | 背景 + 关键约束（为什么做、边界是什么） |
 | `status` | 任务状态 | 字符串 | 见下方状态定义章节 |
-| `acceptance` | 验收条件 | 数组 | Given/When/Then 格式的验收场景，见下方 acceptance 格式规范 |
+| `acceptance` | 验收条件 | 数组 | Given/When/Then 格式的验收场景，见文件开头 acceptance 格式规范 |
 | `steps` | 实施步骤 | 数组 | 实施过程的关键步骤，必须写绝对路径 |
 | `category` | 任务分类 | 字符串 | 见下方任务分类说明 |
 | `blocked_by` | 前置任务 | 数组 | (可选) 见下方 blocked_by 规范章节 |
 
-**任务分类说明**:
+**任务分类说明** `[建议]`：
 
 | 分类值 | 中文含义 | 适用场景 |
 |--------|---------|---------|
@@ -50,33 +82,6 @@
 | `bugfix` | 缺陷修复 | 修复已知 bug |
 | `refactor` | 重构 | 不改变行为的代码结构优化 |
 | `infra` | 基础设施 | 构建、部署、配置、脚本 |
-
-**acceptance 格式规范（Given/When/Then）**:
-
-`functional`、`ui`、`bugfix` 类任务**必须**使用 GWT 格式，`infra`、`refactor` 类任务**可选**。
-
-格式：`"Given [前置条件] When [用户动作] Then [预期结果]"`
-- 多个条件或结果用"且"连接：`"Then 页面跳转到首页且显示欢迎语"`
-- 单条 acceptance 中"且"超过 3 个时，应拆分为多条
-- `infra`/`refactor` 任务可使用简单描述：`"构建产物不超过 500KB"`
-
-**好的示例**（可证据化，每个 Then 子句 = 一个 `expect()` 断言）：
-```
-Given 用户在 /login 页面输入正确的 email+password
-When 点击提交按钮
-Then 跳转到 /dashboard，localStorage 中存在 auth_token，有效期 7 天
-```
-
-**坏的示例**（无法验证）：
-```
-Given 用户登录
-When 提交表单
-Then 登录成功
-```
-
-坏在哪里：Given 没有具体页面和数据状态；Then 是主观描述，不是可断言的系统状态。
-
-**Then 子句自检**：能否直接写成 `expect(actual).toBe(expected)` 或 `assert actual == expected`？不能则需要细化。
 
 ---
 

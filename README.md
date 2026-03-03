@@ -231,6 +231,16 @@ flowchart TD
 
 ### 异常处理
 
+#### 超前实施验收失败：回退方式
+
+前置任务验收失败时，人工决定回退方式，Agent 执行并重新验证超前任务：
+
+| 方式 | 适用场景 |
+|------|---------|
+| `revert` | 超前任务已 push 到远端，需撤销公开提交 |
+| `reset --soft` | 超前任务只在本地，保留代码改动但撤销 commit |
+| `修改` | 超前任务代码仍有效，只需调整以适配阻塞任务的新实现 |
+
 #### BLOCKED — 环境或依赖问题
 
 当 Agent 遇到以下情况时，会停止任务并输出 BLOCKED，等待人工介入：
@@ -248,6 +258,27 @@ BLOCKED 时：任务退回 `InSpec`，禁止创建 commit，禁止标记 Done，
 #### 超前实施 — 前置任务还在 InReview
 
 当前任务的前置任务处于 `InReview` 时，Agent 可超前执行后续任务（最多 5 个），超前任务完成时标记 `InReview` 并立即 commit。超前 5 个后暂停等待验收；若前置任务验收失败，协商回退方式（`git revert` / 保留修改 / `git reset`）。
+
+### 规则可执行性
+
+规则文件按「可执行性三层结构」组织：
+
+- **程序性规则**（固定步骤、状态机）：用列表定义，靠结构保证执行
+- **判断性规则**（分类、取舍、边界判定）：必须附正例 / 反例 / 边界例锚点，靠示例保证执行
+- **边界**：「谁的问题谁解决」，不跨层污染
+
+规则文件区分约束强度：**无标注 = 强制约束**，`[建议]` = 软约束（可偏离但需记录）。
+
+关键判断节点（任务选择、CR/BLOCKED 判定、大幅度修改判定等）统一输出 `DECISION TRACE`，格式：
+
+```
+DECISION TRACE
+结论: [BLOCKED | CHANGE REQUEST | CONTINUE | REVIEW | SKIP]
+规则命中: [命中的规则条目]
+证据: [task.json 状态 / 测试日志 / git diff --stat]
+排除项: [为什么不是其他结论]
+下一步: [立即执行的动作]
+```
 
 ---
 
@@ -381,6 +412,22 @@ flowchart TD
 | `SubagentStop` | 子代理完成时 | 比对 session ID 过滤 stale（旧 session 残留）通知；当前 session 子代理完成后立即触发写 recording.md |
 | `Stop` (background) | 回合结束时（后台） | 条件触发快照：仅当存在活跃任务（非 Done/Cancelled）时，将任务状态追加写入 recording.md |
 | `Stop` (blocking) | 回合结束时 | 三分支任务循环：① 有 InProgress → block 继续当前任务；② InReview 积压 > 5 → 放行并通知人工验收；③ 有未阻塞的 InSpec → block 投喂下一任务。无活跃任务时：10分钟内有 session 记录 → block 要求追加写入 recording.md；否则 → block 要求新建 session 记录 |
+
+---
+
+## 内置 Agents
+
+插件内置 7 个专家 agent，可在任务实施时按领域调用：
+
+| Agent | 专长 |
+|-------|------|
+| `ui-designer` | UI/UX 设计架构，组件系统、设计决策 |
+| `backend-architect` | 后端架构，API 设计、数据模型、性能 |
+| `frontend-architect` | 前端架构，状态管理、构建优化 |
+| `api-tester` | API 测试，多语言（Python / JS / Go / Java / Clojure / Ruby） |
+| `devops-architect` | DevOps，CI/CD、容器化、基础设施 |
+| `performance-optimizer` | 性能优化，瓶颈分析、缓存策略 |
+| `legal-compliance` | 法律合规，隐私框架（GDPR/CCPA）、数据合规 |
 
 ---
 
