@@ -62,7 +62,7 @@ diwu 编码工作流套件 — Claude Code 插件。让 AI 按照你确认的需
 | 维度 | 约束 |
 |-----|------|
 | 业务 | 已存在的文件不覆盖（幂等）；规则文件写入 `.claude/rules/`，不内联到 CLAUDE.md |
-| 时序 | 收集信息 → 选择模式 → 创建文件 → 验证清单；不可跳过模式选择直接创建文件 |
+| 时序 | 收集信息 → 创建文件 → 验证清单；不可跳过信息收集直接创建文件 |
 | 跨命令 | 创建的 `.claude/task.json` 结构必须与 `/dtask` 写入格式兼容 |
 | 感知 | 验证清单全部通过才算完成；缺少任一文件不算初始化成功 |
 
@@ -121,7 +121,7 @@ flowchart TD
 |-----|------|
 | 业务 | 每次只处理一个 Demo；核心验证资产篇幅 > 50%；不写生产架构（DDL、多服务 API 契约）；不写 task.json |
 | 时序 | 先读 README（不全量扫描）→ 建立上下文 → 生成 → 写入 → 更新 Demo README |
-| 跨命令 | Demo 文件路径格式 `DEMO-{kebab-case}-prd.md` 是 `/dtask` 的查找依据；通过标准必须可量化（供 `/dtask` acceptance 引用） |
+| 跨命令 | Demo 文件路径格式 `DEMO-{kebab-case-name}-spec.md` 是 `/dtask` 的查找依据；通过标准必须可量化（供 `/dtask` acceptance 引用） |
 | 感知 | 核心验证资产必须可直接运行（Prompt 全文 / 测试矩阵 / 测试脚本），不允许伪代码占位 |
 
 ### /dtask
@@ -326,10 +326,10 @@ DECISION TRACE
 | `ui-designer` | UI/UX 设计架构，组件系统、设计决策 |
 | `backend-architect` | 后端架构，API 设计、数据模型、性能 |
 | `frontend-architect` | 前端架构，状态管理、构建优化 |
-| `api-tester` | API 测试，多语言（Python / JS / Go / Java / Clojure / Ruby） |
+| `api-tester` | API 测试，多语言（Python / JS / Go / Clojure） |
 | `devops-architect` | DevOps，CI/CD、容器化、基础设施 |
 | `performance-optimizer` | 性能优化，瓶颈分析、缓存策略 |
-| `legal-compliance` | 法律合规，隐私框架（GDPR/CCPA）、数据合规 |
+| `legal-compliance` | 法律合规，隐私框架（GDPR/CCPA）、服务条款、知识产权、消费者保护 |
 
 ---
 
@@ -339,6 +339,8 @@ DECISION TRACE
 |------|---------|------|
 | `UserPromptSubmit` | 每次用户发送消息前 | 将规则摘要（rules-index.md）+ lessons + constraints 注入上下文 |
 | `PreToolUse` (Bash) | 每次执行 Bash 前 | 输出当前 InProgress 任务的 acceptance 条件，防止目标漂移 |
+| `SessionStart` | session 启动时 | 将主代理 session ID 写入 `/tmp/.claude_main_session`，供 SubagentStop 过滤子代理触发 |
+| `SubagentStop` | 子代理完成时 | 比对 session ID 过滤主/子 agent；当前 session 子代理完成后触发追加 recording.md |
 | `Stop` (blocking) | 回合结束时 | 三分支任务循环：① 有 InProgress → block 继续；② InReview 积压 > 5 → 放行并通知人工验收；③ 有未阻塞的 InSpec → block 投喂下一任务。无活跃任务时：10 分钟内有 session 记录 → 要求追加写入 recording.md；否则 → 要求新建 session 记录 |
 
 ---
@@ -395,8 +397,8 @@ diwu-workflow/
 │       ├── references/      # 参考资料
 │       └── sync-rules.sh    # 同步规则文件到 assets/dinit/assets/rules/
 ├── hooks/
-│   ├── hooks.json
-│   └── scripts/             # hook 脚本
+│   ├── hooks.json           # hook 配置（逻辑内联，scripts/ 目录为空）
+│   └── scripts/             # hook 脚本（暂未使用）
 ├── init.sh                  # 本仓库开发环境初始化
 └── AGENTS.md                # 多 agent 协作配置（gitignore）
 ```
