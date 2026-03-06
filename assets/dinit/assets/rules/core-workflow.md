@@ -13,7 +13,7 @@
 
 ### 1. Preflight 检查
 - 运行 `.claude/checks/smoke.sh`（如存在），验证基线环境
-- 检查 recording.md 中是否有 pending Change Requests
+- 检查 recording.md 中是否有未解决的阻塞记录
 - 运行 `git status`，确认工作区状态
 
 ### 2. 上下文恢复
@@ -28,7 +28,7 @@
 - 否则选择第一个 `status: "InSpec"` 的任务，并检查 blocked_by：
   - **blocked_by 为空或不存在** → 无阻塞，可开始
   - **blocked_by 全部 Done** → 阻塞已解除，可开始
-  - **blocked_by 存在 InReview 且超前<5** → 可超前实施（标记为超前）
+  - **blocked_by 存在 InReview 且超前未达上限（超前上限见 settings.json）** → 可超前实施（标记为超前）
     - 超前完成的任务标记为 **InReview**，立即创建 git commit
     - recording.md 记录："Task#N (blocked_by Task#M, 超前 X/5, commit: abc123)"
     - 完成第 5 个超前任务后输出 PENDING REVIEW，等待阻塞任务验收
@@ -87,7 +87,7 @@
 **锁定阶段（InSpec）**：
 - **确认**：等人工确认后，Agent 将状态改为 `InSpec`
 - **锁定**：从此刻起，Agent 只能修改 status 字段
-- **变更**：如需修改需求，走 Change Request 流程
+- **变更**：如需修改需求，退回 InDraft 重新确认
 
 ### 任务粒度标准
 - 预估修改代码 < 2000 行（超过则继续拆分）
@@ -153,11 +153,11 @@ InSpec → InProgress → InReview → Done 完整流程：
 **自审原则** `[建议]`：只实现了 acceptance 要求的，不多不少；没有引入技术债或安全问题。
 - ❌ 顺手重构了周边函数、添加了未要求的日志、提取了"以后可能用到"的工具函数
 
-**Change Request 流程**（执行 InSpec 任务时发现需求问题）：见 exceptions.md。
-
 ### 提交规范
 
-**提交时机**：只有任务状态到达 Done 时才提交；超前任务完成时标记 InReview 并立即提交（最多 5 次），阻塞解除后标记 Done。
+**提交时机**：
+- 常规任务：状态到达 Done 时提交
+- 超前任务：完成时标记 InReview 并立即提交（超前上限见 settings.json），阻塞解除后标记 Done（不再重复提交）
 
 **commit message 格式**：
 - 常规：`[Task#N] 任务标题 - completed`
@@ -194,9 +194,10 @@ InSpec → InProgress → InReview → Done 完整流程：
 **Coordinator Pattern**：task.json 的状态更新始终由主代理负责，子代理通过返回值把结果传回主代理。
 
 **超前计数器所有权**：超前计数器由主代理维护，子代理完成超前任务后通过返回值通知主代理，主代理串行更新计数。超前任务完成顺序以主代理接收返回值的时间为准，不以子代理完成时间为准。
+计数器在内存中维护，不持久化到 task.json。Session 重启后通过统计 task.json 中状态为 InReview 且 blocked_by 非空的任务数量来恢复计数。
 
 **启动仪式**（所有子代理，强约束）：
-1. 读取 `.claude/recording.md`（关注 pending CR、历史阻塞、回退记录）
+1. 读取 `.claude/recording.md`（关注历史阻塞、回退记录）
 2. 读取相关 task 的 title、description、acceptance、steps
 3. 读取 `.claude/decisions.md`（如存在），了解历史设计决策
 
@@ -246,7 +247,6 @@ Agent 完成实现和验证后输出 REVIEW 请求，等待人工确认。
      - ✅ 先运行 `date` → 得到 `2026-02-26 16:49:42` → 写 `## Session 2026-02-26 16:49:42`
    - 处理的任务及状态
    - 验收验证结果
-   - Change Request（如有）
    - 下次应该做什么
 3. 如有重大设计决策，追加到 `.claude/decisions.md`（文件不存在时创建）：
    ```markdown

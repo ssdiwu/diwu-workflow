@@ -103,7 +103,7 @@ Then 登录成功
 | InDraft | 人工确认需求 | InSpec | Agent 不可再修改 title/description/acceptance/steps |
 | InDraft | 需求取消 | Cancelled | - |
 | InSpec | Agent 开始实施 | InProgress | - |
-| InSpec | 发现需求问题 | (保持 InSpec) | 提交 Change Request，等人工批准 |
+| InSpec | 发现需求问题 | (保持 InSpec) | 退回 InDraft 重新确认需求 |
 | InProgress | 实现完成，准备验证 | InReview | - |
 | InProgress | 遇到阻塞 | InSpec | 退回，记录阻塞原因 |
 | InProgress | 需求取消 | Cancelled | - |
@@ -136,7 +136,7 @@ Then 登录成功
 表示**阻塞关系**：前置任务未完成，当前任务无法开始。
 
 ### 修改权限
-InDraft 自由修改；InSpec 可改但需在 recording.md 记录原因；InProgress 及之后只能通过 Change Request。
+InDraft 自由修改；InSpec 可改但需在 recording.md 记录原因；InProgress 及之后不可修改（如需修改，退回 InSpec 处理）。
 
 ### 何时使用
 前置任务未完成（InSpec/InProgress/InReview）且当前任务依赖其输出时使用。前置任务已 Done 或仅是代码调用关系时不使用。
@@ -164,6 +164,10 @@ Agent 修改 blocked_by 时必须验证：
 - 结论输出：使用 `DECISION TRACE` 记录完整依赖链和合法性检查结果。
 
 ### 自动清理
+
+**触发时机**：
+1. Session 启动时的"任务选择策略"阶段，批量检查所有任务的 blocked_by
+2. 任务状态变更为 Done 时，立即检查所有引用该任务的 blocked_by 并清理
 
 当 blocked_by 中的任务变为 Done：
 - Agent 自动从 blocked_by 中移除该 ID

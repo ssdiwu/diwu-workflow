@@ -48,8 +48,8 @@
 
 ## 归档触发条件
 
-- **archive/task_archive_YYYY-MM.json**：`task.json` 中 Done/Cancelled 任务超过归档阈值时触发（阈值见 templates.md 可调参数）
-- **archive/recording_YYYY-MM-DD.md**：recording.md 中 session 数超过归档阈值时自动触发，无需人工确认，按天归档（阈值见 templates.md 可调参数）
+- **archive/task_archive_YYYY-MM.json**：`task.json` 中 Done/Cancelled 任务超过归档阈值时触发（阈值见 settings.json `task_archive_threshold`，默认 20）
+- **archive/recording_YYYY-MM-DD.md**：recording.md 中 session 数超过归档阈值时自动触发，无需人工确认，按天归档（阈值见 settings.json `recording_archive_threshold`，默认 10）
 
 ## 归档执行步骤
 
@@ -59,9 +59,10 @@
 3. 在 recording.md 记录归档操作
 
 **recording.md 归档**：
-1. 将最旧的 session 移入 archive/recording_YYYY-MM-DD.md（按天）
-2. recording.md 始终保留最近 5 条 session
-3. 无需人工确认，session 启动时自动执行
+1. 当 session 数超过归档阈值时触发（阈值见 settings.json）
+2. 将最旧的 session 移入 archive/recording_YYYY-MM-DD.md（按天）
+3. 归档后 recording.md 保留最近 5 条 session
+4. 无需人工确认，session 启动时自动执行
 
 ## 查找历史
 
