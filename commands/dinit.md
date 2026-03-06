@@ -64,6 +64,11 @@ allowed-tools: Read, Write, Edit, Bash, Glob
 ### .claude/checks/smoke.sh
 读取 `${CLAUDE_PLUGIN_ROOT}/assets/dinit/assets/smoke.sh.template`，根据技术栈定制，执行 `chmod +x .claude/checks/smoke.sh`。
 
+### .claude/agents/
+创建 `.claude/agents/` 目录，将 `${CLAUDE_PLUGIN_ROOT}/assets/dinit/assets/agents/` 下的文件逐一复制：
+- `explorer.md` — 只读探索代理（permissionMode: plan）
+- `implementer.md` — 实施代理（permissionMode: acceptEdits）
+
 ## Step 4：可选 — 架构约束
 
 询问用户是否需要 `.claude/rules/constraints.md`（架构复杂的项目推荐）。
@@ -91,5 +96,6 @@ git commit -m "Initial project setup with Claude Code workflow"
 - [ ] `.claude/lessons.md` 存在
 - [ ] `.claude/settings.json` 存在且 JSON 合法
 - [ ] `.claude/checks/smoke.sh` 可执行
+- [ ] `.claude/agents/explorer.md` 和 `implementer.md` 存在
 - [ ] （可选）`.claude/decisions.md`
 - [ ] （可选）`.claude/rules/constraints.md`

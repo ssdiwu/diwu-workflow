@@ -319,7 +319,7 @@ DECISION TRACE
 
 ## 内置 Agents
 
-插件内置 7 个专家 agent，可在任务实施时按领域调用：
+### 插件级（所有使用插件的项目可用）
 
 | Agent | 专长 |
 |-------|------|
@@ -331,18 +331,30 @@ DECISION TRACE
 | `performance-optimizer` | 性能优化，瓶颈分析、缓存策略 |
 | `legal-compliance` | 法律合规，隐私框架（GDPR/CCPA）、服务条款、知识产权、消费者保护 |
 
+### 项目级（/dinit 初始化时创建到 `.claude/agents/`）
+
+| Agent | permissionMode | maxTurns | 用途 |
+|-------|---------------|----------|------|
+| `explorer` | plan（只读） | 20 | 代码库调查、架构分析、文件搜索、技术调研 |
+| `implementer` | acceptEdits（自动接受编辑） | 100 | 代码修改、功能实现、bug 修复、重构执行 |
+
 ---
 
 ## Hooks
 
-| Hook | 触发时机 | 作用 |
-|------|---------|------|
-| `UserPromptSubmit` | 每次用户发送消息前 | 将规则摘要（rules-index.md）+ lessons + constraints 注入上下文 |
-| `PreToolUse` (Bash) | 每次执行 Bash 前 | 输出当前 InProgress 任务的 acceptance 条件，防止目标漂移 |
-| `SessionStart` | session 启动时 | 将主代理 session ID 写入 `/tmp/.claude_main_session`，供 SubagentStop 过滤子代理触发 |
-| `SubagentStop` | 子代理完成时 | 比对 session ID 过滤主/子 agent；当前 session 子代理完成后触发追加 recording.md |
-| `Stop` (background) | 回合结束时（后台） | 输出 `git status --short` 文件变更快照（非 git 项目跳过），供下次 session 快速恢复上下文 |
-| `Stop` (blocking) | 回合结束时（前台） | 从 `settings.json` 读取配置（review_limit、recording_session_window）；使用 `has_substantial_work()` 检查实质性工作（git status + git log + task 状态 + task.json mtime）；三分支任务循环：① 有 InProgress → block 继续；② 有 InReview 任务时启动 review buffer（默认 5 次），每次继续执行递增 review_used，达到 review_limit 时放行并通知人工验收；③ 有未阻塞的 InSpec → block 投喂下一任务。无活跃任务时：recording_session_window（默认 600 秒）内有实质性工作 → 要求追加写入 recording.md；否则 → 要求新建 session 记录 |
+所有 hook 逻辑已外部化到 `hooks/scripts/*.py`，hooks.json 仅引用外部脚本。
+
+| Hook | 触发时机 | 脚本 | 作用 |
+|------|---------|------|------|
+| `UserPromptSubmit` | 用户发送消息前 | `user_prompt_submit.py` | 将规则摘要 + lessons + constraints 注入上下文 |
+| `SessionStart` | session 启动时 | `session_start.py` | 写主代理 session ID；读取 `.claude/env` 注入环境变量 |
+| `PreToolUse` (Bash) | 执行 Bash 前 | `pre_tool_use_bash.py` | 输出 InProgress 任务的 acceptance，防止目标漂移 |
+| `SubagentStart` | 子代理启动时 | `subagent_start.py` | 自动注入 recording.md 摘要 + InProgress 任务 + 最近决策到子代理上下文 |
+| `SubagentStop` | 子代理完成时 | `subagent_stop.py` | 读取 `last_assistant_message` 自动记录子代理产出摘要到 recording.md |
+| `PreCompact` | 对话压缩前 | `pre_compact.py` | 自动保存 InProgress 任务进度快照（git diff --stat）到 recording.md |
+| `PostToolUse` (Write/Edit) | 写入文件后 | `post_tool_json_validate.py` | 自动校验 .json 文件格式，发现错误立即反馈 |
+| `Stop` (background) | 回合结束（后台） | `stop_background.py` | 输出 git status 文件变更快照 |
+| `Stop` (blocking) | 回合结束（前台） | `stop_blocking.py` | review buffer 机制 + 任务循环（从 settings.json 读取配置） |
 
 ---
 
@@ -386,20 +398,35 @@ diwu-workflow/
 │   ├── ddemo.md
 │   └── dtask.md
 ├── skills/                  # Claude 自动加载的背景知识
-│   └── ddoc/
-│       └── SKILL.md         # /ddoc 所需的框架知识
+│   ├── ddoc/
+│   │   └── SKILL.md         # /ddoc 框架知识（正向六步法 + 逆向还原）
+│   ├── diwu-prd/
+│   │   └── SKILL.md         # PRD 方法论（竞品分析、用户画像、非功能性需求）
+│   └── diwu-demo/
+│       └── SKILL.md         # 积木式能力验证方法论（不确定性判断、三层积木模型）
 ├── assets/
 │   ├── rules/
 │   │   └── rules-index.md   # UserPromptSubmit hook 注入的规则摘要
 │   └── dinit/               # /dinit 依赖的模板与规则
 │       ├── assets/
 │       │   ├── *.template   # CLAUDE.md / task.json / settings.json 等模板
+│       │   ├── agents/      # 项目级 agents 模板（explorer / implementer）
+│       │   ├── env.example   # 环境变量示例文件
 │       │   └── rules/       # core-states / core-workflow 等规则文件（完整版）
 │       ├── references/      # 参考资料
 │       └── sync-rules.sh    # 同步规则文件到 assets/dinit/assets/rules/
 ├── hooks/
-│   ├── hooks.json           # hook 配置（逻辑内联，scripts/ 目录为空）
-│   └── scripts/             # hook 脚本（暂未使用）
+│   ├── hooks.json           # hook 配置（引用 scripts/ 下的外部脚本）
+│   └── scripts/             # hook 脚本（9 个独立 .py 文件）
+│       ├── user_prompt_submit.py
+│       ├── session_start.py
+│       ├── pre_tool_use_bash.py
+│       ├── subagent_start.py
+│       ├── subagent_stop.py
+│       ├── pre_compact.py
+│       ├── post_tool_json_validate.py
+│       ├── stop_background.py
+│       └── stop_blocking.py
 ├── init.sh                  # 本仓库开发环境初始化
 └── AGENTS.md                # 多 agent 协作配置（gitignore）
 ```

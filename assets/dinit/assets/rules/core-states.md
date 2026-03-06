@@ -41,7 +41,6 @@ Then 登录成功
       "id": 3,
       "title": "实现邮件验证码发送",
       "description": "用户注册后需要验证邮箱。调用 SMTP 服务发送 6 位验证码，验证码有效期 10 分钟，存储在 Redis 中；SMTP 不可用时必须返回明确错误而非静默失败。",
-      "status": "InDraft",
       "acceptance": [
         "Given 新用户完成注册表单提交 When 系统调用 sendVerification(email) Then Redis 中存在 key=verify:{email}，value=6位数字，TTL=600s",
         "Given SMTP 服务不可用 When 调用 sendVerification() Then 抛出 EmailServiceError，不写入 Redis",
@@ -54,7 +53,8 @@ Then 登录成功
         "4. 运行 /absolute/path/to/project/.claude/checks/task_3_verify.sh 验证"
       ],
       "category": "functional",
-      "blocked_by": [2]
+      "blocked_by": [2],
+      "status": "InDraft"
     }
   ]
 }
@@ -67,11 +67,11 @@ Then 登录成功
 | `id` | 任务编号 | 数字 | 从 1 开始递增，永不复用 |
 | `title` | 任务标题 | 字符串 | 一句话描述任务做什么（动词开头） |
 | `description` | 任务描述 | 字符串 | 背景 + 关键约束（为什么做、边界是什么） |
-| `status` | 任务状态 | 字符串 | 见下方状态定义章节 |
 | `acceptance` | 验收条件 | 数组 | Given/When/Then 格式的验收场景，见文件开头 acceptance 格式规范 |
 | `steps` | 实施步骤 | 数组 | 实施过程的关键步骤，必须写绝对路径 |
 | `category` | 任务分类 | 字符串 | 见下方任务分类说明 |
 | `blocked_by` | 前置任务 | 数组 | (可选) 见下方 blocked_by 规范章节 |
+| `status` | 任务状态 | 字符串 | 运行时状态，见下方状态定义章节 |
 
 **任务分类说明** `[建议]`：
 

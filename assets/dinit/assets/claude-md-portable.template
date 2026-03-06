@@ -64,6 +64,14 @@
 
 <!-- 子代理并发数: 3 -->
 
+## Compact Instructions
+
+When compacting conversation history, always preserve:
+- Current InProgress task ID, title, and full acceptance criteria
+- Blocked status with specific blocking reasons and blocked_by task IDs
+- Pending Change Requests (CR number, status, and proposed changes)
+- Current session's uncommitted work and verification results
+
 ## 编码约定
 
 - [约定1：例如 TypeScript strict mode]

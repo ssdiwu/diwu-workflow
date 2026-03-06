@@ -55,6 +55,14 @@
 - [约定2：例如 函数式组件 + hooks]
 - [约定3：例如 遵循项目既有命名风格]
 
+## Compact Instructions
+
+When compacting conversation history, always preserve:
+- Current InProgress task ID, title, and full acceptance criteria
+- Blocked status with specific blocking reasons and blocked_by task IDs
+- Pending Change Requests (CR number, status, and proposed changes)
+- Current session's uncommitted work and verification results
+
 ## 项目特定约束（可选）
 
 如有架构级约束，在 `.claude/rules/constraints.md` 中定义。

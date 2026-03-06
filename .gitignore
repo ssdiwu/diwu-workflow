@@ -4,3 +4,4 @@ AGENTS.md
 .claude/
 .doc/
 sync-rules.sh
+__pycache__/

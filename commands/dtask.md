@@ -42,8 +42,6 @@ allowed-tools: Read, Write, Edit, Glob
 {
   "id": 3,
   "title": "实现邮件验证码发送",
-  "category": "functional",
-  "status": "InDraft",
   "description": "用户注册后需要验证邮箱。调用 SMTP 服务发送 6 位验证码，验证码有效期 10 分钟，存储在 Redis 中；SMTP 不可用时必须返回明确错误而非静默失败。",
   "acceptance": [
     "Given 新用户完成注册表单提交 When 系统调用 sendVerification(email) Then Redis 中存在 key=verify:{email}，value=6位数字，TTL=600s",
@@ -56,7 +54,9 @@ allowed-tools: Read, Write, Edit, Glob
     "3. 凭据见 /absolute/path/to/project/doc/runbook.md §2.1（SMTP 配置）",
     "4. 运行 /absolute/path/to/project/.claude/checks/task_3_verify.sh 验证"
   ],
-  "blocked_by": [2]
+  "category": "functional",
+  "blocked_by": [2],
+  "status": "InDraft"
 }
 ```
 

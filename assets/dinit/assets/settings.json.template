@@ -1,9 +1,22 @@
 {
+  "language": "",
+  "defaultMode": "default",
   "review_limit": 5,
   "task_archive_threshold": 20,
   "recording_archive_threshold": 10,
   "subagent_concurrency": 3,
   "subagent_explore_model": "haiku",
   "subagent_implement_model": "inherit",
-  "recording_session_window": 600
+  "recording_session_window": 600,
+  "permissions": {
+    "allow": [
+      "Bash(python3 -m json.tool *)",
+      "Bash(git status)",
+      "Bash(git diff *)",
+      "Bash(git log *)",
+      "Bash(date *)",
+      "Bash(wc *)",
+      "Bash(python3 -c 'import py_compile*')"
+    ]
+  }
 }

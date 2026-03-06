@@ -191,15 +191,22 @@ InSpec → InProgress → InReview → Done 完整流程：
 - 边界例：代码目录不同，但都依赖同一个生成产物（如 `openapi.json`）。结论：先串行生成共享产物，再并行执行剩余步骤。
 - 结论输出：使用 `DECISION TRACE` 记录模块边界、共享写文件检查结果和执行顺序。
 
+**Worktree 隔离** `[建议]`（适用于并行实施类子代理）：
+- **使用场景**：多个子代理并行修改不同模块的代码时，使用 git worktree 隔离各自的工作目录，避免文件系统层面的冲突
+- **使用方法**：启动子代理时指定 `isolation: "worktree"`，Agent 会自动在独立的 worktree 副本中工作
+- **注意事项**：每个 worktree 创建独立的工作副本和分支；子代理完成后，主代理负责将各 worktree 分支合并回主分支；合并时需检查是否有意外冲突
+
 **Coordinator Pattern**：task.json 的状态更新始终由主代理负责，子代理通过返回值把结果传回主代理。
 
 **超前计数器所有权**：超前计数器由主代理维护，子代理完成超前任务后通过返回值通知主代理，主代理串行更新计数。超前任务完成顺序以主代理接收返回值的时间为准，不以子代理完成时间为准。
 计数器在内存中维护，不持久化到 task.json。Session 重启后通过统计 task.json 中状态为 InReview 且 blocked_by 非空的任务数量来恢复计数。
 
 **启动仪式**（所有子代理，强约束）：
-1. 读取 `.claude/recording.md`（关注历史阻塞、回退记录）
-2. 读取相关 task 的 title、description、acceptance、steps
-3. 读取 `.claude/decisions.md`（如存在），了解历史设计决策
+
+以下步骤由 SubagentStart Hook 自动注入到子代理的 additionalSystemPrompt 中，无需手动执行：
+1. `.claude/recording.md` 最近一条 session 摘要
+2. task.json 中 InProgress 任务的 title、acceptance、steps
+3. `.claude/decisions.md` 最近 3 条设计决策（如存在）
 
 **子代理并发数**：读取优先级与行为定义见 templates.md 可调参数。
 
