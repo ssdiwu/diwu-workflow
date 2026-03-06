@@ -119,8 +119,8 @@ flowchart TD
 
 | 维度 | 约束 |
 |-----|------|
-| 业务 | 每次只处理一个 Demo；核心验证资产篇幅 > 50%；不写生产架构（DDL、多服务 API 契约）；不写 task.json |
-| 时序 | 先读 README（不全量扫描）→ 建立上下文 → 生成 → 写入 → 更新 Demo README |
+| 业务 | 每次只处理一个 Demo；两级门控（先判产品类型，再判能力 vs 功能）；核心验证资产篇幅 > 50%；不写生产架构；不写 task.json |
+| 时序 | 两级门控 → 读 README（不全量扫描）→ 建立上下文 → 生成 → 写入 → 更新 Demo README |
 | 跨命令 | Demo 文件路径格式 `DEMO-{kebab-case-name}-spec.md` 是 `/dtask` 的查找依据；通过标准必须可量化（供 `/dtask` acceptance 引用） |
 | 感知 | 核心验证资产必须可直接运行（Prompt 全文 / 测试矩阵 / 测试脚本），不允许伪代码占位 |
 
