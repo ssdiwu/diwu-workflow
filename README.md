@@ -341,7 +341,8 @@ DECISION TRACE
 | `PreToolUse` (Bash) | 每次执行 Bash 前 | 输出当前 InProgress 任务的 acceptance 条件，防止目标漂移 |
 | `SessionStart` | session 启动时 | 将主代理 session ID 写入 `/tmp/.claude_main_session`，供 SubagentStop 过滤子代理触发 |
 | `SubagentStop` | 子代理完成时 | 比对 session ID 过滤主/子 agent；当前 session 子代理完成后触发追加 recording.md |
-| `Stop` (blocking) | 回合结束时 | 三分支任务循环：① 有 InProgress → block 继续；② 有 InReview 任务时启动 review buffer（默认 5 次），每次继续执行递增 review_used，达到 review_limit 时放行并通知人工验收；③ 有未阻塞的 InSpec → block 投喂下一任务。无活跃任务时：10 分钟内有 session 记录 → 要求追加写入 recording.md；否则 → 要求新建 session 记录 |
+| `Stop` (background) | 回合结束时（后台） | 输出 `git status --short` 文件变更快照（非 git 项目跳过），供下次 session 快速恢复上下文 |
+| `Stop` (blocking) | 回合结束时（前台） | 从 `settings.json` 读取配置（review_limit、recording_session_window）；使用 `has_substantial_work()` 检查实质性工作（git status + git log + task 状态 + task.json mtime）；三分支任务循环：① 有 InProgress → block 继续；② 有 InReview 任务时启动 review buffer（默认 5 次），每次继续执行递增 review_used，达到 review_limit 时放行并通知人工验收；③ 有未阻塞的 InSpec → block 投喂下一任务。无活跃任务时：recording_session_window（默认 600 秒）内有实质性工作 → 要求追加写入 recording.md；否则 → 要求新建 session 记录 |
 
 ---
 
@@ -392,7 +393,7 @@ diwu-workflow/
 │   │   └── rules-index.md   # UserPromptSubmit hook 注入的规则摘要
 │   └── dinit/               # /dinit 依赖的模板与规则
 │       ├── assets/
-│       │   ├── *.template   # CLAUDE.md / task.json 等模板
+│       │   ├── *.template   # CLAUDE.md / task.json / settings.json 等模板
 │       │   └── rules/       # core-states / core-workflow 等规则文件（完整版）
 │       ├── references/      # 参考资料
 │       └── sync-rules.sh    # 同步规则文件到 assets/dinit/assets/rules/
