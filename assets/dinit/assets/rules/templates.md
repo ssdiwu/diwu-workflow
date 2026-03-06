@@ -153,3 +153,4 @@ DECISION TRACE
 | 子代理并发数 | 3 | 0=禁用子代理，1=串行子代理，N≥2=最多N个并发子代理 |
 | 探索/搜索类子代理模型 | haiku | 只读操作，降低成本 |
 | 实施类子代理模型 | 继承主模型 | 写代码保持主模型质量 |
+| recording_session_window | 600 | Session 记录时间窗口（秒），控制 check_rec() 判断追加/新建和 git log 查询范围 |

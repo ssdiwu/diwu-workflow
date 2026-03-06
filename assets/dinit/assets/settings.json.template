@@ -1,0 +1,9 @@
+{
+  "review_limit": 5,
+  "task_archive_threshold": 20,
+  "recording_archive_threshold": 10,
+  "subagent_concurrency": 3,
+  "subagent_explore_model": "haiku",
+  "subagent_implement_model": "inherit",
+  "recording_session_window": 600
+}

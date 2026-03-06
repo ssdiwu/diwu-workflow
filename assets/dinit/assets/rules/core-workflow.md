@@ -233,6 +233,12 @@ Agent 完成实现和验证后输出 REVIEW 请求，等待人工确认。
 
 在 session 结束前（包括 context window 接近上限时）：
 
+### 判断锚点：何时写入 recording.md
+- 正例：本次 session 有 task 状态变化（InSpec→InProgress、InProgress→InReview 等）、有 git commit、有重要设计决策讨论。结论：写入 recording.md。
+- 反例：本次 session 只是简单问答、确认状态、阅读文件没有任何修改或决策。结论：不写入 recording.md。
+- 边界例：本次 session 有实质性讨论和方案决策但尚未产生代码修改。结论：写入 recording.md，记录讨论结论和方案决策。
+- 结论输出：判断是否存在实质性工作（task 状态变化、git commit、文件修改、重要决策），无实质性工作则跳过写入。
+
 1. 确保所有代码变更已提交
 2. 更新 `.claude/recording.md`，记录本次 session：
    - Session 时间戳（运行 `date '+%Y-%m-%d %H:%M:%S'` 获取真实时间，禁止伪造）
