@@ -1,4 +1,4 @@
-import json, sys, os, subprocess
+import json, sys, os, subprocess, time
 
 d = json.load(sys.stdin)
 cwd = d.get('cwd', '.')
@@ -10,13 +10,26 @@ if not os.path.exists(os.path.dirname(rec)):
 if not os.path.isdir(os.path.join(cwd, '.git')):
     sys.exit(0)
 
-gs = subprocess.check_output(
-    ['git', 'status', '--short'], cwd=cwd, stderr=subprocess.DEVNULL
-).decode().strip()
+# Dedup: skip if recording.md was modified within session window
+sf = os.path.join(cwd, '.claude/settings.json')
+settings = json.load(open(sf)) if os.path.exists(sf) else {}
+window = settings.get('recording_session_window', 600)
 
-if not gs:
+if os.path.exists(rec) and time.time() - os.path.getmtime(rec) < window:
+    sys.exit(0)
+
+# git diff --stat HEAD: only tracked file changes (no untracked/pid/log noise)
+try:
+    diff = subprocess.check_output(
+        ['git', 'diff', '--stat', 'HEAD'], cwd=cwd, stderr=subprocess.DEVNULL
+    ).decode().strip()
+except subprocess.CalledProcessError:
+    diff = subprocess.check_output(
+        ['git', 'diff', '--stat'], cwd=cwd, stderr=subprocess.DEVNULL
+    ).decode().strip()
+
+if not diff:
     sys.exit(0)
 
 now = subprocess.check_output(['date', '+%Y-%m-%d %H:%M:%S']).decode().strip()
-snap = '变更文件:\n' + gs
-open(rec, 'a').write('\n## Session End ' + now + '\n\n' + snap + '\n')
+open(rec, 'a').write('\n[auto] 变更快照 ' + now + '\n```\n' + diff + '\n```\n')
