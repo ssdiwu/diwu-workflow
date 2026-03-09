@@ -92,7 +92,7 @@ if count >= WARNING_THRESHOLD and not os.path.exists(warn_file):
             '建议：\n'
             '1. 确认 recording.md 已记录当前进度\n'
             '2. 当前任务能否在本轮完成？不能则考虑拆分\n'
-            '3. 避免���量只读探索，优先完成已开始的工作'
+            '3. 避免大量只读探索，优先完成已开始的工作'
         )
     }))
     sys.exit(0)

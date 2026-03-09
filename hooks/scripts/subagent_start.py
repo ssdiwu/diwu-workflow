@@ -47,7 +47,7 @@ if os.path.exists(dp):
         text = '\n'.join(x.strip() for x in recent)
         if len(text) > 1000:
             text = text[:1000] + '...(truncated)'
-        parts.append('# 近期设计决���\n' + text)
+        parts.append('# 近期设计决策\n' + text)
 
 if parts:
     prompt = '\n\n'.join(parts)
