@@ -79,6 +79,14 @@
             "command": "python3 hooks/scripts/post_tool_json_validate.py 2>/dev/null||true"
           }
         ]
+      },
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 hooks/scripts/context_monitor.py 2>/dev/null||true"
+          }
+        ]
       }
     ],
     "PreCompact": [

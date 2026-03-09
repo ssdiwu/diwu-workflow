@@ -7,14 +7,6 @@ main = open('/tmp/.claude_main_session').read().strip() if os.path.exists('/tmp/
 if sid != main or not sid:
     sys.exit(0)
 
-msg = (d.get('last_assistant_message') or '').strip()
-if msg:
-    summary = msg[:200] + ('...' if len(msg) > 200 else '')
-    rec = '.claude/recording.md'
-    if os.path.exists(rec):
-        with open(rec, 'a') as rf:
-            rf.write('\n[subagent] 产出摘要: ' + summary + '\n')
-
 tf = '.claude/task.json'
 if not os.path.exists(tf):
     sys.exit(0)

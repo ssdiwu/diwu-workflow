@@ -1,4 +1,4 @@
-import json, sys, os, platform
+import json, sys, os, platform, subprocess
 
 
 def notify(msg):
@@ -43,6 +43,49 @@ rev = [t for t in tasks if t['status'] == 'InReview']
 nx = [t for t in tasks if t['status'] == 'InSpec' and is_unblocked(t)]
 
 if ip:
+    # --- 断点恢复文件生成 ---
+    t = ip[0]
+    ch = os.path.join(os.path.dirname(f), 'continue-here.md')
+    try:
+        diff_stat = subprocess.check_output(
+            ['git', 'diff', '--stat'], stderr=subprocess.DEVNULL
+        ).decode().strip()
+    except Exception:
+        diff_stat = ''
+    try:
+        now = subprocess.check_output(
+            ['date', '+%Y-%m-%d %H:%M:%S'], stderr=subprocess.DEVNULL
+        ).decode().strip()
+    except Exception:
+        now = ''
+    lines = ['# 断点恢复', '', '> 生成时间: ' + now, '> 恢复后自动删除', '']
+    lines.append('## 当前位置')
+    lines.append('Task#' + str(t['id']) + ': ' + t.get('title', '') + ' → InProgress')
+    lines.append('')
+    acc = t.get('acceptance', [])
+    if acc:
+        lines.append('## 验收条件')
+        for a in acc:
+            lines.append('- [ ] ' + a)
+        lines.append('')
+    steps = t.get('steps', [])
+    if steps:
+        lines.append('## 实施步骤')
+        for s in steps:
+            lines.append('- ' + s)
+        lines.append('')
+    if diff_stat:
+        lines.append('## 未提交变更')
+        lines.append('```')
+        lines.append(diff_stat)
+        lines.append('```')
+        lines.append('')
+    lines.append('## 恢复后第一步')
+    lines.append('继续实施 Task#' + str(t['id']) + '，从上次中断处恢复。')
+    lines.append('')
+    with open(ch, 'w') as cf:
+        cf.write('\n'.join(lines))
+
     print(json.dumps({'decision': 'block', 'reason': mk('继续完成当前任务：', ip[0])}))
     sys.exit(0)
 

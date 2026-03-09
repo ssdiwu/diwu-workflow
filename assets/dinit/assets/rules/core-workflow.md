@@ -17,7 +17,8 @@
 - 运行 `git status`，确认工作区状态
 
 ### 2. 上下文恢复
-- 读取 `.claude/recording.md`，了解上一个 session 的工作和注意事项
+- **优先读取** `.claude/continue-here.md`（如存在），了解精确断点位置，读完后删除该文件
+- 如果 continue-here.md 不存在，读取 `.claude/recording.md`，了解上一个 session 的工作和注意事项
 - 检查 `.claude/task.json` 中 Done/Cancelled 任务数
 - 读取 `.claude/decisions.md`（如存在），了解历史设计决策
 - 运行 `git log --oneline -20`，了解最近的代码变更历史
@@ -153,6 +154,24 @@ InSpec → InProgress → InReview → Done 完整流程：
 **自审原则** `[建议]`：只实现了 acceptance 要求的，不多不少；没有引入技术债或安全问题。
 - ❌ 顺手重构了周边函数、添加了未要求的日志、提取了"以后可能用到"的工具函数
 
+### 执行偏差规则
+
+在实施过程中遇到计划外的问题时，按以下分级处理：
+
+| 偏差等级 | 权限 | 例子 | 记录要求 |
+|---------|------|------|---------|
+| Level 1: Bug 修复 | 自动修复 | 类型错误、import 缺失、语法错误 | recording.md 记录 |
+| Level 2: 关键缺失 | 自动补充 | 缺少错误处理、缺少输入验证 | recording.md 记录 |
+| Level 3: 阻塞问题 | 自动修复 | 依赖缺失、配置格式错误 | recording.md 记录 |
+| Level 4: 架构变更 | 必须问用户 | 新建数据库表、切换框架、破坏性 API 变更 | DECISION TRACE |
+
+单个任务累计 Level 1-3 自动修复不超过 5 次，超过则停下评估 acceptance/steps 定义是否有缺陷。
+
+### 判断锚点：执行偏差分级
+- 正例（Level 2 自动补充）：实现用户注册时发现缺少 email 格式校验，acceptance 没写但显然需要。结论：Level 2 自动补充，recording.md 记录。
+- 反例（Level 4 必须问用户）：发现 PostgreSQL 比 MySQL 更适合当前场景，想换数据库。结论：Level 4 架构变更，停下问用户并输出 DECISION TRACE。
+- 边界例：需要新增一个工具函数且不改变 API。结论：如果 < 20 行，按 Level 2 处理；如果引入新的公共接口，按 Level 4 处理。
+
 ### 提交规范
 
 **提交时机**：
@@ -224,6 +243,12 @@ InSpec → InProgress → InReview → Done 完整流程：
 
 ### 3. 人工审查（大幅度修改）
 Agent 完成实现和验证后输出 REVIEW 请求，等待人工确认。
+
+### 4. 独立验证（InReview 阶段可选）
+大幅度修改或涉及多模块的任务，建议在标记 InReview 后启动 verifier agent 独立验证。verifier 不读 recording.md 中的实施记录，只从 acceptance 的 Then 子句反推可观测事实并独立验证。适用场景：
+- 单任务改动超过 500 行
+- 涉及 3 个以上模块的变更
+- 包含外部依赖集成的任务
 
 ### 基线验证（smoke.sh）
 位置：`.claude/checks/smoke.sh`，验证基线环境（依赖/构建/lint）。模板见 templates.md。
