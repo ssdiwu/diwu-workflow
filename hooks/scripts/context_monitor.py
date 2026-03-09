@@ -1,10 +1,15 @@
 import json, sys, os
 
-# 用 PPID 作为 session 标识（同一 Claude Code 进程的所有 hook 共享同一父进程）
-pid = os.environ.get('PPID', str(os.getppid()))
-counter_file = f'/tmp/diwu_ctx_{pid}'
-warn_file = f'/tmp/diwu_ctx_{pid}_warned'
-crit_file = f'/tmp/diwu_ctx_{pid}_critical'
+# 用 session_id 作为稳定标识（由 session_start.py 写入 /tmp/.claude_main_session）
+sid_file = '/tmp/.claude_main_session'
+if not os.path.exists(sid_file):
+    sys.exit(0)
+sid = open(sid_file).read().strip()
+if not sid:
+    sys.exit(0)
+counter_file = f'/tmp/diwu_ctx_{sid}'
+warn_file = f'/tmp/diwu_ctx_{sid}_warned'
+crit_file = f'/tmp/diwu_ctx_{sid}_critical'
 
 WARNING_THRESHOLD = 100
 CRITICAL_THRESHOLD = 150
