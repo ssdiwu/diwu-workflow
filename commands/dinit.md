@@ -9,8 +9,39 @@ allowed-tools: Read, Write, Edit, Bash, Glob
 ## Step 0：刷新检测
 
 检查 `.claude/CLAUDE.md` 是否已存在：
-- **已存在** → 刷新模式：跳过 Step 2-3 的骨架创建，只执行 Step 1（收集信息）和 Step 1.5（代码库扫描），然后更新 `.claude/CLAUDE.md` 的「项目结构」章节
+- **已存在** → 刷新模式：跳过 Step 2-3 的骨架创建，只执行 Step 1（收集信息）和 Step 1.5（代码库扫描），然后更新 `.claude/CLAUDE.md` 并确保项目符合最新规范
 - **不存在** → 初始化模式：执行完整流程（Step 1 → Step 1.5 → Step 2 → Step 3 → ...）
+
+**刷新模式的章节补充逻辑**：
+
+1. **检测「工作流规则」章节**：
+   - 搜索 CLAUDE.md 中是否存在 `## 工作流规则` 标题
+   - 如果不存在，在 `## 核心原则` 之前插入以下内容：
+   ```markdown
+   ## 工作流规则
+
+   详细规则见 @rules/ 目录：
+   - @rules/core-states.md - 任务状态机与 acceptance 格式
+   - @rules/core-workflow.md - Session 启动、任务规划、实施、验证
+   - @rules/exceptions.md - 异常处理与 BLOCKED 判定
+   - @rules/templates.md - DECISION TRACE、BLOCKED、REVIEW 格式模板
+   - @rules/file-layout.md - .claude/ 目录结构与归档规则
+   - @rules/constraints.md - 架构约束（五维约束设计）
+
+   ```
+
+2. **检测「Compact Instructions」章节**：
+   - 搜索 CLAUDE.md 中是否存在 `## Compact Instructions` 标题
+   - 如果不存在，在文件末尾追加以下内容：
+   ```markdown
+
+   ## Compact Instructions
+
+   本项目使用 Claude Code 的 Compact Instructions 功能，通过 @rules/ 引用自动加载工作流规则。规则文件位于 `.claude/rules/` 目录，由 UserPromptSubmit hook 在每次对话开始时注入。
+   ```
+
+3. **更新「项目结构」章节**：
+   - 用 Step 1.5 的扫描结果替换 `<!-- SCAN_RESULT_PLACEHOLDER -->` 占位符或更新现有内容
 
 ## Step 1：收集项目信息
 
