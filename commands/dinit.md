@@ -6,6 +6,12 @@ allowed-tools: Read, Write, Edit, Bash, Glob
 
 # /dinit — 项目初始化
 
+## Step 0：刷新检测
+
+检查 `.claude/CLAUDE.md` 是否已存在：
+- **已存在** → 刷新模式：跳过 Step 2-3 的骨架创建，只执行 Step 1（收集信息）和 Step 1.5（代码库扫描），然后更新 `.claude/CLAUDE.md` 的「项目结构」章节
+- **不存在** → 初始化模式：执行完整流程（Step 1 → Step 1.5 → Step 2 → Step 3 → ...）
+
 ## Step 1：收集项目信息
 
 询问用户（上下文已有的跳过）：
@@ -22,6 +28,20 @@ allowed-tools: Read, Write, Edit, Bash, Glob
 - 关键目录：`commands/`（用户命令），`assets/`（模板文件），`skills/`（技能文件）
 
 收集到的信息要达到这个粒度才能生成有效的 CLAUDE.md 和 smoke.sh。
+
+## Step 1.5：代码库扫描
+
+从 `.claude/settings.json` 读取 `subagent_concurrency` 参数（默认 3），使用子代理并行扫描代码库：
+
+**扫描任务**（并行执行）：
+1. **目录结构扫描**：识别主要目录层级、文件分布、模块组织方式
+2. **技术栈检测**：识别 package.json / requirements.txt / go.mod 等配置文件，提取依赖和工具链信息
+3. **关键文件识别**：定位 README、配置文件、入口文件、测试目录
+
+**扫描结果整合**：
+- 将扫描结果整合为结构化的项目结构描述
+- 补充 Step 1 收集的信息（如用户未提供关键目录，用扫描结果填充）
+- 用于填充 `.claude/CLAUDE.md` 的「项目结构」章节
 
 ## Step 2：复制规则文件
 
@@ -88,6 +108,7 @@ git commit -m "Initial project setup with Claude Code workflow"
 
 确认以下文件均已创建：
 - [ ] `.claude/CLAUDE.md` 已填充项目信息
+- [ ] `.claude/CLAUDE.md` 的「项目结构」章节包含扫描结果（非默认占位符）
 - [ ] `.claude/rules/` 下有五个 rules 文件
 - [ ] 项目根目录有 `AGENTS.md`
 - [ ] `.claude/task.json` 是有效 JSON

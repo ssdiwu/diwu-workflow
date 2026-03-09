@@ -9,13 +9,8 @@ root = (entries[0].get('installPath', '') if entries else '') or os.environ.get(
 if not root:
     sys.exit(0)
 
-ri = os.path.join(root, 'assets', 'rules', 'rules-index.md')
-content = open(ri).read() if os.path.exists(ri) else ''
-
-if not content:
-    sys.exit(0)
-
 d = json.load(sys.stdin)
+content = ''
 cwd = d.get('cwd', '.')
 
 lp = os.path.join(cwd, '.claude', 'lessons.md')

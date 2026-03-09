@@ -47,8 +47,8 @@ Then 登录成功
         "Given 同一邮箱 10 分钟内重复请求 When 调用 sendVerification() Then 覆盖旧验证码，重置 TTL"
       ],
       "steps": [
-        "1. 在 /absolute/path/to/project/src/services/email.ts 实现 sendVerification(email: string): Promise<void>",
-        "2. 在 /absolute/path/to/project/src/lib/redis.ts 添加 setVerifyCode(email, code, ttl) 方法",
+        "1. [锁定] 在 /absolute/path/to/project/src/services/email.ts 实现 sendVerification(email: string): Promise<void>，使用 nodemailer 库",
+        "2. [建议] 在 /absolute/path/to/project/src/lib/redis.ts 添加 setVerifyCode(email, code, ttl) 方法",
         "3. 凭据见 /absolute/path/to/project/doc/runbook.md §2.1（SMTP 配置）",
         "4. 运行 /absolute/path/to/project/.claude/checks/task_3_verify.sh 验证"
       ],
@@ -68,7 +68,8 @@ Then 登录成功
 | `title` | 任务标题 | 字符串 | 一句话描述任务做什么（动词开头） |
 | `description` | 任务描述 | 字符串 | 背景 + 关键约束（为什么做、边界是什么） |
 | `acceptance` | 验收条件 | 数组 | Given/When/Then 格式的验收场景，见文件开头 acceptance 格式规范 |
-| `steps` | 实施步骤 | 数组 | 实施过程的关键步骤，必须写绝对路径 |
+| `steps` | 实施步骤 | 数组 | 实施过程的关键步骤，必须写绝对路径；可用 [锁定] 标注关键技术选型，[建议] 标注实现细节 |
+| `files_modified` | 修改文件列表 | 数组 | (可选) 从 steps 中自动提取的绝对路径，用于并行冲突检测 |
 | `category` | 任务分类 | 字符串 | 见下方任务分类说明 |
 | `blocked_by` | 前置任务 | 数组 | (可选) 见下方 blocked_by 规范章节 |
 | `status` | 任务状态 | 字符串 | 运行时状态，见下方状态定义章节 |

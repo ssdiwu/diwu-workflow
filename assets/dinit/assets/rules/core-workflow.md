@@ -193,6 +193,7 @@ InSpec → InProgress → InReview → Done 完整流程：
   - ✓ 子代理A 实现 `src/auth/`，子代理B 实现 `src/payment/`（不同域）
   - ❌ 两个子代理都需要修改 `src/models/user.ts`（共享写文件）
 - 无共享写文件（子代理永远不写 task.json，只写自己的产出文件）
+- files_modified 无重叠：若任务包含 files_modified 字段，检查两个任务的 files_modified 数组是否有交集，有交集则必须串行
 
 **串行条件**（满足任一则串行）：
 - 后一步依赖前一步的输出

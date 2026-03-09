@@ -49,10 +49,14 @@ allowed-tools: Read, Write, Edit, Glob
     "Given 同一邮箱 10 分钟内重复请求 When 调用 sendVerification() Then 覆盖旧验证码，重置 TTL"
   ],
   "steps": [
-    "1. 在 /absolute/path/to/project/src/services/email.ts 实现 sendVerification(email: string): Promise<void>",
-    "2. 在 /absolute/path/to/project/src/lib/redis.ts 添加 setVerifyCode(email, code, ttl) 方法",
+    "1. [锁定] 在 /absolute/path/to/project/src/services/email.ts 实现 sendVerification(email: string): Promise<void>，使用 nodemailer 库",
+    "2. [建议] 在 /absolute/path/to/project/src/lib/redis.ts 添加 setVerifyCode(email, code, ttl) 方法",
     "3. 凭据见 /absolute/path/to/project/doc/runbook.md §2.1（SMTP 配置）",
     "4. 运行 /absolute/path/to/project/.claude/checks/task_3_verify.sh 验证"
+  ],
+  "files_modified": [
+    "/absolute/path/to/project/src/services/email.ts",
+    "/absolute/path/to/project/src/lib/redis.ts"
   ],
   "category": "functional",
   "blocked_by": [2],
@@ -97,6 +101,13 @@ allowed-tools: Read, Write, Edit, Glob
 根据澄清结果生成任务列表，追加到 `.claude/task.json`。
 每个任务必须包含所有字段，字段粒度参照 Step 1.5 示例。
 
+**files_modified 自动提取**：从 steps 中提取所有绝对路径（以 `/` 开头且包含文件扩展名），写入 files_modified 数组，用于并行冲突检测。
+
+**灰色地带追问**：对每个任务的 steps，逐条判断是否需要标注 [锁定] 或 [建议]：
+- **[锁定]**：关键技术选型、架构决策、外部依赖选择（如"使用 PostgreSQL"、"调用 Stripe API"）
+- **[建议]**：实现细节、代码组织方式、可替换的工具函数（如"提取 validateEmail 工具函数"、"使用 lodash.debounce"）
+- 无标注：中性步骤（如"运行验证脚本"、"凭据见文档"）
+
 边界情况：
 - `.claude/task.json` 不存在：创建 `{"tasks": []}` 再追加
 - `.claude/` 目录不存在：先创建目录
@@ -110,6 +121,7 @@ allowed-tools: Read, Write, Edit, Glob
 - steps 是否自包含（外部凭据有来源路径，无隐式上下文依赖）
 - 粒度是否合理（预估是否超过 2000 行，如是提示拆分）
 - 是否垂直切片（端到端打通，非按技术层横切）
+- **标注合理性**：关键技术选型是否标注了 [锁定]，纯实现细节是否标注了 [建议]
 
 **acceptance 坏→好对比**：
 - ❌ `Given 用户登录 When 提交表单 Then 登录成功`（Then 无法断言，Given 无具体状态）
