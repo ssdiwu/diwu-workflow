@@ -30,14 +30,14 @@ allowed-tools: Read, Write, Edit, Bash, Glob
 
    ```
 
-2. **检测「Compact Instructions」章节**：
-   - 搜索 CLAUDE.md 中是否存在 `## Compact Instructions` 标题
+2. **检测「规则引用说明」章节**：
+   - 搜索 CLAUDE.md 中是否存在 `## 规则引用说明` 标题
    - 如果不存在，在文件末尾追加以下内容：
    ```markdown
 
-   ## Compact Instructions
+   ## 规则引用说明
 
-   本项目使用 Claude Code 的 Compact Instructions 功能，通过 @rules/ 引用自动加载工作流规则。规则文件位于 `.claude/rules/` 目录，由 UserPromptSubmit hook 在每次对话开始时注入。
+   本项目使用 @rules/ 引用自动加载工作流规则。规则文件位于 `.claude/rules/` 目录，由 UserPromptSubmit hook 在每次对话开始时注入。
    ```
 
 3. **更新「项目结构」章节**：
