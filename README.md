@@ -353,6 +353,7 @@ DECISION TRACE
 | `SubagentStop` | 子代理完成时 | `subagent_stop.py` | 读取 `last_assistant_message` 自动记录子代理产出摘要到 recording.md |
 | `PreCompact` | 对话压缩前 | `pre_compact.py` | 自动保存 InProgress 任务进度快照（git diff --stat）到 recording.md |
 | `PostToolUse` (Write/Edit) | 写入文件后 | `post_tool_json_validate.py` | 自动校验 .json 文件格式，发现错误立即反馈 |
+| `PostToolUse` (通用) | 每次工具调用后 | `context_monitor.py` | Context Rot 监控（WARNING@100次 / CRITICAL@150次）+ 只读连击检测（≥15次提醒） |
 | `Stop` (background) | 回合结束（后台） | `stop_background.py` | git diff --stat 变更快照（session 窗口内去重，不含 untracked 噪声） |
 | `Stop` (blocking) | 回合结束（前台） | `stop_blocking.py` | review buffer 机制 + 任务循环（从 settings.json 读取配置） |
 
