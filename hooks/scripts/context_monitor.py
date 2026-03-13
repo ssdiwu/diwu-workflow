@@ -1,4 +1,5 @@
-import json, sys, os, subprocess
+import json, sys, os, subprocess, time, re
+from datetime import datetime
 
 # 读取 PostToolUse 事件数据获取工具名
 tool_name = ''
@@ -8,28 +9,62 @@ try:
 except:
     pass
 
-# 用 session_id 作为稳定标识（由 session_start.py 写入 /tmp/.claude_main_session）
+# 用 session_id 作为稳定标识
 sid_file = '/tmp/.claude_main_session'
 if not os.path.exists(sid_file):
     sys.exit(0)
 sid = open(sid_file).read().strip()
 if not sid:
     sys.exit(0)
+
 counter_file = f'/tmp/diwu_ctx_{sid}'
 warn_file = f'/tmp/diwu_ctx_{sid}_warned'
 crit_file = f'/tmp/diwu_ctx_{sid}_critical'
+crit_ts_file = f'/tmp/diwu_ctx_{sid}_critical_ts'
 readonly_file = f'/tmp/diwu_ctx_{sid}_readonly'
 readonly_warn_file = f'/tmp/diwu_ctx_{sid}_readonly_warned'
+config_cache_file = f'/tmp/diwu_ctx_{sid}_config_cache'
 
-WARNING_THRESHOLD = 30
-CRITICAL_THRESHOLD = 50
+# 配置读取（带 mtime 缓存）
+def load_config():
+    settings_path = '.claude/settings.json'
+    if not os.path.exists(settings_path):
+        return {'warning': 30, 'critical': 50, 'delay': 10, 'session_window': 600}
+
+    settings_mtime = os.path.getmtime(settings_path)
+    if os.path.exists(config_cache_file):
+        try:
+            cache = json.load(open(config_cache_file))
+            if cache.get('mtime') == settings_mtime:
+                return cache.get('config', {})
+        except:
+            pass
+
+    try:
+        settings = json.load(open(settings_path))
+        config = {
+            'warning': settings.get('context_monitor_warning', 30),
+            'critical': settings.get('context_monitor_critical', 50),
+            'delay': settings.get('context_monitor_delay', 10),
+            'session_window': settings.get('recording_session_window', 600)
+        }
+        open(config_cache_file, 'w').write(json.dumps({'mtime': settings_mtime, 'config': config}))
+        return config
+    except:
+        return {'warning': 30, 'critical': 50, 'delay': 10, 'session_window': 600}
+
+config = load_config()
+WARNING_THRESHOLD = config['warning']
+CRITICAL_THRESHOLD = config['critical']
+DELAY_THRESHOLD = config['delay']
+SESSION_WINDOW = config['session_window']
 
 # 递增计数器
 count = 1
 if os.path.exists(counter_file):
     try:
         count = int(open(counter_file).read().strip()) + 1
-    except (ValueError, OSError):
+    except:
         count = 1
 open(counter_file, 'w').write(str(count))
 
@@ -67,9 +102,64 @@ if readonly_count >= 15 and not os.path.exists(readonly_warn_file):
     }))
     sys.exit(0)
 
-# CRITICAL 检查（优先级高于 WARNING）
+# B 逻辑：CRITICAL+DELAY 检查
+if count >= CRITICAL_THRESHOLD + DELAY_THRESHOLD and os.path.exists(crit_ts_file):
+    try:
+        critical_ts = float(open(crit_ts_file).read().strip())
+        recording_path = '.claude/recording.md'
+        if os.path.exists(recording_path):
+            recording_mtime = os.path.getmtime(recording_path)
+            if recording_mtime < critical_ts:
+                # recording.md 未更新，自动写入 checkpoint
+                def write_checkpoint():
+                    try:
+                        # 读取 InProgress 任务
+                        task_json = json.load(open('.claude/task.json'))
+                        in_progress = [t for t in task_json.get('tasks', []) if t.get('status') == 'InProgress']
+
+                        # git diff --stat
+                        diff_stat = subprocess.run(['git', 'diff', '--stat'], capture_output=True, text=True).stdout.strip()
+
+                        # 检查时间窗口
+                        now = time.time()
+                        append_mode = False
+                        if os.path.exists(recording_path):
+                            content = open(recording_path).read()
+                            # 解析最后一个 session 时间戳
+                            matches = re.findall(r'## Session (\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2})', content)
+                            if matches:
+                                last_ts_str = matches[-1]
+                                try:
+                                    last_ts = datetime.strptime(last_ts_str, '%Y-%m-%d %H:%M:%S').timestamp()
+                                    if now - last_ts < SESSION_WINDOW:
+                                        append_mode = True
+                                except:
+                                    pass
+
+                        # 生成 checkpoint 内容
+                        current_time = datetime.fromtimestamp(now).strftime('%Y-%m-%d %H:%M:%S')
+
+                        with open(recording_path, 'a') as f:
+                            if not append_mode:
+                                f.write(f'\n---\n## Session {current_time}\n\n')
+                            f.write('### [Auto Checkpoint]\n\n')
+                            if in_progress:
+                                for task in in_progress:
+                                    f.write(f"**Task#{task['id']}**: {task['title']} (InProgress)\n")
+                            if diff_stat:
+                                f.write(f'\n**未提交变更**:\n```\n{diff_stat}\n```\n')
+                            f.write('\n')
+                    except Exception as e:
+                        pass
+
+                write_checkpoint()
+    except:
+        pass
+
+# A 逻辑：CRITICAL 检查（优先级高于 WARNING）
 if count >= CRITICAL_THRESHOLD and not os.path.exists(crit_file):
     open(crit_file, 'w').write('1')
+    open(crit_ts_file, 'w').write(str(time.time()))
     print(json.dumps({
         'decision': 'block',
         'reason': (
