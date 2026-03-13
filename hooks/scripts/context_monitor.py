@@ -1,4 +1,4 @@
-import json, sys, os
+import json, sys, os, subprocess
 
 # 读取 PostToolUse 事件数据获取工具名
 tool_name = ''
@@ -21,8 +21,8 @@ crit_file = f'/tmp/diwu_ctx_{sid}_critical'
 readonly_file = f'/tmp/diwu_ctx_{sid}_readonly'
 readonly_warn_file = f'/tmp/diwu_ctx_{sid}_readonly_warned'
 
-WARNING_THRESHOLD = 100
-CRITICAL_THRESHOLD = 150
+WARNING_THRESHOLD = 30
+CRITICAL_THRESHOLD = 50
 
 # 递增计数器
 count = 1
@@ -74,10 +74,11 @@ if count >= CRITICAL_THRESHOLD and not os.path.exists(crit_file):
         'decision': 'block',
         'reason': (
             '⚠️ CRITICAL: Context 使用量已达临界值（工具调用 ' + str(count) + ' 次）。\n\n'
-            '必须立即执行：\n'
-            '1. 立即写入 recording.md，记录当前进度和未完成工作\n'
-            '2. 未完成的任务保持 InProgress\n'
-            '3. 评估是否需要结束当前 session 并在新 session 中继续'
+            '立即更新 recording.md，记录：\n'
+            '1. 当前任务状态和已完成的工作\n'
+            '2. 关键决策和下一步计划\n'
+            '3. 未完成的任务保持 InProgress\n\n'
+            '然后评估是否需要结束当前 session 并在新 session 中继续。'
         )
     }))
     sys.exit(0)
