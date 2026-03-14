@@ -61,7 +61,7 @@
 **recording.md 归档**：
 1. 当 session 数超过归档阈值时触发（阈值见 settings.json）
 2. 将最旧的 session 移入 archive/recording_YYYY-MM-DD.md（按天）
-3. 归档后 recording.md 保留最近 5 条 session
+3. 归档后 recording.md 保留最近 N 条 session（N 见 settings.json `recording_keep_count`，默认 10）
 4. 无需人工确认，session 启动时自动执行
 
 ## 查找历史

@@ -8,6 +8,7 @@
   "subagent_explore_model": "haiku",
   "subagent_implement_model": "inherit",
   "recording_session_window": 600,
+  "recording_keep_count": 10,
   "context_monitor_warning": 30,
   "context_monitor_critical": 50,
   "context_monitor_delay": 10,
