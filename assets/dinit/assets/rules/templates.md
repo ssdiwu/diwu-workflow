@@ -102,12 +102,11 @@ DECISION TRACE
 |------|--------|------|
 | 超前上限 | 5 | 最多同时超前实施的任务数（值存储在 settings.json） |
 | task.json 归档阈值 | 20 | task.json 中 Done/Cancelled 任务超过此数触发归档（值存储在 settings.json） |
-| recording.md 归档阈值 | 10 | recording.md 中 session 数超过此数触发归档（值存储在 settings.json） |
 | 子代理并发数 | 3 | 0=禁用子代理，1=串行子代理，N≥2=最多N个并发子代理（值存储在 settings.json） |
 | 探索/搜索类子代理模型 | haiku | 只读操作，降低成本（值存储在 settings.json） |
 | 实施类子代理模型 | 继承主模型 | 写代码保持主模型质量（值存储在 settings.json） |
 | recording_session_window | 600 | Session 记录时间窗口（秒），控制 check_rec() 判断追加/新建和 git log 查询范围（值存储在 settings.json） |
-| recording_keep_count | 10 | recording.md 归档后保留的 session 数量（值存储在 settings.json） |
+| recording_retention_days | 30 | recording/ 目录文件保留天数，超过则可手动清理（值存储在 settings.json） |
 | context_monitor_warning | 30 | Context Rot 监控 WARNING 阈值，工具调用次数达到此值时输出提醒（值存储在 settings.json） |
 | context_monitor_critical | 50 | Context Rot 监控 CRITICAL 阈值，达到此值时触发阻塞提醒要求更新 recording.md（值存储在 settings.json） |
 | context_monitor_delay | 10 | Context Rot 监控延迟阈值，CRITICAL+DELAY 时检查 recording.md 是否更新，未更新则自动写入 checkpoint（值存储在 settings.json） |

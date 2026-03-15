@@ -211,7 +211,7 @@ stateDiagram-v2
 ```mermaid
 flowchart TD
     Start([Session 启动]) --> Preflight[1. Preflight 检查<br>smoke.sh / CR / git status]
-    Preflight --> Context[2. 上下文恢复<br>recording.md / git log]
+    Preflight --> Context[2. 上下文恢复<br>recording/ 最新文件 / git log]
     Context --> SelectTask[3. 任务选择]
 
     SelectTask --> CheckInProgress{存在 InProgress?}
@@ -252,7 +252,7 @@ flowchart TD
 
 | 文件 | 回答的问题 | 写入时机 |
 |------|-----------|---------:|
-| `recording.md` | 发生了什么（session 流水、任务进度、下一步） | 每次 session 结束时 |
+| `recording/` | 发生了什么（session 流水、任务进度、下一步），每个 session 一个独立文件 | 每次 session 结束时 |
 | `decisions.md` | 为什么这样设计（方案选择、边界定义、设计方向） | 有重大设计决策时 |
 
 **通用货币：README 索引**
@@ -276,7 +276,7 @@ flowchart TD
 - 外部依赖不可用（第三方服务宕机、需人工授权）
 - 验证无法进行（需真实账号、依赖未部署的外部系统）
 
-BLOCKED 时：任务退回 `InSpec`，禁止创建 commit，禁止标记 Done，在 `recording.md` 记录阻塞原因。人工介入后从 `InSpec` 恢复继续。
+BLOCKED 时：任务退回 `InSpec`，禁止创建 commit，禁止标记 Done，在 `recording/` 记录阻塞原因。人工介入后从 `InSpec` 恢复继续。
 
 #### Change Request — 需求本身有问题
 
@@ -349,9 +349,9 @@ DECISION TRACE
 | `UserPromptSubmit` | 用户发送消息前 | `user_prompt_submit.py` | 将规则摘要 + lessons + constraints 注入上下文 |
 | `SessionStart` | session 启动时 | `session_start.py` | 写主代理 session ID；读取 `.claude/env` 注入环境变量 |
 | `PreToolUse` (Bash) | 执行 Bash 前 | `pre_tool_use_bash.py` | 输出 InProgress 任务的 acceptance，防止目标漂移 |
-| `SubagentStart` | 子代理启动时 | `subagent_start.py` | 自动注入 recording.md 摘要 + InProgress 任务 + 最近决策到子代理上下文 |
-| `SubagentStop` | 子代理完成时 | `subagent_stop.py` | 读取 `last_assistant_message` 自动记录子代理产出摘要到 recording.md |
-| `PreCompact` | 对话压缩前 | `pre_compact.py` | 自动保存 InProgress 任务进度快照（git diff --stat）到 recording.md |
+| `SubagentStart` | 子代理启动时 | `subagent_start.py` | 自动注入 recording/ 最新摘要 + InProgress 任务 + 最近决策到子代理上下文 |
+| `SubagentStop` | 子代理完成时 | `subagent_stop.py` | 读取 `last_assistant_message` 自动记录子代理产出摘要到 recording/ |
+| `PreCompact` | 对话压缩前 | `pre_compact.py` | 自动保存 InProgress 任务进度快照（git diff --stat）到 recording/ |
 | `PostToolUse` (Write/Edit) | 写入文件后 | `post_tool_json_validate.py` | 自动校验 .json 文件格式，发现错误立即反馈 |
 | `PostToolUse` (通用) | 每次工具调用后 | `context_monitor.py` | Context Rot 监控（WARNING@100次 / CRITICAL@150次）+ 只读连击检测（≥15次提醒） |
 | `Stop` (background) | 回合结束（后台） | `stop_background.py` | git diff --stat 变更快照（session 窗口内去重，不含 untracked 噪声） |

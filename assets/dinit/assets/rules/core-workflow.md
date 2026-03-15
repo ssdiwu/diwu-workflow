@@ -18,7 +18,7 @@
 
 ### 2. 上下文恢复
 - **优先读取** `.claude/continue-here.md`（如存在），了解精确断点位置，读完后删除该文件
-- 如果 continue-here.md 不存在，读取 `.claude/recording.md`，了解上一个 session 的工作和注意事项
+- 如果 continue-here.md 不存在，使用 `ls -t .claude/recording/ | head -2` 读取最新 1-2 个 session 文件，了解最近的工作和注意事项
 - 检查 `.claude/task.json` 中 Done/Cancelled 任务数
 - 读取 `.claude/decisions.md`（如存在），了解历史设计决策
 - 运行 `git log --oneline -20`，了解最近的代码变更历史
@@ -267,21 +267,22 @@ Agent 完成实现和验证后输出 REVIEW 请求，等待人工确认。
 
 在 session 结束前（包括 context window 接近上限时）：
 
-### 判断锚点：何时写入 recording.md
-- 正例：本次 session 有 task 状态变化（InSpec→InProgress、InProgress→InReview 等）、有 git commit、有重要设计决策讨论。结论：写入 recording.md。
-- 反例：本次 session 只是简单问答、确认状态、阅读文件没有任何修改或决策。结论：不写入 recording.md。
-- 边界例：本次 session 有实质性讨论和方案决策但尚未产生代码修改。结论：写入 recording.md，记录讨论结论和方案决策。
+### 判断锚点：何时写入 recording
+- 正例：本次 session 有 task 状态变化（InSpec→InProgress、InProgress→InReview 等）、有 git commit、有重要设计决策讨论。结论：写入新 session 文件。
+- 反例：本次 session 只是简单问答、确认状态、阅读文件没有任何修改或决策。结论：不写入。
+- 边界例：本次 session 有实质性讨论和方案决策但尚未产生代码修改。结论：写入新 session 文件，记录讨论结论和方案决策。
 - 结论输出：判断是否存在实质性工作（task 状态变化、git commit、文件修改、重要决策），无实质性工作则跳过写入。
 
 1. 确保所有代码变更已提交
-2. 更新 `.claude/recording.md`，记录本次 session：
-   - **写入顺序**：最新的 session 在最前面（紧跟 `# Session 记录` 标题）
-   - Session 时间戳（运行 `date '+%Y-%m-%d %H:%M:%S'` 获取真实时间，禁止伪造）
-     - ❌ `## Session 2026-02-26 （续）` — 手写占位符，违规
-     - ✅ 先运行 `date` → 得到 `2026-02-26 16:49:42` → 写 `## Session 2026-02-26 16:49:42`
-   - 处理的任务及状态
-   - 验收验证结果
-   - 下次应该做什么
+2. 写入 `.claude/recording/session-YYYY-MM-DD-HHMMSS.md` 新文件，记录本次 session：
+   - 文件名时间戳（运行 `date '+%Y-%m-%d %H:%M:%S'` 获取真实时间，转换为文件名格式 YYYY-MM-DD-HHMMSS）
+     - ❌ 手写时间或使用占位符
+     - ✅ 先运行 `date '+%Y-%m-%d %H:%M:%S'` → 得到 `2026-02-26 16:49:42` → 写入 `recording/session-2026-02-26-164942.md`
+   - 文件内容包含：
+     - Session 标题（`## Session YYYY-MM-DD HH:MM:SS`）
+     - 处理的任务及状态
+     - 验收验证结果
+     - 下次应该做什么
 3. 如有重大设计决策，追加到 `.claude/decisions.md`（文件不存在时创建）：
    ```markdown
    ## DEC-NNN YYYY-MM-DD 决策标题
@@ -301,5 +302,3 @@ Agent 完成实现和验证后输出 REVIEW 请求，等待人工确认。
 - context window 会在接近上限时自动压缩，允许无限期继续工作
 - 不要因为 token 预算担忧而提前停止任务
 - 始终保持最大程度的自主性，完整完成任务
-
-归档触发条件与执行步骤见 `file-layout.md`。
