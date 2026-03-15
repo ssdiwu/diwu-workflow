@@ -106,53 +106,47 @@ if readonly_count >= 15 and not os.path.exists(readonly_warn_file):
 if count >= CRITICAL_THRESHOLD + DELAY_THRESHOLD and os.path.exists(crit_ts_file):
     try:
         critical_ts = float(open(crit_ts_file).read().strip())
-        recording_path = '.claude/recording.md'
-        if os.path.exists(recording_path):
-            recording_mtime = os.path.getmtime(recording_path)
-            if recording_mtime < critical_ts:
-                # recording.md 未更新，自动写入 checkpoint
-                def write_checkpoint():
-                    try:
-                        # 读取 InProgress 任务
-                        task_json = json.load(open('.claude/task.json'))
-                        in_progress = [t for t in task_json.get('tasks', []) if t.get('status') == 'InProgress']
+        recording_dir = '.claude/recording'
+        latest_mtime = 0
+        if os.path.exists(recording_dir):
+            for f in os.listdir(recording_dir):
+                if f.startswith('session-') and f.endswith('.md'):
+                    fpath = os.path.join(recording_dir, f)
+                    latest_mtime = max(latest_mtime, os.path.getmtime(fpath))
 
-                        # git diff --stat
-                        diff_stat = subprocess.run(['git', 'diff', '--stat'], capture_output=True, text=True).stdout.strip()
+        if latest_mtime < critical_ts:
+            # recording/ 未更新，自动写入 checkpoint
+            def write_checkpoint():
+                try:
+                    # 读取 InProgress 任务
+                    task_json = json.load(open('.claude/task.json'))
+                    in_progress = [t for t in task_json.get('tasks', []) if t.get('status') == 'InProgress']
 
-                        # 检查时间窗口
-                        now = time.time()
-                        append_mode = False
-                        if os.path.exists(recording_path):
-                            content = open(recording_path).read()
-                            # 解析最后一个 session 时间戳
-                            matches = re.findall(r'## Session (\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2})', content)
-                            if matches:
-                                last_ts_str = matches[-1]
-                                try:
-                                    last_ts = datetime.strptime(last_ts_str, '%Y-%m-%d %H:%M:%S').timestamp()
-                                    if now - last_ts < SESSION_WINDOW:
-                                        append_mode = True
-                                except:
-                                    pass
+                    # git diff --stat
+                    diff_stat = subprocess.run(['git', 'diff', '--stat'], capture_output=True, text=True).stdout.strip()
 
-                        # 生成 checkpoint 内容
-                        current_time = datetime.fromtimestamp(now).strftime('%Y-%m-%d %H:%M:%S')
+                    # 生成新的 session 文件
+                    now = time.time()
+                    current_time = datetime.fromtimestamp(now).strftime('%Y-%m-%d %H:%M:%S')
+                    filename = datetime.fromtimestamp(now).strftime('%Y-%m-%d-%H%M%S')
 
-                        with open(recording_path, 'a') as f:
-                            if not append_mode:
-                                f.write(f'\n---\n## Session {current_time}\n\n')
-                            f.write('### [Auto Checkpoint]\n\n')
-                            if in_progress:
-                                for task in in_progress:
-                                    f.write(f"**Task#{task['id']}**: {task['title']} (InProgress)\n")
-                            if diff_stat:
-                                f.write(f'\n**未提交变更**:\n```\n{diff_stat}\n```\n')
-                            f.write('\n')
-                    except Exception as e:
-                        pass
+                    recording_dir = '.claude/recording'
+                    os.makedirs(recording_dir, exist_ok=True)
+                    session_file = os.path.join(recording_dir, f'session-{filename}.md')
 
-                write_checkpoint()
+                    with open(session_file, 'w') as f:
+                        f.write(f'## Session {current_time}\n\n')
+                        f.write('### [Auto Checkpoint]\n\n')
+                        if in_progress:
+                            for task in in_progress:
+                                f.write(f"**Task#{task['id']}**: {task['title']} (InProgress)\n")
+                        if diff_stat:
+                            f.write(f'\n**未提交变更**:\n```\n{diff_stat}\n```\n')
+                        f.write('\n')
+                except Exception as e:
+                    pass
+
+            write_checkpoint()
     except:
         pass
 
@@ -164,7 +158,7 @@ if count >= CRITICAL_THRESHOLD and not os.path.exists(crit_file):
         'decision': 'block',
         'reason': (
             '⚠️ CRITICAL: Context 使用量已达临界值（工具调用 ' + str(count) + ' 次）。\n\n'
-            '立即更新 recording.md，记录：\n'
+            '立即更新 recording/，记录：\n'
             '1. 当前任务状态和已完成的工作\n'
             '2. 关键决策和下一步计划\n'
             '3. 未完成的任务保持 InProgress\n\n'
@@ -181,7 +175,7 @@ if count >= WARNING_THRESHOLD and not os.path.exists(warn_file):
         'reason': (
             '⚡ WARNING: Context 使用量较高（工具调用 ' + str(count) + ' 次）。\n\n'
             '建议：\n'
-            '1. 确认 recording.md 已记录当前进度\n'
+            '1. 确认 recording/ 已记录当前进度\n'
             '2. 当前任务能否在本轮完成？不能则考虑拆分\n'
             '3. 避免大量只读探索，优先完成已开始的工作'
         )

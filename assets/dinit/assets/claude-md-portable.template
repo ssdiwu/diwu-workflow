@@ -50,7 +50,8 @@
 ├── .claude/
 │   ├── CLAUDE.md          # 本文件
 │   ├── task.json          # 任务定义（source of truth）
-│   ├── recording.md       # 进度日志
+│   ├── recording/         # Session 进度记录目录
+│   │   └── session-YYYY-MM-DD-HHMMSS.md
 │   ├── checks/
 │   │   └── smoke.sh       # 基线验证脚本
 │   └── rules/

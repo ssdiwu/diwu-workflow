@@ -4,14 +4,15 @@ d = json.load(sys.stdin)
 cwd = d.get('cwd', '.')
 parts = []
 
-# 1. recording.md: extract last session
-rp = os.path.join(cwd, '.claude', 'recording.md')
-if os.path.exists(rp):
-    rc = open(rp).read()
-    sessions = re.split(r'(?=^## Session )', rc, flags=re.MULTILINE)
-    last = [s for s in sessions if s.strip().startswith('## Session')]
-    if last:
-        text = last[-1].rstrip().rstrip('-').strip()
+# 1. recording/: extract latest session file
+recording_dir = os.path.join(cwd, '.claude', 'recording')
+if os.path.exists(recording_dir):
+    session_files = [f for f in os.listdir(recording_dir) if f.startswith('session-') and f.endswith('.md')]
+    if session_files:
+        latest = sorted(session_files)[-1]
+        rp = os.path.join(recording_dir, latest)
+        rc = open(rp).read()
+        text = rc.rstrip().rstrip('-').strip()
         if len(text) > 1500:
             text = text[:1500] + '...(truncated)'
         parts.append('# 最近 Session 记录\n' + text)

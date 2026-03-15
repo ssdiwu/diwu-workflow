@@ -137,7 +137,7 @@ Then 登录成功
 表示**阻塞关系**：前置任务未完成，当前任务无法开始。
 
 ### 修改权限
-InDraft 自由修改；InSpec 可改但需在 recording.md 记录原因；InProgress 及之后不可修改（如需修改，退回 InSpec 处理）。
+InDraft 自由修改；InSpec 可改但需在 session 文件中记录原因；InProgress 及之后不可修改（如需修改，退回 InSpec 处理）。
 
 ### 何时使用
 前置任务未完成（InSpec/InProgress/InReview）且当前任务依赖其输出时使用。前置任务已 Done 或仅是代码调用关系时不使用。
@@ -172,4 +172,4 @@ Agent 修改 blocked_by 时必须验证：
 
 当 blocked_by 中的任务变为 Done：
 - Agent 自动从 blocked_by 中移除该 ID
-- 在 recording.md 记录："Task#10 阻塞解除：Task#8 已完成"
+- 在 session 文件中记录："Task#10 阻塞解除：Task#8 已完成"

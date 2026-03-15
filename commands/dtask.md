@@ -31,8 +31,8 @@ allowed-tools: Read, Write, Edit, Glob
 
 边界例（参数既是回答也含功能描述）：
 - 上下文：AI 刚问"要不要加示例？"
-- 参数："确认。然后还要规划一个任务：没有主动更新 recording.md"
-- 结论：提取功能描述（规划 recording.md 主动更新任务），直接进入 Step 1.5
+- 参数："确认。然后还要规划一个任务：没有主动更新 recording/"
+- 结论：提取功能描述（规划 recording/ 主动更新任务），直接进入 Step 1.5
 
 ## Step 1.5：示范（先看目标产物）
 

@@ -18,7 +18,7 @@ tools:
 
 1. 读取 .claude/task.json 中目标任务的 acceptance 条件
 2. 从每个 Then 子句反推可观测事实（文件存在？函数签名正确？测试通过？输出格式匹配？）
-3. 用 Grep/Bash 独立验证每个可观测事实，不读取 recording.md 中的实施记录
+3. 用 Grep/Bash 独立验证每个可观测事实，不读取 recording/ 中的实施记录
 4. 扫描 stub pattern（见下方清单），识别假实现
 5. 产出验证报告
 

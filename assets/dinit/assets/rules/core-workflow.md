@@ -13,7 +13,7 @@
 
 ### 1. Preflight 检查
 - 运行 `.claude/checks/smoke.sh`（如存在），验证基线环境
-- 检查 recording.md 中是否有未解决的阻塞记录
+- 检查 recording/ 最新 session 文件中是否有未解决的阻塞记录
 - 运行 `git status`，确认工作区状态
 
 ### 2. 上下文恢复
@@ -31,7 +31,7 @@
   - **blocked_by 全部 Done** → 阻塞已解除，可开始
   - **blocked_by 存在 InReview 且超前未达上限（超前上限见 settings.json）** → 可超前实施（标记为超前）
     - 超前完成的任务标记为 **InReview**，立即创建 git commit
-    - recording.md 记录："Task#N (blocked_by Task#M, 超前 X/5, commit: abc123)"
+    - 写入新 session 文件记录："Task#N (blocked_by Task#M, 超前 X/5, commit: abc123)"
     - 完成第 5 个超前任务后输出 PENDING REVIEW，等待阻塞任务验收
   - **其他情况** → 跳过，选择下一个任务
 - **禁止选择** `status: "InDraft"` 的任务（需人工先确认）
@@ -45,7 +45,7 @@
 
 ### 超前实施验收失败：回退方式
 
-**验收通过**：阻塞任务 → Done，超前任务逐个 InReview → Done，recording.md 记录解除。
+**验收通过**：阻塞任务 → Done，超前任务逐个 InReview → Done，写入新 session 文件记录解除。
 **验收失败**：人工决定回退方式，Agent 执行并重新验证超前任务：
 - `revert`：超前任务已 push 到远端，需要撤销公开提交
 - `reset --soft`：超前任务只在本地，保留代码改动但撤销 commit，便于修改后重新提交
@@ -160,15 +160,15 @@ InSpec → InProgress → InReview → Done 完整流程：
 
 | 偏差等级 | 权限 | 例子 | 记录要求 |
 |---------|------|------|---------|
-| Level 1: Bug 修复 | 自动修复 | 类型错误、import 缺失、语法错误 | recording.md 记录 |
-| Level 2: 关键缺失 | 自动补充 | 缺少错误处理、缺少输入验证 | recording.md 记录 |
-| Level 3: 阻塞问题 | 自动修复 | 依赖缺失、配置格式错误 | recording.md 记录 |
+| Level 1: Bug 修复 | 自动修复 | 类型错误、import 缺失、语法错误 | 写入 session 文件记录 |
+| Level 2: 关键缺失 | 自动补充 | 缺少错误处理、缺少输入验证 | 写入 session 文件记录 |
+| Level 3: 阻塞问题 | 自动修复 | 依赖缺失、配置格式错误 | 写入 session 文件记录 |
 | Level 4: 架构变更 | 必须问用户 | 新建数据库表、切换框架、破坏性 API 变更 | DECISION TRACE |
 
 单个任务累计 Level 1-3 自动修复不超过 5 次，超过则停下评估 acceptance/steps 定义是否有缺陷。
 
 ### 判断锚点：执行偏差分级
-- 正例（Level 2 自动补充）：实现用户注册时发现缺少 email 格式校验，acceptance 没写但显然需要。结论：Level 2 自动补充，recording.md 记录。
+- 正例（Level 2 自动补充）：实现用户注册时发现缺少 email 格式校验，acceptance 没写但显然需要。结论：Level 2 自动补充，写入 session 文件记录。
 - 反例（Level 4 必须问用户）：发现 PostgreSQL 比 MySQL 更适合当前场景，想换数据库。结论：Level 4 架构变更，停下问用户并输出 DECISION TRACE。
 - 边界例：需要新增一个工具函数且不改变 API。结论：如果 < 20 行，按 Level 2 处理；如果引入新的公共接口，按 Level 4 处理。
 
@@ -182,7 +182,7 @@ InSpec → InProgress → InReview → Done 完整流程：
 - 常规：`[Task#N] 任务标题 - completed`
 - 超前：`[Task#N] 任务标题 - completed (超前实施 X/5, blocked_by Task#M)`
 
-**提交内容**：代码变更 + `.claude/task.json` + `.claude/recording.md`，同一个 commit。
+**提交内容**：代码变更 + `.claude/task.json` + 新 session 文件，同一个 commit。
 
 **force push**：执行前必须先 `git fetch origin` 并确认远端无未合并变更，有差异须先与用户确认。
 
@@ -224,7 +224,7 @@ InSpec → InProgress → InReview → Done 完整流程：
 **启动仪式**（所有子代理，强约束）：
 
 以下步骤由 SubagentStart Hook 自动注入到子代理的 additionalSystemPrompt 中，无需手动执行：
-1. `.claude/recording.md` 最近一条 session 摘要
+1. recording/ 最新 session 文件摘要
 2. task.json 中 InProgress 任务的 title、acceptance、steps
 3. `.claude/decisions.md` 最近 3 条设计决策（如存在）
 
@@ -234,7 +234,7 @@ InSpec → InProgress → InReview → Done 完整流程：
 
 ## 验证要求
 
-**核心原则**：**未验证 = 未完成**。所有 acceptance 条件逐条验证通过后才能标记 InReview，验证方法和结果记录在 recording.md。
+**核心原则**：**未验证 = 未完成**。所有 acceptance 条件逐条验证通过后才能标记 InReview，验证方法和结果记录在 session 文件中。
 
 ### 1. 自动化验证（推荐）
 脚本位置：`.claude/checks/task_<id>_verify.sh`，返回 0 成功 / 非0 失败。模板见 templates.md。
@@ -246,7 +246,7 @@ InSpec → InProgress → InReview → Done 完整流程：
 Agent 完成实现和验证后输出 REVIEW 请求，等待人工确认。
 
 ### 4. 独立验证（InReview 阶段可选）
-大幅度修改或涉及多模块的任务，建议在标记 InReview 后启动 verifier agent 独立验证。verifier 不读 recording.md 中的实施记录，只从 acceptance 的 Then 子句反推可观测事实并独立验证。适用场景：
+大幅度修改或涉及多模块的任务，建议在标记 InReview 后启动 verifier agent 独立验证。verifier 不读 session 文件中的实施记录，只从 acceptance 的 Then 子句反推可观测事实并独立验证。适用场景：
 - 单任务改动超过 500 行
 - 涉及 3 个以上模块的变更
 - 包含外部依赖集成的任务
@@ -295,7 +295,7 @@ Agent 完成实现和验证后输出 REVIEW 请求，等待人工确认。
 
 ### 判断锚点：何时写 decisions.md
 - 正例：从多个方案中选定设计方向（如"引入 README 索引层"代替全量 glob 扫描），**且影响范围 ≥2 个命令/模块**。结论：写 decisions.md。
-- 反例：记录本次 session 做了什么、下一步计划。结论：写 recording.md，不写 decisions.md。
+- 反例：记录本次 session 做了什么、下一步计划。结论：写入新 session 文件，不写 decisions.md。
 - 边界例：重构某命令的定位（如"/ddemo 从分析报告改为落地文档生成器"）。结论：写 decisions.md（定位变更是设计决策）。
 
 ### Context Window 管理

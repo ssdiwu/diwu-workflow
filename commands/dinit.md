@@ -1,5 +1,5 @@
 ---
-description: 初始化项目的 Claude Code Agent 工作流结构，创建 CLAUDE.md、task.json、recording.md、init.sh、smoke.sh
+description: 初始化项目的 Claude Code Agent 工作流结构，创建 CLAUDE.md、task.json、recording/ 目录、init.sh、smoke.sh
 argument-hint: [项目描述（可选）]
 allowed-tools: Read, Write, Edit, Bash, Glob
 ---
@@ -42,6 +42,14 @@ allowed-tools: Read, Write, Edit, Bash, Glob
 
 3. **更新「项目结构」章节**：
    - 用 Step 1.5 的扫描结果替换 `<!-- SCAN_RESULT_PLACEHOLDER -->` 占位符或更新现有内容
+
+4. **迁移 recording.md 到 recording/ 目录**：
+   - 检查 `.claude/recording.md` 是否存在
+   - 如果存在，执行迁移：
+     - 读取 recording.md 内容，按 `## Session YYYY-MM-DD HH:MM:SS` 分隔符识别所有 session
+     - 创建 `.claude/recording/` 目录
+     - 将每个 session 写入独立文件 `recording/session-YYYY-MM-DD-HHMMSS.md`（时间戳从 session 标题提取并转换为文件名格式）
+     - 迁移完成后将原 recording.md 重命名为 `recording.md.backup`
 
 ## Step 1：收集项目信息
 
@@ -95,13 +103,8 @@ allowed-tools: Read, Write, Edit, Bash, Glob
 ### init.sh（项目根目录）
 读取 `${CLAUDE_PLUGIN_ROOT}/assets/dinit/assets/init.sh.template`，根据技术栈定制安装命令和 dev server 命令，执行 `chmod +x init.sh`。
 
-### .claude/recording.md
-写入初始内容：
-```markdown
-# Session 记录
-
-(Sessions will be recorded here)
-```
+### .claude/recording/
+创建 `.claude/recording/` 目录（用于存储 session 记录文件）。
 
 ### .claude/lessons.md
 读取 `${CLAUDE_PLUGIN_ROOT}/assets/dinit/assets/lessons.md.template` 写入。
@@ -144,7 +147,7 @@ git commit -m "Initial project setup with Claude Code workflow"
 - [ ] 项目根目录有 `AGENTS.md`
 - [ ] `.claude/task.json` 是有效 JSON
 - [ ] `init.sh` 可执行
-- [ ] `.claude/recording.md` 存在
+- [ ] `.claude/recording/` 目录存在
 - [ ] `.claude/lessons.md` 存在
 - [ ] `.claude/settings.json` 存在且 JSON 合法
 - [ ] `.claude/checks/smoke.sh` 可执行

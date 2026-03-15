@@ -74,7 +74,7 @@ DECISION TRACE
 - [立即执行的动作；例如"输出 BLOCKED 模板并等待人工配置"]
 ```
 
-## recording.md Session 格式
+## Session 文件格式
 
 ```markdown
 ---
@@ -108,8 +108,8 @@ DECISION TRACE
 | recording_session_window | 600 | Session 记录时间窗口（秒），控制 check_rec() 判断追加/新建和 git log 查询范围（值存储在 settings.json） |
 | recording_retention_days | 30 | recording/ 目录文件保留天数，超过则可手动清理（值存储在 settings.json） |
 | context_monitor_warning | 30 | Context Rot 监控 WARNING 阈值，工具调用次数达到此值时输出提醒（值存储在 settings.json） |
-| context_monitor_critical | 50 | Context Rot 监控 CRITICAL 阈值，达到此值时触发阻塞提醒要求更新 recording.md（值存储在 settings.json） |
-| context_monitor_delay | 10 | Context Rot 监控延迟阈值，CRITICAL+DELAY 时检查 recording.md 是否更新，未更新则自动写入 checkpoint（值存储在 settings.json） |
+| context_monitor_critical | 50 | Context Rot 监控 CRITICAL 阈值，达到此值时触发阻塞提醒要求更新 recording/（值存储在 settings.json） |
+| context_monitor_delay | 10 | Context Rot 监控延迟阈值，CRITICAL+DELAY 时检查 recording/ 是否更新，未更新则自动写入 checkpoint（值存储在 settings.json） |
 
 ## 验证脚本模板
 

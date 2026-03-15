@@ -4,7 +4,7 @@
 
 ## `<private>` 标签约定
 
-用户用 `<private>...</private>` 包裹的内容（密码、密钥、个人敏感信息）不得写入 recording.md 和 task.json。该内容仅在当前对话上下文中使用，不得持久化。
+用户用 `<private>...</private>` 包裹的内容（密码、密钥、个人敏感信息）不得写入 session 文件和 task.json。该内容仅在当前对话上下文中使用，不得持久化。
 
 ## 需要停止并请求人工帮助的情况
 
@@ -25,7 +25,7 @@
 - 假装任务已完成
 
 **必须**:
-- 在 `.claude/recording.md` 中记录当前进度和阻塞原因
+- 在 session 文件中记录当前进度和阻塞原因
 - 将 `.claude/task.json` 任务状态退回 **InSpec**(不是 InDraft)
 - 输出 DECISION TRACE 后输出 BLOCKED 模板（见 templates.md），说明需要人工做什么
 - 停止任务,等待人工介入
