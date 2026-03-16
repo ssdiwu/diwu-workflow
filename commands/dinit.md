@@ -148,6 +148,7 @@ git commit -m "Initial project setup with Claude Code workflow"
 - [ ] `.claude/task.json` 是有效 JSON
 - [ ] `init.sh` 可执行
 - [ ] `.claude/recording/` 目录存在
+- [ ] `.claude/recording.md` 不存在（已迁移为 recording/ 目录）或已重命名为 `recording.md.backup`
 - [ ] `.claude/lessons.md` 存在
 - [ ] `.claude/settings.json` 存在且 JSON 合法
 - [ ] `.claude/checks/smoke.sh` 可执行
