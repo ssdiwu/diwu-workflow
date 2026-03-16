@@ -51,6 +51,10 @@ allowed-tools: Read, Write, Edit, Bash, Glob
      - 将每个 session 写入独立文件 `recording/session-YYYY-MM-DD-HHMMSS.md`（时间戳从 session 标题提取并转换为文件名格式）
      - 迁移完成后将原 recording.md 重命名为 `recording.md.backup`
 
+5. **同步规则文件**：
+   - 将 `${CLAUDE_PLUGIN_ROOT}/assets/dinit/assets/rules/` 下的五个文件复制到 `.claude/rules/`，覆盖旧版本
+   - 确保项目使用最新的规则文件
+
 ## Step 1：收集项目信息
 
 询问用户（上下文已有的跳过）：
