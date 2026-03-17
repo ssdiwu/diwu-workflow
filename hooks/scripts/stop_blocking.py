@@ -24,7 +24,7 @@ def mk(prefix, t):
         + '\n'.join('  - ' + a for a in t.get('acceptance', [])) + '\n\n'
         + '实施步骤：\n'
         + '\n'.join('  ' + str(i + 1) + '. ' + s for i, s in enumerate(t.get('steps', []))) + '\n\n'
-        + '按 core-workflow.md 流程执行。'
+        + '按 workflow.md 流程执行。'
     )
 
 

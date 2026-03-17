@@ -21,8 +21,10 @@ allowed-tools: Read, Write, Edit, Bash, Glob
    ## 工作流规则
 
    详细规则见 @rules/ 目录：
-   - @rules/core-states.md - 任务状态机与 acceptance 格式
-   - @rules/core-workflow.md - Session 启动、任务规划、实施、验证
+   - @rules/README.md - 规则速查索引
+   - @rules/judgments.md - 判断锚点集中管理
+   - @rules/states.md - 任务状态机与 acceptance 格式
+   - @rules/workflow.md - Session 启动、任务规划、实施、验证
    - @rules/exceptions.md - 异常处理与 BLOCKED 判定
    - @rules/templates.md - DECISION TRACE、BLOCKED、REVIEW 格式模板
    - @rules/file-layout.md - .claude/ 目录结构与归档规则

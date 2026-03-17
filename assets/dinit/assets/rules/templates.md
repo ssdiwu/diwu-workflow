@@ -62,7 +62,7 @@ DECISION TRACE
 结论: [BLOCKED | CONTINUE | REVIEW | SKIP]
 
 规则命中:
-- [命中的规则条目，例如 core-workflow.md §任务选择策略]
+- [命中的规则条目，例如 workflow.md §任务选择策略]
 
 证据:
 - [task.json 状态、blocked_by 明细、测试日志、git diff --stat、配置检查结果]

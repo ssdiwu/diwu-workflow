@@ -413,7 +413,7 @@ diwu-workflow/
 │       │   ├── *.template   # CLAUDE.md / task.json / settings.json 等模板
 │       │   ├── agents/      # 项目级 agents 模板（explorer / implementer）
 │       │   ├── env.example   # 环境变量示例文件
-│       │   └── rules/       # core-states / core-workflow 等规则文件（完整版）
+│       │   └── rules/       # 8 个规则文件（README / judgments / states / workflow / exceptions / templates / file-layout / constraints）
 │       ├── references/      # 参考资料
 │       └── sync-rules.sh    # 同步规则文件到 assets/dinit/assets/rules/
 ├── hooks/

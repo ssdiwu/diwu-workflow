@@ -5,11 +5,14 @@
 
 | 规则文件 | 职责 |
 |---------|------|
-| `core-states.md` | task.json 结构与字段定义、状态机与转移规则、blocked_by 规范 |
-| `core-workflow.md` | Session 流程、任务规划、实施、验证要求 |
+| `README.md` | 规则速查索引 |
+| `judgments.md` | 判断锚点集中管理 |
+| `states.md` | task.json 结构与字段定义、状态机与转移规则、blocked_by 规范 |
+| `workflow.md` | Session 流程、任务规划、实施、验证要求 |
 | `exceptions.md` | 阻塞、Change Request、超前实施、回退处理 |
 | `templates.md` | 所有格式模板、Git 规范、可调参数 |
 | `file-layout.md` | 所有文件路径定义、目录结构、归档触发条件 |
+| `constraints.md` | 架构约束（五维约束设计） |
 
 ## 项目上下文
 
