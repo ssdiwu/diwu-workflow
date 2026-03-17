@@ -52,7 +52,16 @@ allowed-tools: Read, Write, Edit, Bash, Glob
      - 迁移完成后将原 recording.md 重命名为 `recording.md.backup`
 
 5. **同步规则文件**：
-   - 将 `${CLAUDE_PLUGIN_ROOT}/assets/dinit/assets/rules/` 下的五个文件复制到 `.claude/rules/`，覆盖旧版本
+   - 清理旧文件：删除 `.claude/rules/core-states.md` 和 `.claude/rules/core-workflow.md`（如存在）
+   - 将 `${CLAUDE_PLUGIN_ROOT}/assets/dinit/assets/rules/` 下的 8 个文件复制到 `.claude/rules/`，覆盖旧版本：
+     - README.md
+     - judgments.md
+     - states.md
+     - workflow.md
+     - exceptions.md
+     - templates.md
+     - file-layout.md
+     - constraints.md
    - 确保项目使用最新的规则文件
 
 ## Step 1：收集项目信息
@@ -88,7 +97,7 @@ allowed-tools: Read, Write, Edit, Bash, Glob
 
 ## Step 2：复制规则文件
 
-将 `${CLAUDE_PLUGIN_ROOT}/assets/dinit/assets/rules/` 下的五个文件逐一复制到 `.claude/rules/`：`core-states.md`、`core-workflow.md`、`exceptions.md`、`templates.md`、`file-layout.md`。
+将 `${CLAUDE_PLUGIN_ROOT}/assets/dinit/assets/rules/` 下的 8 个文件逐一复制到 `.claude/rules/`：`README.md`、`judgments.md`、`states.md`、`workflow.md`、`exceptions.md`、`templates.md`、`file-layout.md`、`constraints.md`。
 
 > 规则来源唯一：插件 `assets/dinit/assets/rules/`。
 
@@ -147,7 +156,8 @@ git commit -m "Initial project setup with Claude Code workflow"
 确认以下文件均已创建：
 - [ ] `.claude/CLAUDE.md` 已填充项目信息
 - [ ] `.claude/CLAUDE.md` 的「项目结构」章节包含扫描结果（非默认占位符）
-- [ ] `.claude/rules/` 下有五个 rules 文件
+- [ ] `.claude/rules/` 下有 8 个 rules 文件（README.md, judgments.md, states.md, workflow.md, exceptions.md, templates.md, file-layout.md, constraints.md）
+- [ ] `.claude/rules/` 下不存在 core-states.md 和 core-workflow.md（已清理）
 - [ ] 项目根目录有 `AGENTS.md`
 - [ ] `.claude/task.json` 是有效 JSON
 - [ ] `init.sh` 可执行
@@ -158,4 +168,3 @@ git commit -m "Initial project setup with Claude Code workflow"
 - [ ] `.claude/checks/smoke.sh` 可执行
 - [ ] `.claude/agents/explorer.md` 和 `implementer.md` 存在
 - [ ] （可选）`.claude/decisions.md`
-- [ ] （可选）`.claude/rules/constraints.md`
