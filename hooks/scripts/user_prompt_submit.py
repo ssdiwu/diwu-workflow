@@ -23,7 +23,7 @@ cc = open(cp).read().strip() if os.path.exists(cp) else ''
 if cc:
     content += '\n\n# 架构约束\n\n' + cc
 
-rfs = ['core-states.md', 'core-workflow.md', 'exceptions.md', 'templates.md', 'file-layout.md']
+rfs = ['README.md', 'judgments.md', 'states.md', 'workflow.md', 'exceptions.md', 'templates.md', 'file-layout.md']
 rd = os.path.join(cwd, '.claude', 'rules')
 missing = not all(os.path.exists(os.path.join(rd, f)) for f in rfs)
 if missing:
