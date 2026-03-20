@@ -13,7 +13,8 @@
 │   └── session-YYYY-MM-DD-HHMMSS.md  # 单个 session 记录文件
 ├── decisions.md                   # 设计决策记录（可选，有重大决策时创建）
 ├── archive/                       # 归档目录
-│   └── task_archive_YYYY-MM.json  # 归档任务（按月）
+│   ├── task_archive_YYYY-MM.json     # 归档任务（按月）
+│   └── recording_archive_YYYY-MM.tar.gz  # 归档 session 文件（按月）
 ├── checks/                        # 验证脚本目录
 │   ├── smoke.sh
 │   └── task_<id>_verify.sh
@@ -48,6 +49,7 @@
 ## 归档触发条件
 
 - **archive/task_archive_YYYY-MM.json**：`task.json` 中 Done/Cancelled 任务超过归档阈值时触发（阈值见 settings.json `task_archive_threshold`，默认 20）
+- **archive/recording_archive_YYYY-MM.tar.gz**：`recording/` 目录中 session 文件数量超过归档阈值时触发（阈值见 settings.json `recording_archive_threshold`，默认 50），归档时保留最近 N 天的文件（N 见 settings.json `recording_retention_days`，默认 30）
 
 ## 归档执行步骤
 
@@ -55,6 +57,12 @@
 1. 将 Done/Cancelled 任务移到 archive/task_archive_YYYY-MM.json（当前月份）
 2. 保留 id 序列（新任务继续递增）
 3. 在 recording/ 目录中记录归档操作
+
+**recording/ 归档**：
+1. 查找 `recording/` 中修改时间超过保留期的 session 文件（`find .claude/recording/ -name "session-*.md" -mtime +N`，N 为保留天数）
+2. 按月分组，打包为 `archive/recording_archive_YYYY-MM.tar.gz`
+3. 删除已归档的原始文件
+4. 在当前 session 文件中记录归档操作（归档文件数量、时间范围）
 
 ## 查找历史
 

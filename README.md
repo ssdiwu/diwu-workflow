@@ -255,6 +255,13 @@ flowchart TD
 | `recording/` | 发生了什么（session 流水、任务进度、下一步），每个 session 一个独立文件 | 每次 session 结束时 |
 | `decisions.md` | 为什么这样设计（方案选择、边界定义、设计方向） | 有重大设计决策时 |
 
+**归档机制**：
+
+- **task.json 归档**：Done/Cancelled 任务超过 20 个时，自动归档到 `archive/task_archive_YYYY-MM.json`
+- **recording/ 归档**：session 文件超过 50 个时，保留最近 30 天的文件，其余打包到 `archive/recording_archive_YYYY-MM.tar.gz`
+
+归档阈值可在 `.claude/settings.json` 中配置（`task_archive_threshold` / `recording_archive_threshold` / `recording_retention_days`）。
+
 **通用货币：README 索引**
 
 命令之间通过 README 索引传递信息，不直接扫描对方的输出文件：
