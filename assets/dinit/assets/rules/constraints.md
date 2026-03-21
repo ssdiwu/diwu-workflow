@@ -7,7 +7,7 @@
 | Dimension    | Constraint                                                                                       | Verification                                                     |
 |--------------|--------------------------------------------------------------------------------------------------|------------------------------------------------------------------|
 | Business     | 插件命令（commands/*.md）只描述行为，不包含实现逻辑；实现逻辑在 skills/ 或 assets/ 中            | commands/ 文件内无可执行代码，仅有 Markdown 指令                  |
-| Temporal     | plugin.json 的 version 字段必须在功能变更提交时同步更新，不得事后单独提交                        | 每个功能 commit 的 diff 包含 plugin.json version 变更             |
+| Temporal     | plugin.json 的 version 字段必须在功能变更提交时同步更新，不得事后单独提交；版本号遵循语义化版本规范（X.Y.Z）：X=主版本（破坏性变更），Y=次版本（新增功能），Z=修订号（bug修复） | 每个功能 commit 的 diff 包含 plugin.json version 变更；版本号格式符合 semver |
 | Cross-platform | hooks.json 中的路径引用必须兼容 macOS/Linux；禁止使用 Windows 路径分隔符                       | 路径中无 `\` 分隔符                                              |
 | Concurrency  | 插件文件为静态资源，无并发写入场景；多 session 同时使用同一插件时以磁盘文件版本为准              | 无运行时状态，无需并发控制                                        |
 | Perception   | smoke.sh 验证 JSON 合法性；所有 JSON 文件必须通过 `python3 -m json.tool` 校验                  | smoke.sh 全部 check 通过，exit 0                                  |
