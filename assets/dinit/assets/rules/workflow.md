@@ -68,6 +68,15 @@
 
 ### 分解流程
 
+**示例锚点驱动**：执行特定操作前必须先读取对应的示例文件作为锚点。
+
+| 操作 | 必读示例文件 | 用途 |
+|------|-------------|------|
+| 生成 PRD | .claude/examples/prd.md | 对齐 PRD 格式和必须覆盖的要素 |
+| 写 acceptance | .claude/examples/acceptance.md | 对齐 GWT 格式和可断言性标准 |
+| 拆解任务 | .claude/examples/task_breakdown.md | 对齐任务粒度和 blocked_by 使用 |
+| 写 session 记录 | .claude/examples/session_record.md | 对齐 session 记录格式和内容结构 |
+
 **需求精炼（任务描述模糊时触发）** `[建议]`：每次只问一个问题，理解目的、约束、成功标准；提出 2-3 个方案并给出推荐，获得确认后再写 task.json。
 
 **草案阶段（InDraft）**：提炼可执行功能点 → 拆分为一句话可描述的任务 → 定义验收条件 → 识别依赖关系排序 → 展示分解结果 → 写入 `.claude/task.json`，状态为 `InDraft`。
