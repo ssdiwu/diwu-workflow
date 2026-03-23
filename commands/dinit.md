@@ -55,15 +55,7 @@ allowed-tools: Read, Write, Edit, Bash, Glob
 
 5. **同步规则文件**：
    - 清理旧文件：删除 `.claude/rules/core-states.md` 和 `.claude/rules/core-workflow.md`（如存在）
-   - 将 `${CLAUDE_PLUGIN_ROOT}/assets/dinit/assets/rules/` 下的 8 个文件复制到 `.claude/rules/`，覆盖旧版本：
-     - README.md
-     - judgments.md
-     - states.md
-     - workflow.md
-     - exceptions.md
-     - templates.md
-     - file-layout.md
-     - constraints.md
+   - 读取 `${CLAUDE_PLUGIN_ROOT}/assets/dinit/assets/rules-manifest.json`，按 `rules` 列表复制文件到 `.claude/rules/`，覆盖旧版本
    - 确保项目使用最新的规则文件
 
 ## Step 1：收集项目信息
@@ -99,9 +91,7 @@ allowed-tools: Read, Write, Edit, Bash, Glob
 
 ## Step 2：复制规则文件
 
-将 `${CLAUDE_PLUGIN_ROOT}/assets/dinit/assets/rules/` 下的 8 个文件逐一复制到 `.claude/rules/`：`README.md`、`judgments.md`、`states.md`、`workflow.md`、`exceptions.md`、`templates.md`、`file-layout.md`、`constraints.md`。
-
-> 规则来源唯一：插件 `assets/dinit/assets/rules/`。
+读取 `${CLAUDE_PLUGIN_ROOT}/assets/dinit/assets/rules-manifest.json`，按 `rules` 列表将规则文件复制到 `.claude/rules/`（覆盖旧版本）。
 
 ## Step 3：创建项目文件
 

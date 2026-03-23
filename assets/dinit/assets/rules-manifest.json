@@ -1,0 +1,14 @@
+{
+  "description": "规则文件清单，dinit 按此列表复制到项目 .claude/rules/ 目录",
+  "version": 1,
+  "rules": [
+    "README.md",
+    "judgments.md",
+    "states.md",
+    "workflow.md",
+    "exceptions.md",
+    "templates.md",
+    "file-layout.md",
+    "constraints.md"
+  ]
+}
