@@ -433,17 +433,16 @@ diwu-workflow/
 │   │   └── SKILL.md         # PRD 方法论（竞品分析、用户画像、非功能性需求）
 │   └── diwu-demo/
 │       └── SKILL.md         # 积木式能力验证方法论（不确定性判断、三层积木模型）
-├── assets/
-│   ├── rules/
-│   │   └── rules-index.md   # UserPromptSubmit hook 注入的规则摘要
-│   └── dinit/               # /dinit 依赖的模板与规则
-│       ├── assets/
-│       │   ├── *.template   # CLAUDE.md / task.json / settings.json 等模板
-│       │   ├── agents/      # 项目级 agents 模板（explorer / implementer）
-│       │   ├── env.example   # 环境变量示例文件
-│       │   └── rules/       # 8 个规则文件（README / judgments / states / workflow / exceptions / templates / file-layout / constraints）
-│       ├── references/      # 参考资料
-│       └── sync-rules.sh    # 同步规则文件到 assets/dinit/assets/rules/
+└── assets/
+    └── dinit/               # /dinit 依赖的模板与规则
+        ├── assets/
+        │   ├── *.template   # CLAUDE.md / task.json / settings.json 等模板
+        │   ├── agents/      # 项目级 agents 模板（explorer / implementer）
+        │   ├── env.example   # 环境变量示例文件
+        │   ├── rules/       # 规则源文件（由 rules-manifest.json 管理）
+        │   └── rules-manifest.json  # 规则文件清单
+        ├── references/      # 参考资料
+        └── sync-rules.sh    # 同步规则文件到 assets/dinit/assets/rules/
 ├── hooks/
 │   ├── hooks.json           # hook 配置（引用 scripts/ 下的外部脚本）
 │   └── scripts/             # hook 脚本（9 个独立 .py 文件）
