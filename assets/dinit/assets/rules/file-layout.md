@@ -14,7 +14,8 @@
 ├── decisions.md                   # 设计决策记录（可选，有重大决策时创建）
 ├── archive/                       # 归档目录
 │   ├── task_archive_YYYY-MM.json     # 归档任务（按月）
-│   └── recording_archive_YYYY-MM.tar.gz  # 归档 session 文件（按月）
+│   ├── recording_YYYY-MM-DD.md       # 按日归并的 session 归档
+│   └── .last_archive_summary.json   # 最近归档摘要（归档阈值、保留起始点）
 ├── checks/                        # 验证脚本目录
 │   ├── smoke.sh
 │   └── task_<id>_verify.sh
@@ -42,14 +43,16 @@
 | `.claude/recording/` | Session 进度记录目录，每个 session 一个独立文件 | Agent 写 |
 | `.claude/decisions.md` | 重大设计决策记录（影响范围 ≥2 模块，或引入新约束），供 Agent 快速检索历史决策理由 | Agent 写 |
 | `.claude/archive/task_archive_YYYY-MM.json` | 按月归档的 Done/Cancelled 任务，保留 id 序列 | Agent 写 |
+| `.claude/archive/recording_YYYY-MM-DD.md` | 按日归并的 session 归档，便于查找 | Agent 写 |
+| `.claude/archive/.last_archive_summary.json` | 最近归档摘要（recording 保留阈值、活跃起止时间点） | Agent 写 |
 | `.claude/checks/smoke.sh` | 基线环境验证，session 启动时运行 | Agent 提供方案，人工确认后实施 |
 | `.claude/checks/task_<id>_verify.sh` | 任务专属验证脚本，id 对应 task.json | Agent 创建并执行 |
 | `.claude/init.sh` | 开发环境初始化，session 启动时按需运行 | 讨论后由 Agent 实施 |
 
 ## 归档触发条件
 
-- **archive/task_archive_YYYY-MM.json**：`task.json` 中 Done/Cancelled 任务超过归档阈值时触发（阈值见 settings.json `task_archive_threshold`，默认 20）
-- **archive/recording_archive_YYYY-MM.tar.gz**：`recording/` 目录中 session 文件数量超过归档阈值时触发（阈值见 settings.json `recording_archive_threshold`，默认 50），归档时保留最近 N 天的文件（N 见 settings.json `recording_retention_days`，默认 30）
+- **archive/task_archive_YYYY-MM.json**：`task.json` 中 Done/Cancelled 任务超过归档阈值时触发（阈值见 settings.json `task_archive_threshold`）
+- **archive/recording_YYYY-MM-DD.md**：`recording/` 目录中 session 文件数量超过归档阈值时触发（阈值见 settings.json `recording_archive_threshold`），保留最近 N 条活跃 session（N = 归档阈值）
 
 ## 归档执行步骤
 
@@ -59,23 +62,21 @@
 3. 在 recording/ 目录中记录归档操作
 
 **recording/ 归档**：
-1. 查找 `recording/` 中修改时间超过保留期的 session 文件（`find .claude/recording/ -name "session-*.md" -mtime +N`，N 为保留天数）
-2. 按月分组，打包为 `archive/recording_archive_YYYY-MM.tar.gz`
-3. 删除已归档的原始文件
-4. 在当前 session 文件中记录归档操作（归档文件数量、时间范围）
+1. 统计 `recording/` 中 session 文件数量，超过阈值时触发
+2. 将 oldest session 按日期归并到 `archive/recording_YYYY-MM-DD.md`（同日期的多个 session 归并到同一文件）
+3. 从 `recording/` 删除已归档的 session 文件
+4. 更新 `archive/.last_archive_summary.json`（keep_recordings_from = 保留起始时间戳）
+5. 在当前 session 文件中记录归档操作（归档文件列表、时间范围）
 
 ## 查找历史
 
 - 最近任务：查 task.json
 - 历史任务：查 archive/task_archive_YYYY-MM.json（按月，grep 搜索）
 - 最近进度：`ls -t recording/ | head -5` 查看最新 5 个 session 文件
-- 搜索历史：`grep -r "关键词" recording/` 在所有 session 中搜索
+- 搜索活跃历史：`grep -r "关键词" recording/` 在活跃 session 中搜索
+- 搜索归档历史：`grep -r "关键词" archive/recording_*.md` 在归档 session 中搜索
 - 历史决策：查 decisions.md（设计方向、方案选择、边界定义）
 
 ## Session 文件管理
 
-recording/ 目录中的 session 文件按时间戳命名（session-YYYY-MM-DD-HHMMSS.md），建议定期清理超过保留期的文件（保留天数见 settings.json `recording_retention_days`，默认 30 天）。清理命令示例：
-
-```bash
-find .claude/recording/ -name "session-*.md" -mtime +30 -delete
-```
+recording/ 目录中的 session 文件按时间戳命名（session-YYYY-MM-DD-HHMMSS.md），数量超过 settings.json `recording_archive_threshold` 时触发归档，归档后 `recording/` 保留最近 N 条活跃 session。
