@@ -2,6 +2,7 @@
 description: 将功能描述转化为 task.json 任务列表，支持澄清问题、质量检查、三视角审查
 argument-hint: [功能描述（可选）]
 allowed-tools: Read, Write, Edit, Glob
+effort: high
 ---
 
 # /dtask — 任务规划

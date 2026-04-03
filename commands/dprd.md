@@ -2,6 +2,7 @@
 description: 生成产品需求文档（PRD），支持产品级和完整版两种模式
 argument-hint: [full（可选，输出完整技术方案）]
 allowed-tools: Read, Write, Edit, Glob, Bash
+effort: high
 ---
 
 # /dprd — 产品需求文档

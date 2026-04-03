@@ -20,6 +20,16 @@
         ]
       }
     ],
+    "TaskCreated": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 hooks/scripts/task_created_validate.py 2>/dev/null||true"
+          }
+        ]
+      }
+    ],
     "PreToolUse": [
       {
         "matcher": "Bash",
@@ -64,6 +74,7 @@
     "PostToolUse": [
       {
         "matcher": "Write",
+        "if": "Write(*.json)",
         "hooks": [
           {
             "type": "command",
@@ -73,6 +84,7 @@
       },
       {
         "matcher": "Edit",
+        "if": "Edit(*.json)",
         "hooks": [
           {
             "type": "command",

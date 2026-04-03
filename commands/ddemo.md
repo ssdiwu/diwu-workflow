@@ -2,6 +2,7 @@
 description: 将不确定性隔离为可复用的能力验证单元，输出 Demo 规格与目录结构
 argument-hint: [Demo 名称或描述]
 allowed-tools: Read, Write, Glob, Bash
+effort: high
 ---
 
 # /ddemo — Demo 能力规格

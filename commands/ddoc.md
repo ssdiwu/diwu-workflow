@@ -2,6 +2,7 @@
 description: 产品文档工具，支持正向（需求→文档）和逆向（代码→文档）两种模式
 argument-hint: [模式: forward|reverse（可选）]
 allowed-tools: Read, Write, Edit, Glob, Bash
+effort: high
 ---
 
 # /ddoc — 产品文档

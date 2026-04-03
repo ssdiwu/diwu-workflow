@@ -2,6 +2,7 @@
 description: 记录架构决策（ADR），输出到 .doc/adr/ 目录
 argument-hint: [决策描述（可选）]
 allowed-tools: Read, Write, Glob, Bash
+effort: medium
 ---
 
 # /dadr — 架构决策记录

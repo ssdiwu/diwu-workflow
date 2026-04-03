@@ -2,6 +2,7 @@
 description: 初始化项目的 Claude Code Agent 工作流结构，创建 CLAUDE.md、task.json、recording/ 目录、init.sh、smoke.sh
 argument-hint: [项目描述（可选）]
 allowed-tools: Read, Write, Edit, Bash, Glob
+effort: medium
 ---
 
 # /dinit — 项目初始化
