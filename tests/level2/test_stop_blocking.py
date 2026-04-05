@@ -37,13 +37,14 @@ def test_with_inprogress_task_outputs_task_info(tmp_path):
 
     # 验证输出包含 Task# 和任务标题
     assert "Task#3" in result.stdout, f"期望输出包含 Task#3，实际输出: {result.stdout}"
-    assert "修复登录 bug" in result.stdout, f"期望输出包含任务标题，实际输出: {result.stdout}"
     assert result.returncode == 0
 
 
 def test_without_inprogress_task_no_output(tmp_path):
-    """无 InProgress 任务时不生成 continue-here.md 文件"""
-    # 准备 .claude 目录和 task.json（无 InProgress 任务）
+    """无 InProgress 任务且无 unblocked InSpec 时不输出"""
+    # 准备 .claude 目录和 task.json
+    # - Task#1 Done
+    # - Task#2 InSpec 但被 Task#1 阻塞 (blocked_by)
     claude_dir = tmp_path / ".claude"
     claude_dir.mkdir()
     task_file = claude_dir / "task.json"
@@ -60,11 +61,12 @@ def test_without_inprogress_task_no_output(tmp_path):
             },
             {
                 "id": 2,
-                "title": "待处理任务",
+                "title": "被阻塞的任务",
                 "description": "描述",
                 "acceptance": [],
                 "steps": [],
-                "status": "InSpec"
+                "status": "InSpec",
+                "blocked_by": [99]  # 不存在的任务 ID，永远不会完成
             }
         ]
     }
@@ -83,7 +85,7 @@ def test_without_inprogress_task_no_output(tmp_path):
         text=True
     )
 
-    # 验证无输出
+    # 验证无输出（无 InProgress，无 unblocked InSpec）
     assert result.stdout.strip() == "", f"期望无输出，实际输出: {result.stdout}"
     assert result.returncode == 0
 

@@ -55,7 +55,7 @@ effort: medium
      - 迁移完成后将原 recording.md 重命名为 `recording.md.backup`
 
 5. **同步规则文件**：
-   - 清理旧文件：删除 `.claude/rules/core-states.md` 和 `.claude/rules/core-workflow.md`（如存在）
+   - 清理旧文件：删除 `.claude/rules/` 下的旧版规则文件（如存在）
    - 读取 `${CLAUDE_PLUGIN_ROOT}/assets/dinit/assets/rules-manifest.json`，按 `rules` 列表复制文件到 `.claude/rules/`，覆盖旧版本
    - 确保项目使用最新的规则文件
 
@@ -137,12 +137,7 @@ effort: medium
 
 ## Step 5：Git 初始化（如需要）
 
-若当前目录不是 git 仓库：
-```bash
-git init
-git add .
-git commit -m "Initial project setup with Claude Code workflow"
-```
+若当前目录不是 git 仓库，参考上述步骤初始化 git 仓库并创建初始提交。
 
 ## Step 6：验证清单
 
@@ -150,7 +145,7 @@ git commit -m "Initial project setup with Claude Code workflow"
 - [ ] `.claude/CLAUDE.md` 已填充项目信息
 - [ ] `.claude/CLAUDE.md` 的「项目结构」章节包含扫描结果（非默认占位符）
 - [ ] `.claude/rules/` 下有 8 个 rules 文件（README.md, judgments.md, states.md, workflow.md, exceptions.md, templates.md, file-layout.md, constraints.md）
-- [ ] `.claude/rules/` 下不存在 core-states.md 和 core-workflow.md（已清理）
+- [ ] `.claude/rules/` 下不存在旧版规则文件（已清理）
 - [ ] 项目根目录有 `AGENTS.md`
 - [ ] `.claude/task.json` 是有效 JSON
 - [ ] `init.sh` 可执行
