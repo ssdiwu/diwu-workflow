@@ -5,3 +5,4 @@ AGENTS.md
 .doc/
 sync-rules.sh
 __pycache__/
+tests/
