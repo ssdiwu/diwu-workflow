@@ -10,19 +10,33 @@
 ├── settings.json                  # 可调参数配置
 ├── task.json                      # 当前任务列表
 ├── recording/                     # Session 进度记录目录
-│   └── session-YYYY-MM-DD-HHMMSS.md  # 单个 session 记录文件
-├── decisions.md                   # 设计决策记录（可选，有重大决策时创建）
+│   └── session-YYYY-MM-DD-HHMMSS.md
+├── decisions.md                   # 设计决策记录（可选）
 ├── archive/                       # 归档目录
-│   ├── task_archive_YYYY-MM.json     # 归档任务（按月）
-│   ├── recording_YYYY-MM-DD.md       # 按日归并的 session 归档
-│   └── .last_archive_summary.json   # 最近归档摘要（归档阈值、保留起始点）
+│   ├── task_archive_YYYY-MM.json
+│   ├── recording_YYYY-MM-DD.md
+│   └── .last_archive_summary.json
 ├── checks/                        # 验证脚本目录
 │   ├── smoke.sh
 │   └── task_<id>_verify.sh
-└── init.sh                        # 环境初始化脚本（可选）
+├── init.sh                        # 环境初始化脚本（可选）
+└── rules/                         # 工作流规则（12 文件）
+    ├── README.md                  # 规则速查索引
+    ├── mindset.md                 # 上位心智层（独立注入，非自动加载）
+    ├── judgments.md               # 判断锚点（四段式：启动/实施/验收/纠偏）
+    ├── task.md                    # 任务状态机、acceptance、task.json 结构
+    ├── workflow.md                # 任务规划、实施、验证（Session 见 session.md）
+    ├── session.md                 # Session 生命周期管理
+    ├── verification.md            # 证据优先级体系（L1-L5）
+    ├── correction.md              # 纠偏体系（退化信号→止损动作）
+    ├── pitfalls.md                # 误判防护（三层：泛化/项目/接口）
+    ├── exceptions.md              # 异常处理与 BLOCKED 判定
+    ├── templates.md               # 格式模板与可调参数
+    ├── file-layout.md             # 本文件：目录结构与归档规则
+    └── constraints.md             # 架构约束（五维约束设计）
 ```
 
-> 规则文件由插件 UserPromptSubmit hook 注入，不在项目 .claude/ 目录中。
+> 规则文件由插件 UserPromptSubmit hook 注入。**mindset.md 为独立注入**（由 UserPromptSubmit hook 单独读取注入，不随 rules/ 目录批量加载）。
 
 ## .doc/ 目录结构（SDD 规范产物）
 
@@ -33,50 +47,48 @@
     └── ADR-NNN-kebab-case-title.md
 ```
 
-## 文件说明
+## 规则文件说明
+
+| 路径 | 用途 | 读写方 |
+|------|------|--------|
+| `rules/mindset.md` | 上位心智层：三唯一框架、五问开工、不确定性门控、三层工程论 | Agent 读（hook 独立注入） |
+| `rules/judgments.md` | 全部判断锚点：按阶段索引（启动/实施/验收/纠偏）+ 入口门控 | Agent 读 |
+| `rules/task.md` | 任务状态机、GWT acceptance 格式、task.json 结构、blocked_by 规范 | Agent 读写 |
+| `rules/workflow.md` | 任务规划、任务实施、验证要求（不含 Session 生命周期） | Agent 读 |
+| `rules/session.md` | Session 启动（Step 1-5）、任务选择、continuous_mode、Session 结束 | Agent 读 |
+| `rules/verification.md` | L1-L5 证据优先级、Done 判定门槛、无法验证处理规范 | Agent 读 |
+| `rules/correction.md` | 纠偏体系：退化信号检测、四行重写、止损序列、与 BLOCKED 边界 | Agent 读 |
+| `rules/pitfalls.md` | 误判防护：Layer 1 泛化模式 / Layer 2 项目高频 / Layer 3 接口预留 | Agent 读 |
+| `rules/exceptions.md` | 异常处理、BLOCKED 判定锚点、阻塞恢复流程 | Agent 读 |
+| `rules/templates.md` | BLOCKED/REVIEW/DECISION TRACE 格式、最小规格模板、可调参数 | Agent 读 |
+| `rules/constraints.md` | 架构约束（五维）、版本号语义化、Degradation Paths | Agent 读 |
+| `rules/README.md` | 规则速查索引、阅读顺序建议 | Agent 读 |
+
+## 运行时文件说明
 
 | 路径 | 用途 | 读写方 |
 |------|------|--------|
 | `.claude/CLAUDE.md` | 全局配置、个人偏好、规则索引 | 共同维护 |
-| `.claude/settings.json` | 可调参数配置（review_limit、归档阈值、子代理并发数等） | 人工设置，Agent 读取 |
+| `.claude/settings.json` | 可调参数配置 | 人工设置，Agent 读取 |
 | `.claude/task.json` | 当前所有任务的状态和内容 | Agent 读写 |
-| `.claude/recording/` | Session 进度记录目录，每个 session 一个独立文件 | Agent 写 |
-| `.claude/decisions.md` | 重大设计决策记录（影响范围 ≥2 模块，或引入新约束），供 Agent 快速检索历史决策理由 | Agent 写 |
-| `.claude/archive/task_archive_YYYY-MM.json` | 按月归档的 Done/Cancelled 任务，保留 id 序列 | Agent 写 |
-| `.claude/archive/recording_YYYY-MM-DD.md` | 按日归并的 session 归档，便于查找 | Agent 写 |
-| `.claude/archive/.last_archive_summary.json` | 最近归档摘要（recording 保留阈值、活跃起止时间点） | Agent 写 |
-| `.claude/checks/smoke.sh` | 基线环境验证，session 启动时运行 | Agent 提供方案，人工确认后实施 |
-| `.claude/checks/task_<id>_verify.sh` | 任务专属验证脚本，id 对应 task.json | Agent 创建并执行 |
-| `.claude/init.sh` | 开发环境初始化，session 启动时按需运行 | 讨论后由 Agent 实施 |
+| `.claude/recording/` | Session 进度记录，每个 session 一个文件 | Agent 写 |
+| `.claude/decisions.md` | 重大设计决策记录（影响范围 ≥2 模块） | Agent 写 |
+| `.claude/archive/` | 归档目录（tasks + recordings + summary） | Agent 写 |
+| `.claude/checks/smoke.sh` | 基线环境验证 | Agent 提供，人工确认 |
+| `.claude/checks/task_<id>_verify.sh` | 任务专属验证脚本 | Agent 创建执行 |
+| `.claude/init.sh` | 开发环境初始化 | 讨论后 Agent 实施 |
 
 ## 归档触发条件
 
-- **archive/task_archive_YYYY-MM.json**：`task.json` 中 Done/Cancelled 任务超过归档阈值时触发（阈值见 settings.json `task_archive_threshold`）
-- **archive/recording_YYYY-MM-DD.md**：`recording/` 目录中 session 文件数量超过归档阈值时触发（阈值见 settings.json `recording_archive_threshold`），保留最近 N 条活跃 session（N = 归档阈值）
+| 归档目标 | 触发条件 | 阈值来源 |
+|---------|---------|---------|
+| task_archive_YYYY-MM.json | Done/Cancelled 任务数超阈值 | settings.json `task_archive_threshold`（默认 20）|
+| recording_YYYY-MM-DD.md | session 文件数超阈值 | settings.json `recording_archive_threshold`（默认 50）|
 
-## 归档执行步骤
+## 数据所有权
 
-**task.json 归档**：
-1. 将 Done/Cancelled 任务移到 archive/task_archive_YYYY-MM.json（当前月份）
-2. 保留 id 序列（新任务继续递增）
-3. 在 recording/ 目录中记录归档操作
-
-**recording/ 归档**：
-1. 统计 `recording/` 中 session 文件数量，超过阈值时触发
-2. 将 oldest session 按日期归并到 `archive/recording_YYYY-MM-DD.md`（同日期的多个 session 归并到同一文件）
-3. 从 `recording/` 删除已归档的 session 文件
-4. 更新 `archive/.last_archive_summary.json`（keep_recordings_from = 保留起始时间戳）
-5. 在当前 session 文件中记录归档操作（归档文件列表、时间范围）
-
-## 查找历史
-
-- 最近任务：查 task.json
-- 历史任务：查 archive/task_archive_YYYY-MM.json（按月，grep 搜索）
-- 最近进度：`ls -t recording/ | head -5` 查看最新 5 个 session 文件
-- 搜索活跃历史：`grep -r "关键词" recording/` 在活跃 session 中搜索
-- 搜索归档历史：`grep -r "关键词" archive/recording_*.md` 在归档 session 中搜索
-- 历史决策：查 decisions.md（设计方向、方案选择、边界定义）
-
-## Session 文件管理
-
-recording/ 目录中的 session 文件按时间戳命名（session-YYYY-MM-DD-HHMMSS.md），数量超过 settings.json `recording_archive_threshold` 时触发归档，归档后 `recording/` 保留最近 N 条活跃 session。
+| 数据 | Source of Truth | 说明 |
+|------|----------------|------|
+| 插件元数据 | `.claude-plugin/plugin.json` | 版本、命令列表 |
+| 规则文件列表 | `assets/dinit/assets/rules-manifest.json` | `/dinit` 按 `rules` 字段复制 |
+| 模板文件 | `assets/dinit/assets/*.template` | `/dinit` 复制到用户项目 |

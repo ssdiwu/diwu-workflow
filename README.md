@@ -22,12 +22,13 @@ diwu 编码工作流套件 — Claude Code 插件。让 AI 按照你确认的需
 ### 新项目
 
 ```
-/dinit          # 初始化工作流结构（CLAUDE.md / task.json / hooks）
+/dinit          # 初始化工作流结构（CLAUDE.md / task.json / hooks / rules 12 文件）
 /dprd           # 讨论方案，生成 PRD，识别 Demo 需求
 /dadr           # 有架构决策时记录（可选）
 /ddoc           # 基于 PRD 正向生成产品文档
 /ddemo          # 对每个 Demo 需求生成落地方案
 /dtask          # Demo 验证通过后，拆解集成任务列表
+/dcorr       # 偏航时执行纠偏恢复协议（四行重写→误判排查→重判门控→恢复骨架）
 ```
 
 > 示例：做「消息通知」功能 → `/dprd` 讨论推送方式，确定用 WebSocket 时 `/dadr` 记录决策，方案通过后 `/ddoc` 写产品文档，`/ddemo` 为不确定功能点（如 Prompt 稳定性）生成验证方案，通过后 `/dtask` 拆集成任务。
@@ -48,12 +49,13 @@ diwu 编码工作流套件 — Claude Code 插件。让 AI 按照你确认的需
 
 | 命令 | 作用 |
 |------|------|
-| `/dinit` | 初始化项目工作流结构 |
+| `/dinit` | 初始化项目工作流结构（12 个 rules 文件 + 迁移检测） |
 | `/dprd` | 生成产品需求文档（PRD） |
 | `/dadr` | 记录架构决策（ADR） |
 | `/ddoc` | 产品文档（正向/逆向两种模式） |
 | `/ddemo` | 针对单个不确定性功能点，生成完整落地方案 |
 | `/dtask` | 将功能描述拆解为任务列表 |
+| `/dcorr` | 纠偏恢复协议（四行重写 → 误判排查 → 重判门控 → 恢复骨架） |
 
 每个命令的约束表说明「必须同时为真的约束集合」——违反任一约束，输出即不可信。
 
@@ -301,15 +303,32 @@ BLOCKED 时：任务退回 `InSpec`，禁止创建 commit，禁止标记 Done，
 | `reset --soft` | 超前任务只在本地，保留代码改动但撤销 commit |
 | `修改` | 超前任务代码仍有效，只需调整以适配阻塞任务的新实现 |
 
-### 规则可执行性
+### 规则体系（v1.0：12 文件架构）
 
-规则文件按「可执行性三层结构」组织：
+规则文件按职责分离，每个文件 ≤ 200 行。由 `rules-manifest.json` 管理清单，`/dinit` 按此列表安装到项目 `.claude/rules/`。
+
+| 层级 | 文件 | 用途 | 注入方式 |
+|------|------|------|---------|
+| **上位心智** | `mindset.md` | 三唯一框架、五问开工、不确定性门控、三层工程论 | 独立全量注入 |
+| **判断锚点** | `judgments.md` | 四段式索引（启动/实施/验收/纠偏）+ 入口门控 | rfs 精简索引 |
+| **任务引擎** | `task.md` | 状态机、GWT acceptance、task.json 结构、blocked_by、提交规范 | rfs 精简索引 |
+| **工作流** | `workflow.md` | 任务规划、实施、验证（Session 见 session.md） | rfs 精简索引 |
+| **会话管理** | `session.md` | Session 生命周期（Preflight/上下文/归档/选择/结束/continuous_mode） | rfs 精简索引 |
+| **证据优先级** | `verification.md` | L1-L5 五级证据、Done 判定门槛、无法验证处理 | rfs 精简索引 |
+| **纠偏体系** | `correction.md` | 退化信号检测、四行重写、止损序列、BLOCKED 边界 | rfs 精简索引 |
+| **误判防护** | `pitfalls.md` | 三层防护（泛化模式/项目高频/接口预留 v2） | rfs 精简索引 |
+| **异常处理** | `exceptions.md` | BLOCKED 判定、阻塞恢复流程 | rfs 精简索引 |
+| **格式模板** | `templates.md` | DECISION TRACE/BLOCKED/REVIEW 格式、最小规格、退化对照表、可调参数 | rfs 精简索引 |
+| **文件布局** | `file-layout.md` | .claude/ 目录结构、归档规则 | rfs 精简索引 |
+| **架构约束** | `constraints.md` | 五维约束设计、版本号语义化、Degradation Paths | 独立全量注入 |
+
+**规则可执行性三层**：
 
 - **程序性规则**（固定步骤、状态机）：用列表定义，靠结构保证执行
 - **判断性规则**（分类、取舍、边界判定）：必须附正例 / 反例 / 边界例锚点，靠示例保证执行
 - **边界**：「谁的问题谁解决」，不跨层污染
 
-规则文件区分约束强度：**无标注 = 强制约束**，`[建议]` = 软约束（可偏离但需记录）。
+约束强度：**无标注 = 强制约束**，`[建议]` = 软约束（可偏离但需记录）。
 
 ### 思维框架：从现象到动作
 
@@ -374,16 +393,16 @@ DECISION TRACE
 
 | Hook | 触发时机 | 脚本 | 作用 |
 |------|---------|------|------|
-| `UserPromptSubmit` | 用户发送消息前 | `user_prompt_submit.py` | 将规则摘要 + lessons + constraints 注入上下文 |
+| `UserPromptSubmit` | 用户发送消息前 | `user_prompt_submit.py` | 注入 lessons + constraints(全量) + mindset(全量/独立) + rules 精简索引 |
 | `SessionStart` | session 启动时 | `session_start.py` | 写主代理 session ID；读取 `.claude/env` 注入环境变量 |
-| `PreToolUse` (Bash) | 执行 Bash 前 | `pre_tool_use_bash.py` | 输出 InProgress 任务的 acceptance，防止目标漂移 |
+| `PreToolUse` (Edit\|Write\|Bash) | 编辑/写入/Bash 前 | `drift_detect_pre.py` | 退化信号实时检测（edit_strek/pure_discussion/repetitive_loop/scope_drift），退出码始终 0 |
 | `SubagentStart` | 子代理启动时 | `subagent_start.py` | 自动注入 recording/ 最新摘要 + InProgress 任务 + 最近决策到子代理上下文 |
 | `SubagentStop` | 子代理完成时 | `subagent_stop.py` | 读取 `last_assistant_message` 自动记录子代理产出摘要到 recording/ |
 | `PreCompact` | 对话压缩前 | `pre_compact.py` | 自动保存 InProgress 任务进度快照（git diff --stat）到 recording/ |
 | `PostToolUse` (Write/Edit) | 写入文件后 | `post_tool_json_validate.py` | 自动校验 .json 文件格式，发现错误立即反馈 |
 | `PostToolUse` (通用) | 每次工具调用后 | `context_monitor.py` | Context Rot 监控（WARNING@100次 / CRITICAL@150次）+ 只读连击检测（≥15次提醒） |
 | `Stop` (background) | 回合结束（后台） | `stop_background.py` | git diff --stat 变更快照（session 窗口内去重，不含 untracked 噪声） |
-| `Stop` (blocking) | 回合结束（前台） | `stop_blocking.py` | review buffer 机制 + 任务循环（从 settings.json 读取配置） |
+| `Stop` (blocking) | 回合结束（前台） | `stop_blocking.py` | continue 机制 + 完整性检查(踩坑必填) + 归档聚合(project-pitfalls) |
 
 ---
 
@@ -413,19 +432,20 @@ InDraft（草稿）→ InSpec（已锁定）→ InProgress（实施中）→ InR
 ```
 diwu-workflow/
 ├── .claude-plugin/
-│   ├── plugin.json          # 插件描述
+│   ├── plugin.json          # 插件描述（v0.7.0）
 │   ├── marketplace.json     # 市场索引
 │   └── agents/              # 内置专家 agents（7 个）
 │       ├── ui-designer.md
 │       ├── backend-architect.md
 │       └── ...
-├── commands/                # 用户主动触发的命令（/dinit 等）
-│   ├── dinit.md
-│   ├── dprd.md
-│   ├── dadr.md
-│   ├── ddoc.md
-│   ├── ddemo.md
-│   └── dtask.md
+├── commands/                # 用户主动触发的命令（7 个）
+│   ├── dinit.md             # 初始化工作流结构（12 rules + 迁移检测）
+│   ├── dprd.md              # 生成产品需求文档（PRD）
+│   ├── dadr.md              # 记录架构决策（ADR）
+│   ├── ddoc.md              # 产品文档（正向/逆向两种模式）
+│   ├── ddemo.md             # 针对单个不确定性功能点，生成落地方案
+│   ├── dtask.md             # 将功能描述拆解为任务列表
+│   └── dcorr.md          # 纠偏恢复协议（五步流程）
 ├── skills/                  # Claude 自动加载的背景知识
 │   ├── ddoc/
 │   │   └── SKILL.md         # /ddoc 框架知识（正向六步法 + 逆向还原）
@@ -436,17 +456,31 @@ diwu-workflow/
 └── assets/
     └── dinit/               # /dinit 依赖的模板与规则
         ├── assets/
-        │   ├── *.template   # CLAUDE.md / task.json / settings.json 等模板
-        │   ├── agents/      # 项目级 agents 模板（explorer / implementer）
-        │   ├── env.example   # 环境变量示例文件
-        │   ├── rules/       # 规则源文件（由 rules-manifest.json 管理）
-        │   └── rules-manifest.json  # 规则文件清单
+        │   ├── *.template       # CLAUDE.md / task.json / settings.json 等模板
+        │   ├── agents/          # 项目级 agents 模板（explorer / implementer）
+        │   ├── env.example      # 环境变量示例文件
+        │   ├── rules/            # 规则源文件（13 文件，含 README.md）
+        │   │   ├── mindset.md      # 上位心智层（独立注入）
+        │   │   ├── judgments.md    # 判断锚点（四段式）
+        │   │   ├── task.md         # 任务状态机
+        │   │   ├── workflow.md     # 任务工作流
+        │   │   ├── session.md      # Session 生命周期
+        │   │   ├── verification.md # 证据优先级 L1-L5
+        │   │   ├── correction.md   # 纠偏体系
+        │   │   ├── pitfalls.md     # 误判防护
+        │   │   ├── exceptions.md   # BLOCKED 判定
+        │   │   ├── templates.md    # 格式模板与参数
+        │   │   ├── file-layout.md   # 文件布局
+        │   │   ├── constraints.md  # 架构约束
+        │   │   └── README.md       # 规则速查索引
+        │   ├── project-pitfalls.md.template  # 项目高频误判表模板
+        │   └── rules-manifest.json  # 规则文件清单（version 2, 12 文件）
         ├── references/      # 参考资料
         └── sync-rules.sh    # 同步规则文件到 assets/dinit/assets/rules/
 ├── hooks/
 │   ├── hooks.json           # hook 配置（引用 scripts/ 下的外部脚本）
-│   └── scripts/             # hook 脚本（9 个独立 .py 文件）
-│       ├── user_prompt_submit.py
+│   └── scripts/             # hook 脚本（10 个独立 .py 文件）
+│       ├── user_prompt_submit.py   # 规则注入（mindset独立+constraints 全量+rfs 精简索引）
 │       ├── session_start.py
 │       ├── pre_tool_use_bash.py
 │       ├── subagent_start.py
@@ -454,7 +488,8 @@ diwu-workflow/
 │       ├── pre_compact.py
 │       ├── post_tool_json_validate.py
 │       ├── stop_background.py
-│       └── stop_blocking.py
+│       ├── stop_blocking.py      # continue机制+完整性检查+归档聚合
+│       └── drift_detect_pre.py    # PreToolUse 退化信号实时检测
 ├── init.sh                  # 本仓库开发环境初始化
 └── AGENTS.md                # 多 agent 协作配置（gitignore）
 ```

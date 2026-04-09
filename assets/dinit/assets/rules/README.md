@@ -6,11 +6,16 @@
 
 | 文件 | 用途 | 何时查阅 |
 |------|------|---------|
-| **states.md** | 任务状态机、acceptance 格式、task.json 结构、blocked_by 规范 | 写任务、改状态、处理依赖时 |
-| **workflow.md** | Session 启动、任务规划、任务实施、验证要求、Session 结束 | Session 开始、规划任务、实施任务时 |
-| **judgments.md** | 所有判断锚点集中管理（正例/反例/边界例） | 需要做判断决策时 |
-| **exceptions.md** | 异常处理、BLOCKED 判定、阻塞恢复流程 | 遇到阻塞、需要人工介入时 |
-| **templates.md** | BLOCKED、REVIEW、DECISION TRACE 格式模板、可调参数 | 输出标准格式、查配置参数时 |
+| **mindset.md** | 上位心智层：三唯一框架、五问开工检查、不确定性门控 | Session 启动、开工检查时 |
+| **judgments.md** | 所有判断锚点集中管理（四段式：启动/实施/验收/纠偏） | 需要做判断决策时 |
+| **task.md** | 任务状态机、acceptance 格式、task.json 结构、blocked_by 规范 | 写任务、改状态、处理依赖时 |
+| **workflow.md** | 任务规划、任务实施、验证要求（Session 见 session.md） | 规划任务、实施任务、验证时 |
+| **session.md** | Session 生命周期管理（启动/结束/continuous_mode/checkpoint） | Session 开始、结束时 |
+| **verification.md** | 证据优先级体系（L1-L5）、Done 判定门槛、无法验证处理 | 选择证据等级、判定完成标准时 |
+| **correction.md** | 纠偏体系：退化信号检测、四行重写、止损序列 | 检测到退化信号、需要纠偏时 |
+| **pitfalls.md** | 误判防护：Layer 1 泛化模式 / Layer 2 项目高频 / Layer 3 接口预留 | Preflight 误判表预加载、归档聚合时 |
+| **exceptions.md** | 异常处理与 BLOCKED 判定、阻塞恢复流程 | 遇到阻塞、需要人工介入时 |
+| **templates.md** | 格式模板与可调参数（BLOCKED/REVIEW/DECISION TRACE 等） | 输出标准格式、查配置参数时 |
 | **file-layout.md** | .claude/ 目录结构、归档规则、查找历史 | 了解文件组织、归档、查历史时 |
 | **constraints.md** | 架构约束（五维约束设计） | 设计新功能、定义约束时 |
 
@@ -18,9 +23,10 @@
 
 **首次使用**：
 1. README.md（本文件）→ 了解整体结构
-2. states.md → 理解任务状态机
-3. workflow.md → 掌握完整工作流
-4. judgments.md → 学习判断决策方法
+2. mindset.md → 理解上位心智层
+3. task.md → 理解任务状态机
+4. session.md + workflow.md → 掌握完整工作流
+5. judgments.md → 学习判断决策方法
 
 **日常使用**：
 - 遇到具体问题时，根据上表"何时查阅"列快速定位

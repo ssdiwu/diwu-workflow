@@ -23,12 +23,16 @@ effort: medium
 
    详细规则见 @rules/ 目录：
    - @rules/README.md - 规则速查索引
+   - @rules/mindset.md - Agent 心智模型与行为准则
    - @rules/judgments.md - 判断锚点集中管理
-   - @rules/states.md - 任务状态机与 acceptance 格式
    - @rules/workflow.md - Session 启动、任务规划、实施、验证
+   - @rules/verification.md - 验证要求与运行态验证
+   - @rules/correction.md - 执行偏差自动修正
+   - @rules/pitfalls.md - 高频误判表（Layer 1 泛化模式）
+   - @rules/session.md - Session 记录格式与上下文管理
+   - @rules/task.md - 任务状态机与 task.json 结构
    - @rules/exceptions.md - 异常处理与 BLOCKED 判定
-   - @rules/templates.md - DECISION TRACE、BLOCKED、REVIEW 格式模板
-   - @rules/file-layout.md - .claude/ 目录结构与归档规则
+   - @rules/templates.md - 格式模板与可调参数
    - @rules/constraints.md - 架构约束（五维约束设计）
 
    ```
@@ -90,6 +94,31 @@ effort: medium
 - 补充 Step 1 收集的信息（如用户未提供关键目录，用扫描结果填充）
 - 用于填充 `.claude/CLAUDE.md` 的「项目结构」章节
 
+## Step 1.8：旧版迁移检测（复制 rules 之前执行）
+
+检测项目是否使用旧版 diwu-workflow（v0.x）：
+
+1. **检测旧版标志**：
+   - 检查 `.claude/rules/states.md` 是否存在
+   - 检查 `.claude/rules/task.md` 是否**不存在**
+   - 两个条件同时满足 → 检测到旧版
+
+2. **如检测到旧版，执行迁移**：
+   a. **更新 CLAUDE.md 引用**：搜索 CLAUDE.md 中所有 `@rules/states.md` 引用，替换为 `@rules/task.md`
+   b. **合并 dsettings 新字段**：读取 `${CLAUDE_PLUGIN_ROOT}/assets/dinit/assets/settings.json.template`（或 `dsettings.json.template`，以实际存在的文件名为准），将其中的新字段合并到用户项目的 `.claude/settings.json`（或 `.claude/dsettings.json`）。合并规则：不覆盖已有值，只追加缺失字段（如 `drift_detection`、`pitfalls`、`commit_enhanced`、`checkpoint_min_steps`、`checkpoint_min_lines`）
+   c. **复制新 rules 文件**：读取 `rules-manifest.json`，将 12 个新规则文件复制到 `.claude/rules/`（覆盖旧版）
+   d. **备份旧 states.md**：将 `.claude/rules/states.md` 重命名为 `.claude/rules/states.md.backup`
+   e. **输出迁移报告**：
+      ```
+      === 旧版迁移报告 (v0.x → v1.0) ===
+      - CLAUDE.md 引用更新: N 处 states.md → task.md
+      - settings 合并: 追加 X 个新字段
+      - rules 文件: 已更新至 12 个（v1.0 规则集）
+      - 旧 states.md: 已备份为 states.md.backup
+      ```
+
+3. **如未检测到旧版**：跳过此步骤，直接进入 Step 2
+
 ## Step 2：复制规则文件
 
 读取 `${CLAUDE_PLUGIN_ROOT}/assets/dinit/assets/rules-manifest.json`，按 `rules` 列表将规则文件复制到 `.claude/rules/`（覆盖旧版本）。
@@ -115,8 +144,11 @@ effort: medium
 ### .claude/lessons.md
 读取 `${CLAUDE_PLUGIN_ROOT}/assets/dinit/assets/lessons.md.template` 写入。
 
-### .claude/settings.json
-读取 `${CLAUDE_PLUGIN_ROOT}/assets/dinit/assets/settings.json.template` 写入。若已存在则跳过。
+### .claude/settings.json（或 .claude/dsettings.json）
+读取 `${CLAUDE_PLUGIN_ROOT}/assets/dinit/assets/settings.json.template` 写入。若 `.claude/dsettings.json` 已存在则跳过；若 `.claude/settings.json` 已存在则跳过。优先使用 `dsettings.json` 作为 v1.0 命名空间（如模板文件名为 `dsettings.json.template` 则使用该文件名）。
+
+### .claude/project-pitfalls.md
+读取 `${CLAUDE_PLUGIN_ROOT}/assets/dinit/assets/project-pitfalls.md.template` 写入 `.claude/project-pitfalls.md`。若已存在则跳过（不覆盖用户已有内容）。此文件用于记录项目级高频误判表，由 Stop hook 的归档聚合逻辑持续填充。
 
 ### .claude/decisions.md（可选）
 询问用户是否需要创建决策记录文件（有明确设计方向或技术选型的项目推荐）。如需要，读取 `${CLAUDE_PLUGIN_ROOT}/assets/dinit/assets/decisions.md.template` 写入。
@@ -144,15 +176,18 @@ effort: medium
 确认以下文件均已创建：
 - [ ] `.claude/CLAUDE.md` 已填充项目信息
 - [ ] `.claude/CLAUDE.md` 的「项目结构」章节包含扫描结果（非默认占位符）
-- [ ] `.claude/rules/` 下有 8 个 rules 文件（README.md, judgments.md, states.md, workflow.md, exceptions.md, templates.md, file-layout.md, constraints.md）
-- [ ] `.claude/rules/` 下不存在旧版规则文件（已清理）
+- [ ] `.claude/CLAUDE.md` 包含「工作流规则」章节，规则索引列出 12 个文件（含 mindset.md、verification.md、correction.md、pitfalls.md、session.md、task.md，不含 states.md/file-layout.md）
+- [ ] `.claude/rules/` 下有 12 个 rules 文件（README.md, mindset.md, judgments.md, workflow.md, verification.md, correction.md, pitfalls.md, session.md, task.md, exceptions.md, templates.md, constraints.md）
+- [ ] `.claude/rules/` 下不存在 states.md 或 file-layout.md（已替换为新版规则集）
+- [ ] `.claude/rules/states.md.backup` 仅在检测到旧版时存在（正常初始化不应存在）
 - [ ] 项目根目录有 `AGENTS.md`
 - [ ] `.claude/task.json` 是有效 JSON
 - [ ] `init.sh` 可执行
 - [ ] `.claude/recording/` 目录存在
 - [ ] `.claude/recording.md` 不存在（已迁移为 recording/ 目录）或已重命名为 `recording.md.backup`
 - [ ] `.claude/lessons.md` 存在
-- [ ] `.claude/settings.json` 存在且 JSON 合法
+- [ ] `.claude/settings.json` 或 `.claude/dsettings.json` 存在且 JSON 合法
+- [ ] `.claude/project-pitfalls.md` 存在（从模板初始化）
 - [ ] `.claude/checks/smoke.sh` 可执行
 - [ ] `.claude/agents/explorer.md` 和 `implementer.md` 存在
 - [ ] （可选）`.claude/decisions.md`

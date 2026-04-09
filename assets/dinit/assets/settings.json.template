@@ -10,5 +10,20 @@
   "context_monitor_warning": 30,
   "context_monitor_critical": 50,
   "context_monitor_delay": 10,
-  "continuous_mode": true
+  "continuous_mode": true,
+  "drift_detection": {
+    "enabled": true,
+    "checks": ["edit_streak", "pure_discussion", "repetitive_loop", "scope_drift"],
+    "edit_streak_threshold": 3,
+    "pure_discussion_threshold": 10,
+    "scope_drift_tolerance": "high"
+  },
+  "pitfalls": {
+    "auto_extract": true,
+    "archive_aggregate": true,
+    "preflight_top_n": 3
+  },
+  "commit_enhanced": true,
+  "checkpoint_min_steps": 5,
+  "checkpoint_min_lines": 500
 }

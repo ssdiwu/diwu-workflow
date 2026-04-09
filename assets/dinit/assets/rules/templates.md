@@ -4,206 +4,123 @@
 
 ## 文档铁律（跨文档通用）
 
-### PRD 文档铁律
+| 文档类型 | 核心铁律 |
+|---------|---------|
+| **PRD** | 序号层级 `1.→1.1→1.1.1→•→。`；纯中文（除 ID/CSV/API 等行业术语）；业务视角，不干涉技术实现 |
+| **Acceptance** | GWT 格式 `Given...When...Then`；Then 子句可断言为 expect/assert；单条"且"≤3 个 |
+| **Session 记录** | 时间戳必须 `date '+%Y-%m-%d %H:%M:%S'` 获取；最新 session 在最前面 |
+| **Task.json** | steps 绝对路径；[锁定] 标注技术选型，[建议] 标注实现细节 |
 
-**序号层级规范**：
-- 必须遵循 `1. -> 1.1 -> 1.1.1 -> • -> 。` 的层级嵌套关系
-- 绝对不允许层级混乱或随意更改缩进
+## BLOCKED / REVIEW / PENDING 格式
 
-**纯中文表达**：
-- 除行业标准专有名词（如 ID、CSV、PDF、API、TTS）外，必须使用中文
-- 用"轻提示"代替 Toast，用"弹窗/模态框"代替 Modal，用"骨架屏"代替 Skeleton
-
-**业务视角**：
-- 只定义业务规则、状态机、数据流向和前端表现
-- 严禁干涉研发的底层技术实现
-
-### Acceptance 文档铁律
-
-**GWT 格式**：
-- 必须使用 `Given [前置条件] When [用户动作] Then [预期结果]` 格式
-- 多个条件或结果用"且"连接
-
-**Then 子句可断言**：
-- 每个 Then 子句必须能直接写成 `expect(actual).toBe(expected)` 或 `assert actual == expected`
-- 不能是主观描述（如"登录成功"），必须是可观测的系统状态（如"跳转到 /dashboard，localStorage 中存在 auth_token"）
-
-**单条不超过 3 个'且'**：
-- 单条 acceptance 中"且"超过 3 个时，应拆分为多条
-
-### Session 记录文档铁律
-
-**时间戳格式**：
-- 必须运行 `date '+%Y-%m-%d %H:%M:%S'` 获取真实时间戳
-- 禁止手写日期或写"（续）"等占位符
-
-**最新在前**：
-- 最新的 session 在最前面（紧跟 # Session 记录 标题）
-
-### Task.json 文档铁律
-
-**steps 使用绝对路径**：
-- steps 中的文件路径必须是绝对路径，不能是相对路径
-- 可用 [锁定] 标注关键技术选型，[建议] 标注实现细节
-
-## BLOCKED 格式
-
+### BLOCKED
 ```
 BLOCKED - 需要人工介入
-
-当前任务: Task#N - [任务标题]
-任务描述: [背景与关键约束]
-
-已完成的工作:
-- [已实现的部分]
-
-阻塞原因:
-- [具体阻塞原因]
-- [环境/依赖缺失详情]
-
-需人工帮助:
-1. [具体操作步骤]
-2. [配置/凭据来源]
-
-解除阻塞后:
-- 任务将从 InSpec 恢复到 InProgress
+当前任务: Task#N - [标题]
+阻塞原因: [具体原因]
+需人工帮助: [操作步骤]
+解除后: InSpec → InProgress
 ```
 
-## PENDING REVIEW 格式
-
+### PENDING REVIEW
 ```
 PENDING REVIEW - 超前实施已达上限
-
-等待验收: Task#N
-已超前完成: Task#X, Task#Y, Task#Z (N/5)
-
-请验收 Task#N:
-- 通过 → 可继续超前实施
-- 失败 → 需评估已超前任务的影响并修复
+等待验收: Task#N  |  已超前: Task#X, Task#Y (N/5)
 ```
 
-## REVIEW 请求格式
-
+### REVIEW 请求
 ```
 REVIEW - 请求人工审查
-
-Task#N: [任务标题]
-修改范围: [文件路径（行数变更）]
-
-验收验证:
-- [x] [acceptance 条目] — [验证方法/测试结果]
-
-等待: 人工确认后将标记为 Done
+Task#N: [标题]  |  修改范围: [文件路径]
+验收验证: - [x] [条目] — [方法]
+等待: 人工确认后 Done
 ```
 
-## DECISION TRACE 格式（判断过程模板）
+## DECISION TRACE
 
-**触发原则**：当需要在多个互斥选项中做出选择时，必须先输出 DECISION TRACE。
-
-常见场景包括但不限于：任务选择、BLOCKED 判定、并行与串行选择、大幅度修改判定、blocked_by 写入判定、循环依赖识别、状态转移判定。
+**框架定位**：现象→判断→动作的结构化输出。证据=现象，规则命中+排除项=判断，下一步=动作。
 
 ```
 DECISION TRACE
-
-结论: [BLOCKED | CONTINUE | REVIEW | SKIP]
-
-规则命中:
-- [命中的规则条目，例如 workflow.md §任务选择策略]
-
-证据:
-- [task.json 状态、blocked_by 明细、测试日志、git diff --stat、配置检查结果]
-
-排除项:
-- [为什么不是其他结论]
-
-下一步:
-- [立即执行的动作；例如"输出 BLOCKED 模板并等待人工配置"]
+结论: [BLOCKED|CONTINUE|REVIEW|SKIP]
+规则命中: - [规则条目]
+证据: - [事实数据]
+排除项: - [为什么不是其他结论]
+下一步: - [立即执行的动作]
 ```
 
 ## Session 文件格式
 
 ```markdown
----
 ## Session YYYY-MM-DD HH:MM:SS
-
-### Task#N: [任务标题] → [状态]
-
-**实施内容**:
-- [完成的工作]
-
-**验收验证**:
-- [x] [acceptance 条目] ([验证方法])
-
+### Task#N: [标题] → [状态]
+**实施内容**: - [工作项]
+**验收验证**: - [x] [acceptance] ([方法])
 **提交**: commit [hash]
-
-### 下一步
-[下一步计划]
-
----
+### 下一步: [计划]
 ```
+
+## CONTINUOUS_MODE_COMPLETE
+
+```
+CONTINUOUS MODE COMPLETE - 所有可执行任务已完成
+已完成: Task#A, Task#B  |  剩余: Task#X(InDraft), Task#Y(BLOCKED)
+本轮连续完成 N 个任务
+```
+
+## 最小规格通用模板
+
+```text
+目标：   一句话描述这次要得到的结果
+输入：   已知材料 / 关键约束 / 外部依赖 / 必填参数 / 可选参数
+输出：   最终产物 / 存放位置 / 返回形式 / 命名规则
+格式：   必含字段 / 顺序要求 / 结构要求
+验收标准：什么证据算完成 / 验证哪一层 / 边界不能破 / 待验证项
+```
+
+### 按类型收口规格
+
+| 类型 | 重点写清 |
+|------|---------|
+| **实现型** | 改哪条能力边界 / 不允许扩大范围 / 完成后看什么运行态变化 |
+| **排查型** | 已知现象 / 最小复现 / 已排除项 / 怀疑链路 / 最小验证 |
+| **回归型** | 验证哪条能力边界 / 样本前提 / 预期输出与失败信号 / 可接受降级 |
+| **评审型** | 哪些风险 / 行为变化在哪 / 契约是否漂移 / 测试缺口与未验证项 |
+
+## 退化信号-止损动作对照表
+
+| 退化信号 | 止损动作 |
+|---------|---------|
+| edit_strek（反复沿用已否定路径） | 回到现象层，重新定义问题 |
+| pure_discussion（输出像套路不像当前任务） | 补正例/反例/边界例 |
+| repetitive_loop（改动无运行态证据） | 停止宣称完成，先补验证 |
+| context_rot（讨论膨胀、边界萎缩） | 压缩高价值前提，只保留当前范围 |
+| scope_drift（同一前提反复重讲） | 把前提外化到 README/规范/任务卡片 |
+| acceptance_drift（历史材料长、动作模糊） | 拆大任务，回到最小可执行单元 |
 
 ## 可调参数
 
 | 参数 | 默认值 | 说明 |
 |------|--------|------|
-| 超前上限 | 5 | 最多同时超前实施的任务数（值存储在 settings.json） |
-| task_archive_threshold | 20 | task.json 中 Done/Cancelled 任务超过此数触发归档（值存储在 settings.json） |
-| recording_archive_threshold | 50 | recording/ 目录中 session 文件超过此数触发归档（值存储在 settings.json） |
-| recording_retention_days | 30 | recording/ 归档时保留最近 N 天的文件，超过 N 天的文件打包归档（值存储在 settings.json） |
-| 子代理并发数 | 3 | 0=禁用子代理，1=串行子代理，N≥2=最多N个并发子代理（值存储在 settings.json） |
-| 探索/搜索类子代理模型 | haiku | 只读操作，降低成本（值存储在 settings.json） |
-| 实施类子代理模型 | 继承主模型 | 写代码保持主模型质量（值存储在 settings.json） |
-| recording_session_window | 600 | Session 记录时间窗口（秒），控制 check_rec() 判断追加/新建和 git log 查询范围（值存储在 settings.json） |
-| context_monitor_warning | 30 | Context Rot 监控 WARNING 阈值，工具调用次数达到此值时输出提醒（值存储在 settings.json） |
-| context_monitor_critical | 50 | Context Rot 监控 CRITICAL 阈值，达到此值时触发阻塞提醒要求更新 recording/（值存储在 settings.json） |
-| context_monitor_delay | 10 | Context Rot 监控延迟阈值，CRITICAL+DELAY 时检查 recording/ 是否更新，未更新则自动写入 checkpoint（值存储在 settings.json） |
-| continuous_mode | true | 持续运行模式开关：true=任务Done后自动选择下一个InSpec任务继续执行（默认）；false=每完成一个任务即停止等待人工介入（值存储在 settings.json） |
-
-## CONTINUOUS_MODE_COMPLETE 格式
-
-```
-CONTINUOUS MODE COMPLETE - 所有可执行任务已完成
-
-已完成任务: Task#A, Task#B, Task#C
-剩余任务:
-- Task#X: InDraft (待确认)
-- Task#Y: BLOCKED (需人工介入)
-
-Session 统计: 本轮连续完成 N 个任务
-```
+| 超前上限 | 5 | 最多同时超前实施的任务数（settings.json） |
+| task_archive_threshold | 20 | Done/Cancelled 任务超此数触发归档（settings.json） |
+| recording_archive_threshold | 50 | session 文件超此数触发归档（settings.json） |
+| recording_retention_days | 30 | 归档时保留最近 N 天（settings.json） |
+| 子代理并发数 | 3 | 0=禁用，1=串行，N≥2=最多 N 并发（settings.json） |
+| 探索类子代理模型 | haiku | 只读操作降低成本（settings.json） |
+| 实施类子代理模型 | 继承主模型 | 写代码保持质量（settings.json） |
+| recording_session_window | 600 | Session 记录时间窗口秒数（settings.json） |
+| context_monitor_warning | 30 | WARNING 阈值：工具调用次数（settings.json） |
+| context_monitor_critical | 50 | CRITICAL 阈值：触发阻塞提醒（settings.json） |
+| context_monitor_delay | 10 | CRITICAL+DELAY 延迟阈值（settings.json） |
+| continuous_mode | true | 持续运行模式开关（settings.json） |
+| drift_detection | enabled | 退化检测开关（dsettings.json） |
+| pitfalls | auto_extract | 误判自动提取模式（dsettings.json） |
+| commit_enhanced | true | 结构化 commit message 开关（dsettings.json） |
+| checkpoint_min_steps | 5 | 大任务 checkpoint 触发步数门槛（dsettings.json） |
+| checkpoint_min_lines | 500 | 大任务 checkpoint 触发行数门槛（dsettings.json） |
 
 ## 验证脚本模板
 
-**smoke.sh**：
-```bash
-#!/bin/bash
-set -e
-
-echo "=== Smoke Test ==="
-
-# JSON 合法性检查
-for file in .claude/task.json .claude/settings.json; do
-  if [ -f "$file" ]; then
-    python3 -m json.tool "$file" > /dev/null && echo "✓ $file"
-  fi
-done
-
-echo "=== All checks passed ==="
-```
-
-**task\_\<id\>\_verify.sh**：
-```bash
-#!/bin/bash
-set -e
-
-echo "=== Task #<id> Verification ==="
-
-# 根据 acceptance 条件编写验证逻辑
-# 示例：
-# - 检查文件是否存在
-# - 运行单元测试
-# - 验证 API 响应
-
-echo "=== Verification passed ==="
-exit 0
-```
+**smoke.sh**：JSON 合法性检查（task.json + settings.json），exit 0。
+**task\_\<id\>\_verify.sh**：按 acceptance 编写验证逻辑，exit 0 成功。
