@@ -100,7 +100,7 @@ class TestContextMonitor(unittest.TestCase):
         self.assertIn('Task#1', content)
 
     def test_config_cache_uses_cached_when_mtime_unchanged(self):
-        """配置缓存测试：settings.json mtime 未变化时使用缓存配置"""
+        """配置缓存测试：dsettings.json mtime 未变化时使用缓存配置"""
         settings_mtime = 1234567890.0
         cache_data = {
             'mtime': settings_mtime,

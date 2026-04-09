@@ -186,7 +186,7 @@ def archive_aggregate(settings, tasks):
 f = '.claude/task.json'
 data = json.load(open(f)) if os.path.exists(f) else {}
 
-sf = '.claude/settings.json'
+sf = '.claude/dsettings.json'
 settings = json.load(open(sf)) if os.path.exists(sf) else {}
 continuous_mode = settings.get('continuous_mode', True)
 

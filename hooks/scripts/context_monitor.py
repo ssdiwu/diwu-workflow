@@ -27,7 +27,7 @@ config_cache_file = f'/tmp/diwu_ctx_{sid}_config_cache'
 
 # 配置读取（带 mtime 缓存）
 def load_config():
-    settings_path = '.claude/settings.json'
+    settings_path = '.claude/dsettings.json'
     if not os.path.exists(settings_path):
         return {'warning': 30, 'critical': 50, 'delay': 10, 'session_window': 600}
 

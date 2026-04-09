@@ -114,11 +114,11 @@ CONTINUOUS MODE COMPLETE - 所有可执行任务已完成
 | context_monitor_critical | 50 | CRITICAL 阈值：触发阻塞提醒（dsettings.json） |
 | context_monitor_delay | 10 | CRITICAL+DELAY 延迟阈值（dsettings.json） |
 | continuous_mode | true | 持续运行模式开关（dsettings.json） |
-| drift_detection | enabled | 退化检测开关（ddsettings.json） |
-| pitfalls | auto_extract | 误判自动提取模式（ddsettings.json） |
-| commit_enhanced | true | 结构化 commit message 开关（ddsettings.json） |
-| checkpoint_min_steps | 5 | 大任务 checkpoint 触发步数门槛（ddsettings.json） |
-| checkpoint_min_lines | 500 | 大任务 checkpoint 触发行数门槛（ddsettings.json） |
+| drift_detection | enabled | 退化检测开关（dsettings.json） |
+| pitfalls | auto_extract | 误判自动提取模式（dsettings.json） |
+| commit_enhanced | true | 结构化 commit message 开关（dsettings.json） |
+| checkpoint_min_steps | 5 | 大任务 checkpoint 触发步数门槛（dsettings.json） |
+| checkpoint_min_lines | 500 | 大任务 checkpoint 触发行数门槛（dsettings.json） |
 
 ## 验证脚本模板
 

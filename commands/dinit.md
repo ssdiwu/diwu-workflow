@@ -82,7 +82,7 @@ effort: medium
 
 ## Step 1.5：代码库扫描
 
-从 `.claude/settings.json` 读取 `subagent_concurrency` 参数（默认 3），使用子代理并行扫描代码库：
+从 `.claude/dsettings.json` 读取 `subagent_concurrency` 参数（默认 3），使用子代理并行扫描代码库：
 
 **扫描任务**（并行执行）：
 1. **目录结构扫描**：识别主要目录层级、文件分布、模块组织方式
@@ -106,7 +106,7 @@ effort: medium
 2. **如检测到旧版，执行迁移**：
    a. **更新 CLAUDE.md 引用**：搜索 CLAUDE.md 中所有 `@rules/states.md` 引用，替换为 `@rules/task.md`
    b. **合并 dsettings 新字段**：读取 `${CLAUDE_PLUGIN_ROOT}/assets/dinit/assets/settings.json.template`（或 `dsettings.json.template`，以实际存在的文件名为准），将其中的新字段合并到用户项目的 `.claude/settings.json`（或 `.claude/dsettings.json`）。合并规则：不覆盖已有值，只追加缺失字段（如 `drift_detection`、`pitfalls`、`commit_enhanced`、`checkpoint_min_steps`、`checkpoint_min_lines`）
-   c. **复制新 rules 文件**：读取 `rules-manifest.json`，将 12 个新规则文件复制到 `.claude/rules/`（覆盖旧版）
+   c. **复制新 rules 文件**：读取 `rules-manifest.json`，将 13 个新规则文件复制到 `.claude/rules/`（覆盖旧版）
    d. **备份旧 states.md**：将 `.claude/rules/states.md` 重命名为 `.claude/rules/states.md.backup`
    e. **输出迁移报告**：
       ```
@@ -144,8 +144,8 @@ effort: medium
 ### .claude/lessons.md
 读取 `${CLAUDE_PLUGIN_ROOT}/assets/dinit/assets/lessons.md.template` 写入。
 
-### .claude/settings.json（或 .claude/dsettings.json）
-读取 `${CLAUDE_PLUGIN_ROOT}/assets/dinit/assets/settings.json.template` 写入。若 `.claude/dsettings.json` 已存在则跳过；若 `.claude/settings.json` 已存在则跳过。优先使用 `dsettings.json` 作为 v1.0 命名空间（如模板文件名为 `dsettings.json.template` 则使用该文件名）。
+### .claude/dsettings.json
+读取 `${CLAUDE_PLUGIN_ROOT}/assets/dinit/assets/dsettings.json.template` 写入。若 `.claude/dsettings.json` 已存在则跳过。优先使用 `dsettings.json` 作为 v1.0 命名空间。
 
 ### .claude/project-pitfalls.md
 读取 `${CLAUDE_PLUGIN_ROOT}/assets/dinit/assets/project-pitfalls.md.template` 写入 `.claude/project-pitfalls.md`。若已存在则跳过（不覆盖用户已有内容）。此文件用于记录项目级高频误判表，由 Stop hook 的归档聚合逻辑持续填充。
@@ -176,8 +176,8 @@ effort: medium
 确认以下文件均已创建：
 - [ ] `.claude/CLAUDE.md` 已填充项目信息
 - [ ] `.claude/CLAUDE.md` 的「项目结构」章节包含扫描结果（非默认占位符）
-- [ ] `.claude/CLAUDE.md` 包含「工作流规则」章节，规则索引列出 12 个文件（含 mindset.md、verification.md、correction.md、pitfalls.md、session.md、task.md，不含 states.md/file-layout.md）
-- [ ] `.claude/rules/` 下有 12 个 rules 文件（README.md, mindset.md, judgments.md, workflow.md, verification.md, correction.md, pitfalls.md, session.md, task.md, exceptions.md, templates.md, constraints.md）
+- [ ] `.claude/CLAUDE.md` 包含「工作流规则」章节，规则索引列出 13 个文件（含 mindset.md、verification.md、correction.md、pitfalls.md、session.md、task.md，不含 states.md）
+- [ ] `.claude/rules/` 下有 13 个 rules 文件（README.md, mindset.md, judgments.md, workflow.md, verification.md, correction.md, pitfalls.md, session.md, task.md, exceptions.md, templates.md, constraints.md, file-layout.md）
 - [ ] `.claude/rules/` 下不存在 states.md 或 file-layout.md（已替换为新版规则集）
 - [ ] `.claude/rules/states.md.backup` 仅在检测到旧版时存在（正常初始化不应存在）
 - [ ] 项目根目录有 `AGENTS.md`

@@ -7,3 +7,5 @@ sync-rules.sh
 __pycache__/
 tests/
 .pytest_cache/
+configs/
+skills/claude-code-docs/

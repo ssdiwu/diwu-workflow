@@ -22,7 +22,7 @@ diwu 编码工作流套件 — Claude Code 插件。让 AI 按照你确认的需
 ### 新项目
 
 ```
-/dinit          # 初始化工作流结构（CLAUDE.md / task.json / hooks / rules 12 文件）
+/dinit          # 初始化工作流结构（CLAUDE.md / task.json / hooks / rules 13 文件）
 /dprd           # 讨论方案，生成 PRD，识别 Demo 需求
 /dadr           # 有架构决策时记录（可选）
 /ddoc           # 基于 PRD 正向生成产品文档
@@ -48,7 +48,7 @@ diwu 编码工作流套件 — Claude Code 插件。让 AI 按照你确认的需
 
 | 命令 | 作用 |
 |------|------|
-| `/dinit` | 初始化项目工作流结构（12 个 rules 文件 + 迁移检测） |
+| `/dinit` | 初始化项目工作流结构（13 个 rules 文件 + 迁移检测） |
 | `/dprd` | 生成产品需求文档（PRD） |
 | `/dadr` | 记录架构决策（ADR） |
 | `/ddoc` | 产品文档（正向/逆向两种模式） |
@@ -261,7 +261,7 @@ flowchart TD
 - **task.json 归档**：Done/Cancelled 任务超过 20 个时，自动归档到 `archive/task_archive_YYYY-MM.json`
 - **recording/ 归档**：session 文件超过 50 个时，保留最近 30 天的文件，其余打包到 `archive/recording_archive_YYYY-MM.tar.gz`
 
-归档阈值可在 `.claude/settings.json` 中配置（`task_archive_threshold` / `recording_archive_threshold` / `recording_retention_days`）。
+归档阈值可在 `.claude/dsettings.json` 中配置（`task_archive_threshold` / `recording_archive_threshold` / `recording_retention_days`）。
 
 **通用货币：README 索引**
 
@@ -302,7 +302,7 @@ BLOCKED 时：任务退回 `InSpec`，禁止创建 commit，禁止标记 Done，
 | `reset --soft` | 超前任务只在本地，保留代码改动但撤销 commit |
 | `修改` | 超前任务代码仍有效，只需调整以适配阻塞任务的新实现 |
 
-### 规则体系（v1.0：12 文件架构）
+### 规则体系（v1.0：13 文件架构）
 
 规则文件按职责分离，每个文件 ≤ 200 行。由 `rules-manifest.json` 管理清单，`/dinit` 按此列表安装到项目 `.claude/rules/`。
 
@@ -438,7 +438,7 @@ diwu-workflow/
 │       ├── backend-architect.md
 │       └── ...
 ├── commands/                # 用户主动触发的命令（7 个）
-│   ├── dinit.md             # 初始化工作流结构（12 rules + 迁移检测）
+│   ├── dinit.md             # 初始化工作流结构（13 rules + 迁移检测）
 │   ├── dprd.md              # 生成产品需求文档（PRD）
 │   ├── dadr.md              # 记录架构决策（ADR）
 │   ├── ddoc.md              # 产品文档（正向/逆向两种模式）
@@ -455,7 +455,7 @@ diwu-workflow/
 └── assets/
     └── dinit/               # /dinit 依赖的模板与规则
         ├── assets/
-        │   ├── *.template       # CLAUDE.md / task.json / settings.json 等模板
+        │   ├── *.template       # CLAUDE.md / task.json / dsettings.json 等模板
         │   ├── agents/          # 项目级 agents 模板（explorer / implementer）
         │   ├── env.example      # 环境变量示例文件
         │   ├── rules/            # 规则源文件（13 文件，含 README.md）
@@ -473,7 +473,7 @@ diwu-workflow/
         │   │   ├── constraints.md  # 架构约束
         │   │   └── README.md       # 规则速查索引
         │   ├── project-pitfalls.md.template  # 项目高频误判表模板
-        │   └── rules-manifest.json  # 规则文件清单（version 2, 12 文件）
+        │   └── rules-manifest.json  # 规则文件清单（version 2, 13 文件）
         ├── references/      # 参考资料
         └── sync-rules.sh    # 同步规则文件到 assets/dinit/assets/rules/
 ├── hooks/

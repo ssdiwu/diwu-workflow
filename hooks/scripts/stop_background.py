@@ -11,7 +11,7 @@ if not os.path.isdir(os.path.join(cwd, '.git')):
     sys.exit(0)
 
 # Dedup: skip if any session file was modified within session window
-sf = os.path.join(cwd, '.claude/settings.json')
+sf = os.path.join(cwd, '.claude/dsettings.json')
 settings = json.load(open(sf)) if os.path.exists(sf) else {}
 window = settings.get('recording_session_window', 600)
 
