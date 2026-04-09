@@ -6,3 +6,4 @@ AGENTS.md
 sync-rules.sh
 __pycache__/
 tests/
+.pytest_cache/
