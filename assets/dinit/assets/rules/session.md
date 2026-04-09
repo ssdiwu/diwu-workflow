@@ -55,7 +55,7 @@
 
 ## 持续运行模式（continuous_mode）
 
-> 规则来源：settings.json `continuous_mode` 字段（默认 true）
+> 规则来源：dsettings.json `continuous_mode` 字段（默认 true）
 
 | 模式 | 行为 |
 |------|------|

@@ -102,25 +102,25 @@ CONTINUOUS MODE COMPLETE - 所有可执行任务已完成
 
 | 参数 | 默认值 | 说明 |
 |------|--------|------|
-| 超前上限 | 5 | 最多同时超前实施的任务数（settings.json） |
-| task_archive_threshold | 20 | Done/Cancelled 任务超此数触发归档（settings.json） |
-| recording_archive_threshold | 50 | session 文件超此数触发归档（settings.json） |
-| recording_retention_days | 30 | 归档时保留最近 N 天（settings.json） |
-| 子代理并发数 | 3 | 0=禁用，1=串行，N≥2=最多 N 并发（settings.json） |
-| 探索类子代理模型 | haiku | 只读操作降低成本（settings.json） |
-| 实施类子代理模型 | 继承主模型 | 写代码保持质量（settings.json） |
-| recording_session_window | 600 | Session 记录时间窗口秒数（settings.json） |
-| context_monitor_warning | 30 | WARNING 阈值：工具调用次数（settings.json） |
-| context_monitor_critical | 50 | CRITICAL 阈值：触发阻塞提醒（settings.json） |
-| context_monitor_delay | 10 | CRITICAL+DELAY 延迟阈值（settings.json） |
-| continuous_mode | true | 持续运行模式开关（settings.json） |
-| drift_detection | enabled | 退化检测开关（dsettings.json） |
-| pitfalls | auto_extract | 误判自动提取模式（dsettings.json） |
-| commit_enhanced | true | 结构化 commit message 开关（dsettings.json） |
-| checkpoint_min_steps | 5 | 大任务 checkpoint 触发步数门槛（dsettings.json） |
-| checkpoint_min_lines | 500 | 大任务 checkpoint 触发行数门槛（dsettings.json） |
+| 超前上限 | 5 | 最多同时超前实施的任务数（dsettings.json） |
+| task_archive_threshold | 20 | Done/Cancelled 任务超此数触发归档（dsettings.json） |
+| recording_archive_threshold | 50 | session 文件超此数触发归档（dsettings.json） |
+| recording_retention_days | 30 | 归档时保留最近 N 天（dsettings.json） |
+| 子代理并发数 | 3 | 0=禁用，1=串行，N≥2=最多 N 并发（dsettings.json） |
+| 探索类子代理模型 | haiku | 只读操作降低成本（dsettings.json） |
+| 实施类子代理模型 | 继承主模型 | 写代码保持质量（dsettings.json） |
+| recording_session_window | 600 | Session 记录时间窗口秒数（dsettings.json） |
+| context_monitor_warning | 30 | WARNING 阈值：工具调用次数（dsettings.json） |
+| context_monitor_critical | 50 | CRITICAL 阈值：触发阻塞提醒（dsettings.json） |
+| context_monitor_delay | 10 | CRITICAL+DELAY 延迟阈值（dsettings.json） |
+| continuous_mode | true | 持续运行模式开关（dsettings.json） |
+| drift_detection | enabled | 退化检测开关（ddsettings.json） |
+| pitfalls | auto_extract | 误判自动提取模式（ddsettings.json） |
+| commit_enhanced | true | 结构化 commit message 开关（ddsettings.json） |
+| checkpoint_min_steps | 5 | 大任务 checkpoint 触发步数门槛（ddsettings.json） |
+| checkpoint_min_lines | 500 | 大任务 checkpoint 触发行数门槛（ddsettings.json） |
 
 ## 验证脚本模板
 
-**smoke.sh**：JSON 合法性检查（task.json + settings.json），exit 0。
+**smoke.sh**：JSON 合法性检查（task.json + dsettings.json），exit 0。
 **task\_\<id\>\_verify.sh**：按 acceptance 编写验证逻辑，exit 0 成功。

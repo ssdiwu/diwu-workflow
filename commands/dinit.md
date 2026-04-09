@@ -10,8 +10,8 @@ effort: medium
 ## Step 0：刷新检测
 
 检查 `.claude/CLAUDE.md` 是否已存在：
-- **已存在** → 刷新模式：跳过 Step 2-3 的骨架创建，只执行 Step 1（收集信息）和 Step 1.5（代码库扫描），然后更新 `.claude/CLAUDE.md` 并确保项目符合最新规范
-- **不存在** → 初始化模式：执行完整流程（Step 1 → Step 1.5 → Step 2 → Step 3 → ...）
+- **已存在** → 刷新模式：跳过 Step 4-6 的骨架创建，只执行 Step 1（收集信息）和 Step 1.5（代码库扫描），然后更新 `.claude/CLAUDE.md` 并确保项目符合最新规范
+- **不存在** → 初始化模式：执行完整流程（Step 1 → Step 1.5 → Step 2 → Step 3 → Step 4 → Step 5 → Step 6 → Step 7）
 
 **刷新模式的章节补充逻辑**：
 
@@ -94,7 +94,7 @@ effort: medium
 - 补充 Step 1 收集的信息（如用户未提供关键目录，用扫描结果填充）
 - 用于填充 `.claude/CLAUDE.md` 的「项目结构」章节
 
-## Step 1.8：旧版迁移检测（复制 rules 之前执行）
+## Step 2：旧版迁移检测（复制 rules 之前执行）
 
 检测项目是否使用旧版 diwu-workflow（v0.x）：
 
@@ -117,13 +117,13 @@ effort: medium
       - 旧 states.md: 已备份为 states.md.backup
       ```
 
-3. **如未检测到旧版**：跳过此步骤，直接进入 Step 2
+3. **如未检测到旧版**：跳过此步骤，直接进入 Step 3
 
-## Step 2：复制规则文件
+## Step 3：复制规则文件
 
 读取 `${CLAUDE_PLUGIN_ROOT}/assets/dinit/assets/rules-manifest.json`，按 `rules` 列表将规则文件复制到 `.claude/rules/`（覆盖旧版本）。
 
-## Step 3：创建项目文件
+## Step 4：创建项目文件
 
 ### .claude/CLAUDE.md
 读取 `${CLAUDE_PLUGIN_ROOT}/assets/dinit/assets/claude-md-portable.template`，填入项目信息，写入 `.claude/CLAUDE.md`（保留 `@rules/` 引用，不展开）。**不得**创建 `.claude/assets/rules/` 或其他子目录。
@@ -161,17 +161,17 @@ effort: medium
 - `explorer.md` — 只读探索代理（permissionMode: plan）
 - `implementer.md` — 实施代理（permissionMode: acceptEdits）
 
-## Step 4：可选 — 架构约束
+## Step 5：可选 — 架构约束
 
 询问用户是否需要 `.claude/rules/constraints.md`（架构复杂的项目推荐）。
 
 如需要，读取 `${CLAUDE_PLUGIN_ROOT}/assets/dinit/references/constraint-template.md`，引导用户用五维框架（业务/时序/跨平台/并发/感知）定义约束。
 
-## Step 5：Git 初始化（如需要）
+## Step 6：Git 初始化（如需要）
 
 若当前目录不是 git 仓库，参考上述步骤初始化 git 仓库并创建初始提交。
 
-## Step 6：验证清单
+## Step 7：验证清单
 
 确认以下文件均已创建：
 - [ ] `.claude/CLAUDE.md` 已填充项目信息

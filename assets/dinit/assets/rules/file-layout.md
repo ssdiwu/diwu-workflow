@@ -7,7 +7,7 @@
 ```
 .claude/
 ├── CLAUDE.md                      # 全局 Agent 配置入口
-├── settings.json                  # 可调参数配置
+├── dsettings.json                  # 可调参数配置
 ├── task.json                      # 当前任务列表
 ├── recording/                     # Session 进度记录目录
 │   └── session-YYYY-MM-DD-HHMMSS.md
@@ -69,7 +69,7 @@
 | 路径 | 用途 | 读写方 |
 |------|------|--------|
 | `.claude/CLAUDE.md` | 全局配置、个人偏好、规则索引 | 共同维护 |
-| `.claude/settings.json` | 可调参数配置 | 人工设置，Agent 读取 |
+| `.claude/dsettings.json` | 可调参数配置 | 人工设置，Agent 读取 |
 | `.claude/task.json` | 当前所有任务的状态和内容 | Agent 读写 |
 | `.claude/recording/` | Session 进度记录，每个 session 一个文件 | Agent 写 |
 | `.claude/decisions.md` | 重大设计决策记录（影响范围 ≥2 模块） | Agent 写 |
@@ -82,8 +82,8 @@
 
 | 归档目标 | 触发条件 | 阈值来源 |
 |---------|---------|---------|
-| task_archive_YYYY-MM.json | Done/Cancelled 任务数超阈值 | settings.json `task_archive_threshold`（默认 20）|
-| recording_YYYY-MM-DD.md | session 文件数超阈值 | settings.json `recording_archive_threshold`（默认 50）|
+| task_archive_YYYY-MM.json | Done/Cancelled 任务数超阈值 | dsettings.json `task_archive_threshold`（默认 20）|
+| recording_YYYY-MM-DD.md | session 文件数超阈值 | dsettings.json `recording_archive_threshold`（默认 50）|
 
 ## 数据所有权
 
