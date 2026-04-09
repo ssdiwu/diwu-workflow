@@ -33,6 +33,7 @@ data = json.load(open(f)) if os.path.exists(f) else {}
 
 sf = '.claude/settings.json'
 settings = json.load(open(sf)) if os.path.exists(sf) else {}
+continuous_mode = settings.get('continuous_mode', True)
 
 tasks = data.get('tasks', [])
 done_ids = {t['id'] for t in tasks if t['status'] == 'Done'}
@@ -96,6 +97,18 @@ if rev:
         notify('InReview 任务已达 ' + str(len(rev)) + ' 个，请人工验收后继续')
         sys.exit(0)
     elif nx:
+        if not continuous_mode:
+            # continuous_mode=false: 不自动续跑，停止等待人工介入
+            done_tasks = [t for t in tasks if t['status'] == 'Done']
+            remaining = [t for t in tasks if t['status'] not in ('Done', 'Cancelled')]
+            summary = (
+                'CONTINUOUS_MODE_COMPLETE - continuous_mode 已关闭\n'
+                '已完成: ' + str(len(done_tasks)) + ' 个任务\n'
+                '下一任务: Task#' + str(nx[0]['id']) + ' ' + nx[0].get('title', '') + ' (InSpec)\n'
+                '剩余: ' + ', '.join('#' + str(t['id']) + '(' + t['status'] + ')' for t in remaining)
+            )
+            print(json.dumps({'decision': 'block', 'reason': summary}))
+            sys.exit(0)
         data['review_used'] = rused + 1
         open(f, 'w').write(json.dumps(data, indent=2, ensure_ascii=False))
         print(json.dumps({
@@ -112,5 +125,17 @@ else:
         open(f, 'w').write(json.dumps(data, indent=2, ensure_ascii=False))
 
 if nx:
+    if not continuous_mode:
+        # continuous_mode=false: 不自动续跑，输出完成摘要
+        done_tasks = [t for t in tasks if t['status'] == 'Done']
+        remaining = [t for t in tasks if t['status'] not in ('Done', 'Cancelled')]
+        summary = (
+            'CONTINUOUS_MODE_COMPLETE - continuous_mode 已关闭\n'
+            '已完成: ' + str(len(done_tasks)) + ' 个任务\n'
+            '下一任务: Task#' + str(nx[0]['id']) + ' ' + nx[0].get('title', '') + ' (InSpec)\n'
+            '剩余: ' + ', '.join('#' + str(t['id']) + '(' + t['status'] + ')' for t in remaining)
+        )
+        print(json.dumps({'decision': 'block', 'reason': summary}))
+        sys.exit(0)
     print(json.dumps({'decision': 'block', 'reason': mk('继续执行下一个任务：', nx[0])}))
     sys.exit(0)

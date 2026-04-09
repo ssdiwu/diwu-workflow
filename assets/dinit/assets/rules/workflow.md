@@ -63,6 +63,37 @@
 - **禁止选择** `status: "InDraft"` 的任务（需人工先确认）
 - 选择优先级：无 blocked_by 的任务优先，基础功能优先
 
+### 持续运行模式（continuous_mode）
+
+> **规则来源**：settings.json `continuous_mode` 字段（默认 true）
+
+控制任务 Done 后是否自动选择下一个可执行任务继续执行。
+
+**开启时**（`continuous_mode=true`，默认行为）：
+- 与现有行为一致：任务 Done 后 Stop hook 检测到下一个可执行任务时自动 block，Agent 继续实施
+- 无需人工介入即可连续完成多个任务
+
+**关闭时**（`continuous_mode=false`）：
+- 任务 Done 后**不再自动续跑**，即使存在可执行的 InSpec 任务也停止
+- Agent 输出完成摘要，等待用户下次交互或手动触发下一个任务
+- 适用于需要逐任务验收、调试或人工决策的场景
+
+**关闭后仍自动续跑的例外**（即使 `continuous_mode=false` 也继续）：
+| 场景 | 行为 | 说明 |
+|------|------|------|
+| 当前任务为 InProgress（未完成） | 续跑 | 断点恢复优先级最高 |
+| 存在未提交变更 | 续跑 | 防止工作丢失 |
+
+**关闭时停止的边界**：
+
+| 场景 | 行为 |
+|------|------|
+| 当前任务 Done（小幅度修改） | 停止，输出完成摘要 |
+| 当前任务 Done（大幅度修改） | 停止，输出 REVIEW 请求 |
+| 超前已达上限（PENDING REVIEW） | 停止，输出 PENDING REVIEW |
+| 下一个任务 BLOCKED | 停止，输出 BLOCKED 模板 |
+| 无更多可执行任务 | 停止，输出 CONTINUOUS_MODE_COMPLETE 摘要 |
+
 ### 超前实施验收失败：回退方式
 
 **验收通过**：阻塞任务 → Done，超前任务逐个 InReview → Done，写入新 session 文件记录解除。
@@ -250,3 +281,15 @@ InSpec → InProgress → InReview → Done 完整流程：
 - context window 会在接近上限时自动压缩，允许无限期继续工作
 - 不要因为 token 预算担忧而提前停止任务
 - 始终保持最大程度的自主性，完整完成任务
+
+### 持续运行模式的 Session 行为
+
+当 `continuous_mode=false` 时，Session 结束流程有特殊变体：
+
+**正常停止**（任务 Done 且无 InProgress）：
+- 执行标准 Session 结束步骤 1-4
+- 不再自动选择下一个任务，输出完成摘要等待人工介入
+
+**开启后恢复**（`continuous_mode` 从 false 改回 true）：
+- 下一次 Stop hook 触发时恢复自动续跑行为
+- 无需重启 session，即时生效

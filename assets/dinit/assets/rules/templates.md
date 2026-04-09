@@ -157,6 +157,20 @@ DECISION TRACE
 | context_monitor_warning | 30 | Context Rot 监控 WARNING 阈值，工具调用次数达到此值时输出提醒（值存储在 settings.json） |
 | context_monitor_critical | 50 | Context Rot 监控 CRITICAL 阈值，达到此值时触发阻塞提醒要求更新 recording/（值存储在 settings.json） |
 | context_monitor_delay | 10 | Context Rot 监控延迟阈值，CRITICAL+DELAY 时检查 recording/ 是否更新，未更新则自动写入 checkpoint（值存储在 settings.json） |
+| continuous_mode | true | 持续运行模式开关：true=任务Done后自动选择下一个InSpec任务继续执行（默认）；false=每完成一个任务即停止等待人工介入（值存储在 settings.json） |
+
+## CONTINUOUS_MODE_COMPLETE 格式
+
+```
+CONTINUOUS MODE COMPLETE - 所有可执行任务已完成
+
+已完成任务: Task#A, Task#B, Task#C
+剩余任务:
+- Task#X: InDraft (待确认)
+- Task#Y: BLOCKED (需人工介入)
+
+Session 统计: 本轮连续完成 N 个任务
+```
 
 ## 验证脚本模板
 

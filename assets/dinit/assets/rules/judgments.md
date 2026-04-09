@@ -128,3 +128,17 @@
 - **反例**：依赖链为 A→B→C（无回边）。结论：允许写入。
 - **边界例**：A→B 与 B→A 藏在不同描述中。结论：仍按循环处理并拒绝写入。
 - **结论输出**：使用 `DECISION TRACE` 记录完整依赖链和合法性检查结果。
+
+---
+
+## continuous_mode 是否应自动续跑
+
+**规则来源**：workflow.md §持续运行模式（continuous_mode）
+
+- **正例**：`continuous_mode=true`（默认）；Task#10 刚 Done；存在 Task#11 为 InSpec 且无阻塞。结论：自动续跑，Stop hook 输出 block 继续 Task#11。
+- **反例**：`continuous_mode=false`；Task#10 刚 Done（小幅度修改）；存在 Task#11 为 InSpec 且无阻塞。结论：不续跑，输出完成摘要停止等待人工介入。
+- **边界例 A**：`continuous_mode=false`；当前任务为 InProgress（未完成）。结论：仍续跑，断点恢复优先级高于 continuous_mode 设置。
+- **边界例 B**：`continuous_mode=false`；存在未提交变更。结论：仍续跑，防止工作丢失优先于 continuous_mode 设置。
+- **边界例 C**：`continuous_mode=true`；Task#10 Done 但为大幅度修改（API 变更）。结论：不续跑，输出 REVIEW 请求等待人工确认（大幅度修改不受 continuous_mode 影响）。
+- **边界例 D**：`continuous_mode=true`；超前已达上限（PENDING REVIEW）。结论：不续跑，输出 PENDING REVIEW 等待验收。
+- **结论输出**：使用 `DECISION TRACE` 记录 continuous_mode 配置值、当前任务状态、是否有未提交变更、候选下一任务列表和最终决策。
