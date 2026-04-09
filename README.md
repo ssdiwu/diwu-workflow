@@ -489,7 +489,6 @@ diwu-workflow/
 │       ├── stop_background.py
 │       ├── stop_blocking.py      # continue机制+完整性检查+归档聚合
 │       └── drift_detect_pre.py    # PreToolUse 退化信号实时检测
-├── init.sh                  # 本仓库开发环境初始化
 └── AGENTS.md                # 多 agent 协作配置（gitignore）
 ```
 
