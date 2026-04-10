@@ -432,7 +432,7 @@ InDraft（草稿）→ InSpec（已锁定）→ InProgress（实施中）→ InR
 ```
 diwu-workflow/
 ├── .claude-plugin/
-│   ├── plugin.json          # 插件描述（v0.7.4）
+│   ├── plugin.json          # 插件描述（v0.7.5）
 │   ├── marketplace.json     # 市场索引
 │   └── agents/              # 内置专家 agents（7 个）
 │       ├── ui-designer.md
@@ -473,26 +473,29 @@ diwu-workflow/
         │   │   ├── file-layout.md   # 文件布局
         │   │   ├── constraints.md  # 架构约束
         │   │   └── README.md       # 规则速查索引
-        │   ├── project-pitfalls.md.template  # 项目高频误判表模板
-        │   └── rules-manifest.json  # 规则文件清单（version 2, 13 文件）
+        │   ├── rules-manifest.json  # 规则文件清单（version 2, 13 文件）
+        │   └── project-pitfalls.md.template  # 项目高频误判表模板
         ├── references/      # 参考资料
         └── sync-rules.sh    # 同步规则文件到 assets/dinit/assets/rules/
 ├── hooks/
 │   ├── hooks.json           # hook 配置（引用 scripts/ 下的外部脚本）
-│   └── scripts/             # hook 脚本（13 个独立 .py 文件）
+│   └── scripts/             # hook 脚本（16 个独立 .py 文件）
 │       ├── user_prompt_submit.py   # 规则注入（mindset独立+constraints 全量+rfs 精简索引）
 │       ├── session_start.py
+│       ├── task_created_validate.py # TaskCreated 任务格式合法性验证
 │       ├── pre_tool_use_bash.py
+│       ├── drift_detect_pre.py      # PreToolUse 退化信号实时检测
+│       ├── inject_errors_decisions.py  # PreToolUse 近期踩坑+决策注入
 │       ├── subagent_start.py
 │       ├── subagent_stop.py
-│       ├── pre_compact.py
-│       ├── post_tool_json_validate.py
-│       ├── stop_background.py
 │       ├── stop_blocking.py      # continue机制+完整性检查+归档聚合
-│       ├── drift_detect_pre.py    # PreToolUse 退化信号实时检测
-│       ├── inject_errors_decisions.py  # PreToolUse 近期踩坑+决策注入
+│       ├── post_tool_json_validate.py
+│       ├── post_tool_reminder.py      # PostToolUse 写后记录提醒
+│       ├── context_monitor.py       # Context Rot 监控 + 只读连击检测
+│       ├── pre_compact.py
 │       ├── post_tool_use_failure.py   # PostToolUseFailure 3-Strike 协议
-│       └── post_tool_reminder.py      # PostToolUse 写后记录提醒
+│       ├── task_completed.py          # TaskCompleted 任务完成提醒
+│       └── stop_background.py
 └── AGENTS.md                # 多 agent 协作配置（gitignore）
 ```
 

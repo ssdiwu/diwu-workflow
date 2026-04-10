@@ -47,7 +47,7 @@ def main():
         sys.exit(0)
 
     event = _get_event_data()
-    session_id = event.get('sessionId', event.get('session_id', ''))
+    session_id = event.get('session_id', event.get('sessionId', ''))
     reminders = []
 
     # Check error buffer for unresolved failures (strike >= 2)

@@ -68,7 +68,7 @@ InSpec → InProgress → InReview → Done 完整流程：
 2. 阅读任务描述/验收条件/实施步骤
 3. [建议] 按项目既有模式实现；推荐顺序：验收测试框架 → 单元测试 → 实现
 4. 文件路径修改后 grep 验证无残留
-5. 按 session.md §验证要求验证
+5. 按 workflow.md §验证要求验证
 6. 通过后改 InReview；小幅度自审 Done，大幅度输出 REVIEW
 
 **大幅度修改**：API/字段变更 或 单任务 >2000 行。其余自审即可。

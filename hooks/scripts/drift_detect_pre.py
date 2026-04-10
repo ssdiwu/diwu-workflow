@@ -13,10 +13,28 @@ SETTINGS_FILE = '.claude/dsettings.json'
 EDIT_STREAK_LIMIT = 5
 DISCUSSION_LIMIT = 8
 LOOP_REPEAT = 3
+_SID_CACHE = None  # cache stdin read since it's consumed on first access
+
+
+def _get_sid():
+    """Get sessionId from stdin event data. Cached — safe to call multiple times."""
+    global _SID_CACHE
+    if _SID_CACHE is not None:
+        return _SID_CACHE
+    try:
+        raw = sys.stdin.read()
+        if raw:
+            event = json.loads(raw)
+            _SID_CACHE = event.get('session_id', event.get('sessionId', str(os.getpid())))
+        else:
+            _SID_CACHE = str(os.getpid())
+    except Exception:
+        _SID_CACHE = str(os.getpid())
+    return _SID_CACHE
 
 
 def _ctx_path():
-    return CTX_PREFIX + str(os.getpid())
+    return CTX_PREFIX + _get_sid()
 
 
 def _load(p):
