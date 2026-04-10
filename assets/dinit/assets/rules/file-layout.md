@@ -20,7 +20,7 @@
 │   ├── smoke.sh
 │   └── task_<id>_verify.sh
 ├── init.sh                        # 环境初始化脚本（可选）
-└── rules/                         # 工作流规则（12 文件）
+└── rules/                         # 工作流规则（13 文件）
     ├── README.md                  # 规则速查索引
     ├── mindset.md                 # 上位心智层（独立注入，非自动加载）
     ├── judgments.md               # 判断锚点（四段式：启动/实施/验收/纠偏）

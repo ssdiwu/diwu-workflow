@@ -403,6 +403,7 @@ DECISION TRACE
 | `Stop` (background) | 回合结束（后台） | `stop_background.py` | git diff --stat 变更快照（session 窗口内去重，不含 untracked 噪声） |
 | `Stop` (blocking) | 回合结束（前台） | `stop_blocking.py` | continue 机制 + 完整性检查(踩坑必填) + 归档聚合(project-pitfalls) |
 | `PostToolUseFailure` | 工具执行失败时 | `post_tool_use_failure.py` | **3-Strike 错误协议**（自动计数+分级提示：诊断/换方法/停手重想） |
+| `TaskCompleted` | 任务完成时 | `task_completed.py` | **任务完成提醒**（确认 recording 已写入 + decisions 已更新） |
 
 ---
 
@@ -449,9 +450,9 @@ diwu-workflow/
 ├── skills/                  # Claude 自动加载的背景知识
 │   ├── ddoc/
 │   │   └── SKILL.md         # /ddoc 框架知识（正向六步法 + 逆向还原）
-│   ├── diwu-prd/
+│   ├── dprd/
 │   │   └── SKILL.md         # PRD 方法论（竞品分析、用户画像、非功能性需求）
-│   └── diwu-demo/
+│   └── ddemo/
 │       └── SKILL.md         # 积木式能力验证方法论（不确定性判断、三层积木模型）
 └── assets/
     └── dinit/               # /dinit 依赖的模板与规则
