@@ -394,14 +394,15 @@ DECISION TRACE
 |------|---------|------|------|
 | `UserPromptSubmit` | 用户发送消息前 | `user_prompt_submit.py` | 注入 lessons + constraints(全量) + mindset(全量/独立) + rules 精简索引 |
 | `SessionStart` | session 启动时 | `session_start.py` | 写主代理 session ID；读取 `.claude/env` 注入环境变量 |
-| `PreToolUse` (Edit\|Write\|Bash) | 编辑/写入/Bash 前 | `drift_detect_pre.py` | 退化信号实时检测（edit_strek/pure_discussion/repetitive_loop/scope_drift），退出码始终 0 |
+| `PreToolUse` (Edit\|Write\|Bash\|Read\|Grep\|Glob) | 大部分工具调用前 | `drift_detect_pre.py` + `pre_tool_use_bash.py` + `inject_errors_decisions.py` | 退化信号检测 + 任务提醒 + **近期踩坑/决策注入**（注意力操纵） |
 | `SubagentStart` | 子代理启动时 | `subagent_start.py` | 自动注入 recording/ 最新摘要 + InProgress 任务 + 最近决策到子代理上下文 |
 | `SubagentStop` | 子代理完成时 | `subagent_stop.py` | 读取 `last_assistant_message` 自动记录子代理产出摘要到 recording/ |
 | `PreCompact` | 对话压缩前 | `pre_compact.py` | 自动保存 InProgress 任务进度快照（git diff --stat）到 recording/ |
-| `PostToolUse` (Write/Edit) | 写入文件后 | `post_tool_json_validate.py` | 自动校验 .json 文件格式，发现错误立即反馈 |
-| `PostToolUse` (通用) | 每次工具调用后 | `context_monitor.py` | Context Rot 监控（WARNING@100次 / CRITICAL@150次）+ 只读连击检测（≥15次提醒） |
+| `PostToolUse` (Write/Edit) | 写入文件后 | `post_tool_json_validate.py` + `post_tool_reminder.py` | JSON 格式校验 + **记录提醒**（含未解决失败检测） |
+| `PostToolUse` (通用) | 每次工具调用后 | `context_monitor.py` | Context Rot 监控（**WARNING@30次 / CRITICAL@50次**）+ 只读连击检测（≥15次提醒） |
 | `Stop` (background) | 回合结束（后台） | `stop_background.py` | git diff --stat 变更快照（session 窗口内去重，不含 untracked 噪声） |
 | `Stop` (blocking) | 回合结束（前台） | `stop_blocking.py` | continue 机制 + 完整性检查(踩坑必填) + 归档聚合(project-pitfalls) |
+| `PostToolUseFailure` | 工具执行失败时 | `post_tool_use_failure.py` | **3-Strike 错误协议**（自动计数+分级提示：诊断/换方法/停手重想） |
 
 ---
 
@@ -431,7 +432,7 @@ InDraft（草稿）→ InSpec（已锁定）→ InProgress（实施中）→ InR
 ```
 diwu-workflow/
 ├── .claude-plugin/
-│   ├── plugin.json          # 插件描述（v0.7.0）
+│   ├── plugin.json          # 插件描述（v0.7.4）
 │   ├── marketplace.json     # 市场索引
 │   └── agents/              # 内置专家 agents（7 个）
 │       ├── ui-designer.md
@@ -478,7 +479,7 @@ diwu-workflow/
         └── sync-rules.sh    # 同步规则文件到 assets/dinit/assets/rules/
 ├── hooks/
 │   ├── hooks.json           # hook 配置（引用 scripts/ 下的外部脚本）
-│   └── scripts/             # hook 脚本（10 个独立 .py 文件）
+│   └── scripts/             # hook 脚本（13 个独立 .py 文件）
 │       ├── user_prompt_submit.py   # 规则注入（mindset独立+constraints 全量+rfs 精简索引）
 │       ├── session_start.py
 │       ├── pre_tool_use_bash.py
@@ -488,7 +489,10 @@ diwu-workflow/
 │       ├── post_tool_json_validate.py
 │       ├── stop_background.py
 │       ├── stop_blocking.py      # continue机制+完整性检查+归档聚合
-│       └── drift_detect_pre.py    # PreToolUse 退化信号实时检测
+│       ├── drift_detect_pre.py    # PreToolUse 退化信号实时检测
+│       ├── inject_errors_decisions.py  # PreToolUse 近期踩坑+决策注入
+│       ├── post_tool_use_failure.py   # PostToolUseFailure 3-Strike 协议
+│       └── post_tool_reminder.py      # PostToolUse 写后记录提醒
 └── AGENTS.md                # 多 agent 协作配置（gitignore）
 ```
 

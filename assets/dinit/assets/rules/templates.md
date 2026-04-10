@@ -58,6 +58,10 @@ DECISION TRACE
 **验收验证**: - [x] [acceptance] ([方法])
 **提交**: commit [hash]
 ### 下一步: [计划]
+### 本次踩坑/经验
+- [类别] 现象 → 根因 → 误判 → 正确做法
+### 错误追踪表（可选）
+| 时间戳 | 工具 | 错误摘要 | 尝试 | 解决方式 | 类别 |
 ```
 
 ## CONTINUOUS_MODE_COMPLETE
@@ -119,6 +123,11 @@ CONTINUOUS MODE COMPLETE - 所有可执行任务已完成
 | commit_enhanced | true | 结构化 commit message 开关（dsettings.json） |
 | checkpoint_min_steps | 5 | 大任务 checkpoint 触发步数门槛（dsettings.json） |
 | checkpoint_min_lines | 500 | 大任务 checkpoint 触发行数门槛（dsettings.json） |
+| error_injection.enabled | true | PreToolUse 错误/决策注入开关（dsettings.json） |
+| error_tracking.enabled | true | PostToolUseFailure 3-Strike 协议开关（dsettings.json） |
+| recording_reminder.enabled | true | PostToolUse 写后记录提醒开关（dsettings.json） |
+| error_injection.max_sessions | 3 | 注入时扫描的最近 session 数量（dsettings.json） |
+| error_cooldown_sec | 60 | 同一工具失败计数的冷却窗口秒数（dsettings.json） |
 
 ## 验证脚本模板
 
