@@ -4,6 +4,7 @@
 
 本项目内嵌完整的 diwu 工作流规则，无需依赖全局配置。
 
+<!-- RULES_PLACEHOLDER: 以下列表由 dinit 根据 rules-manifest.json 动态生成，请勿手动编辑 -->
 @rules/README.md
 @rules/mindset.md
 @rules/judgments.md
@@ -17,6 +18,7 @@
 @rules/templates.md
 @rules/file-layout.md
 @rules/constraints.md
+<!-- END_RULES_PLACEHOLDER -->
 
 ---
 
