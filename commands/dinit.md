@@ -8,13 +8,86 @@ effort: medium
 
 # /dinit — 项目初始化
 
-> 详细操作协议见 `skills/dinit/SKILL.md`（Refresh Protocol / Asset Sync Protocol）
+## 核心原则
+
+- **Source of Truth 是文件系统**：`rules-manifest.json` 决定 rules 列表，`agents/` 目录决定 agent 列表。不硬编码任何文件名。
+- **刷新优先于重建**：已有项目的刷新是增量操作，不破坏用户自定义内容。
+- **幂等性**：重复执行 `/dinit` 不应产生副作用（模板资产覆盖，用户跳过的文件不覆盖）。
 
 ## Step 0：模式检测
 
 检查 `.claude/CLAUDE.md` 是否已存在：
-- **已存在** → **刷新模式**：执行 `skills/dinit/refresh-protocol.md` 定义的 Refresh Protocol（章节补充 + recording 迁移 + 资产同步）
+- **已存在** → **刷新模式**：执行以下 Refresh Protocol
 - **不存在** → **初始化模式**：执行 Step 1 → 7 完整流程
+
+---
+
+### Refresh Protocol（刷新模式）
+
+当 `.claude/CLAUDE.md` 已存在时，按以下步骤增量更新：
+
+#### 1. 检测并插入「工作流规则」章节
+
+搜索 CLAUDE.md 中是否存在 `## 工作流规则` 标题。如果不存在，在 `## 核心原则` 之前插入：
+
+```markdown
+## 工作流规则
+
+详细规则见 @rules/ 目录：
+- @rules/README.md - 规则速查索引
+- @rules/mindset.md - 上位心智层（三唯一框架、五问开工、不确定性门控）【独立注入】
+- @rules/judgments.md - 判断锚点集中管理（四段式：启动/实施/验收/纠偏）
+- @rules/task.md - 任务状态机与 acceptance 格式、blocked_by、提交规范
+- @rules/workflow.md - 任务规划、实施、验证
+- @rules/session.md - Session 生命周期管理
+- @rules/verification.md - 证据优先级体系（L1-L5）
+- @rules/correction.md - 纠偏体系（退化信号→四行重写→止损序列）
+- @rules/pitfalls.md - 误判防护（三层：泛化/项目/接口）
+- @rules/exceptions.md - 异常处理与 BLOCKED 判定
+- @rules/templates.md - 格式模板与可调参数
+- @rules/constraints.md - 架构约束（五维约束设计）
+```
+
+**注意**：上述列表中的规则文件名和数量应来自 `rules-manifest.json` 的 `rules` 数组，不应硬编码。
+
+#### 2. 检测并插入「规则引用说明」章节
+
+搜索是否存在 `## 规则引用说明` 标题。如果不存在，在文件末尾追加：
+
+```markdown
+
+## 规则引用说明
+
+本项目使用 @rules/ 引用自动加载工作流规则。规则文件位于 `.claude/rules/` 目录，由 UserPromptSubmit hook 在每次对话开始时注入。
+```
+
+#### 3. 更新「项目结构」章节
+
+用 Step 1.5 的扫描结果替换 `<!-- SCAN_RESULT_PLACEHOLDER -->` 占位符或更新现有内容。
+
+#### 4. 迁移 recording.md 到 recording/ 目录
+
+检查 `.claude/recording.md` 是否存在。如果存在：
+- 读取内容，按 `## Session YYYY-MM-DD HH:MM:SS` 分隔符识别所有 session
+- 创建 `.claude/recording/` 目录（如不存在）
+- 将每个 session 写入独立文件 `recording/session-YYYY-MM-DD-HHMMSS.md`
+- 迁移完成后将原 `recording.md` 重命名为 `recording.md.backup`
+
+#### 5. 同步 Rules
+
+详见下方 Step 3a（初始化模式和刷新模式共用同一套同步逻辑）。
+
+#### 6. 同步 Agents
+
+详见下方 Step 3b（初始化模式和刷新模式共用同一套同步逻辑）。
+
+**刷新模式不做的事**：
+- 不重新收集项目信息（除非用户主动要求更新）
+- 不覆盖用户在 CLAUDE.md 中的自定义章节（只增补标准章节）
+- 不修改 `.claude/task.json` 中的任务数据
+- 不重新生成 `init.sh` 或 `smoke.sh`
+
+---
 
 ## Step 1：收集项目信息
 
@@ -66,28 +139,32 @@ effort: medium
 
 ## Step 3：同步可分发资产
 
-> 详细规则见 `skills/dinit/asset-sync.md`
-
 按以下类别，从模板目录复制到项目目录（**覆盖旧版本**，确保用户拿到最新定义）：
 
-| 资产类型 | 源目录 | 目标目录 | 清单来源 |
-|---------|--------|---------|---------|
-| rules | `${PLUGIN}/assets/dinit/assets/rules/` | `.claude/rules/` | `rules-manifest.json` 的 `rules` 数组 |
-| agents | `${PLUGIN}/assets/dinit/assets/agents/` | `.claude/agents/` | 动态扫描 `*.md` |
+| 资产类型 | 源目录 | 目标目录 | 清单来源 | 冲突策略 |
+|---------|--------|---------|---------|---------|
+| rules | `${PLUGIN}/assets/dinit/assets/rules/` | `.claude/rules/` | `rules-manifest.json` 的 `rules` 数组 | 覆盖 |
+| agents | `${PLUGIN}/assets/dinit/assets/agents/` | `.claude/agents/` | 动态扫描 `*.md` | 覆盖 |
 
-**操作步骤**：
+其中 `${PLUGIN}` = `${CLAUDE_PLUGIN_ROOT}` 或插件根目录绝对路径。
 
 ### 3a. 同步 Rules
-1. 清理孤立文件：删除 `.claude/rules/` 下不在 `rules-manifest.json` `rules` 数组中的文件
+
+1. 清理孤立文件：删除 `.claude/rules/` 下不在 `rules-manifest.json` `rules` 数组中的文件（如旧的 `states.md`）
 2. 读取 `${PLUGIN}/assets/dinit/assets/rules-manifest.json`
 3. 按 `rules` 数组逐一复制到 `.claude/rules/`
 4. 输出：已同步的规则文件数量和名称
 
+**为什么 rules 用 manifest 而非动态扫描？** — Rules 有严格排序语义和版本字段，需要显式清单保证一致性。
+
 ### 3b. 同步 Agents
+
 1. 创建 `.claude/agents/` 目录（如不存在）
 2. 动态扫描 `${PLUGIN}/assets/dinit/assets/agents/` 下所有 `.md` 文件
 3. 逐一复制到 `.claude/agents/`（覆盖旧版本）
 4. 输出：已复制的 agent 文件名及数量
+
+**为什么 agents 用动态扫描？** — Agents 是扁平列表无排序依赖，目录即清单。新增 agent 只需放一个 `.md` 文件，零配置成本。
 
 ## Step 4：创建项目配置文件
 
@@ -95,7 +172,7 @@ effort: medium
 读取 `${PLUGIN}/assets/dinit/assets/claude-md-portable.template`，执行以下填充后写入 `.claude/CLAUDE.md`：
 - 填入项目信息占位符（名称/描述/技术栈/命令/目录）
 - 替换 `<!-- SCAN_RESULT_PLACEHOLDER -->` 为 Step 1.5 的扫描结果
-- 替换 `<!-- RULES_PLACEHOLDER -->` 到 `<!-- END_RULES_PLACEHOLDER -->` 之间的内容为根据 `rules-manifest.json` 动态生成的 `@rules/` 列表（详见 `asset-sync.md` §CLAUDE.md 规则列表动态生成）
+- 替换 `<!-- RULES_PLACEHOLDER -->` 到 `<!-- END_RULES_PLACEHOLDER -->` 之间的内容为根据 `rules-manifest.json` 动态生成的 `@rules/` 列表
 
 **不得**创建 `.claude/assets/rules/` 或其他子目录。
 
