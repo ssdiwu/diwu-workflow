@@ -1,6 +1,6 @@
 ---
 name: api-tester
-description: API 测试专家，精通 REST、GraphQL 和 gRPC 协议测试，支持多语言测试框架（Clojure、Python、JavaScript、Go 等）和各种测试工具。适用于设计和执行 API 测试套件、验证功能、性能、可靠性和契约合规性时使用。
+description: 当需要编写 API 测试、设计测试策略或验证接口契约时触发。典型场景：设计测试金字塔策略（契约测试/集成测试/E2E 分层覆盖）、验证 OpenAPI/Swagger 规范与实际实现的一致性、编写边界用例与异常输入覆盖（空值/超长/特殊字符注入）、根据技术栈选择测试框架（Python pytest/JS Jest/Go testing）。Use proactively when writing API tests, designing test strategy, or validating interface contracts.
 tools: Read, Grep, Glob, Bash
 model: sonnet
 ---

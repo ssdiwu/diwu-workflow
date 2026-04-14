@@ -1,6 +1,6 @@
 ---
 name: frontend-architect
-description: 前端架构专家，擅长现代前端框架的组件架构、状态管理和性能优化，适用于复杂前端应用的架构设计与实施
+description: 当需要做前端技术选型、重构前端架构或优化加载性能时触发。典型场景：对比并选择状态管理方案（Redux/Zustand/Pinia/Jotai 适用边界）、评审组件架构（原子设计/复合组件拆分粒度）、制定构建优化策略（code splitting/tree shaking/lazy loading）、分析包体积并规划按需加载路径。Use proactively when doing frontend tech selection, refactoring architecture, or optimizing bundle size.
 tools:
   - Read
   - Grep

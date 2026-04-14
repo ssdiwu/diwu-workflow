@@ -1,6 +1,6 @@
 ---
 name: backend-architect
-description: 后端架构专家，专注于设计健壮、可扩展的服务端系统、API 和数据库架构。适用于设计后端系统、API 架构、数据库设计、性能优化或需要后端技术方案时使用。
+description: 当需要设计新 API、选型数据库或排查服务端性能问题时触发。典型场景：评审 RESTful/GraphQL schema 设计（请求格式/版本控制/错误处理）、审查数据库 schema 与索引策略（规范化 vs 反范式化）、评估服务端分层架构选型（MVC/CQRS/微服务）、设计缓存策略（本地缓存/Redis/CDN 层级）。Use proactively when designing APIs, choosing database tech, or diagnosing backend performance.
 tools: Read, Grep, Glob, Bash
 model: sonnet
 ---

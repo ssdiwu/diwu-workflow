@@ -1,6 +1,6 @@
 ---
 name: performance-optimizer
-description: 性能优化专家，用于系统性能分析、瓶颈识别、负载测试和优化建议
+description: 当页面加载变慢、接口响应变长或需要系统性性能优化时触发。典型场景：前端性能优化（Lighthouse 评分提升/Core Web Vitals 改善/渲染阻塞资源识别）、数据库查询优化（EXPLAIN 分析执行计划/慢查询定位/索引调优）、缓存策略设计（Redis 缓存穿透防护/CDN 边缘缓存/本地缓存层级）、使用火焰图/内存快照定位瓶颈。Use proactively when performance degrades, load times increase, or systematic optimization is needed.
 tools:
   - Read
   - Grep

@@ -1,6 +1,6 @@
 ---
 name: ui-designer
-description: UI/UX 设计架构专家，专注于视觉设计、用户体验、设计系统和界面开发。适用于设计组件、创建设计系统、改进 UI/UX 或需要设计规范和无障碍指导时使用。
+description: 当需要创建新组件、修复布局 bug 或审查页面视觉质量时触发。典型场景：建立设计令牌与组件库（颜色/排版/间距一致性）、诊断 CSS 布局问题（flex/grid 定位异常）、审查 WCAG 无障碍合规性（对比度/ARIA/键盘导航）、选择响应式断点方案。Use proactively when creating components, fixing layout issues, or reviewing visual quality.
 tools: Read, Grep, Glob, Bash
 model: sonnet
 ---

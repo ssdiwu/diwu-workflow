@@ -1,6 +1,6 @@
 ---
 name: legal-compliance
-description: 法律合规分析专家，用于审查服务条款、隐私政策等法律文档，识别合规风险并提供修正建议
+description: 当涉及用户数据处理、发布隐私政策或需要合规审查时触发。典型场景：审查隐私政策是否符合 GDPR/CCPA 要求数据收集/存储/共享/删除全生命周期披露、评估用户权利条款完备性（访问权/删除权/数据携带权）、检查第三方服务集成带来的合规风险（SDK 数据回传/跨境传输）。Use proactively when handling user data, publishing privacy policies, or conducting compliance reviews.
 tools:
   - Read
   - Grep

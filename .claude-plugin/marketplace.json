@@ -1,1 +1,17 @@
-{"name": "ssdiwu", "description": "diwu 编码工作流插件集（v1.0 规则体系重构）", "owner": {"name": "ssdiwu"}, "plugins": [{"name": "diwu-workflow", "version": "0.7.5", "description": "diwu 编码工作流套件：项目初始化、任务规划、产品需求文档、架构决策记录、产品文档、纠偏恢复。v1.0 核心变化：规则体系重构 / 纠偏机制 / 证据优先级 / 误判防护", "source": "./", "category": "productivity", "homepage": "https://github.com/ssdiwu/diwu-workflow"}]}
+{
+    "name": "ssdiwu",
+    "description": "diwu \u7f16\u7801\u5de5\u4f5c\u6d41\u63d2\u4ef6\u96c6\uff08v1.0 \u89c4\u5219\u4f53\u7cfb\u91cd\u6784\uff09",
+    "owner": {
+        "name": "ssdiwu"
+    },
+    "plugins": [
+        {
+            "name": "diwu-workflow",
+            "version": "0.7.7",
+            "description": "diwu \u7f16\u7801\u5de5\u4f5c\u6d41\u5957\u4ef6\uff1a\u9879\u76ee\u521d\u59cb\u5316\u3001\u4efb\u52a1\u89c4\u5212\u3001\u4ea7\u54c1\u9700\u6c42\u6587\u6863\u3001\u67b6\u6784\u51b3\u7b56\u8bb0\u5f55\u3001\u4ea7\u54c1\u6587\u6863\u3001\u7ea0\u504f\u6062\u590d\u3002v1.0 \u6838\u5fc3\u53d8\u5316\uff1a\u89c4\u5219\u4f53\u7cfb\u91cd\u6784 / \u7ea0\u504f\u673a\u5236 / \u8bc1\u636e\u4f18\u5148\u7ea7 / \u8bef\u5224\u9632\u62a4",
+            "source": "./",
+            "category": "productivity",
+            "homepage": "https://github.com/ssdiwu/diwu-workflow"
+        }
+    ]
+}

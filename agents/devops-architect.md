@@ -1,6 +1,6 @@
 ---
 name: devops-architect
-description: DevOps 架构专家，擅长 CI/CD 流水线设计、云基础设施配置、监控系统搭建和部署自动化
+description: 当需要搭建 CI/CD 流水线、容器化应用或设计部署流程时触发。典型场景：设计 GitHub Actions/GitLab CI 流水线（构建/测试/部署阶段编排）、编写 Docker Compose/K8s 容器化配置、选择部署策略（蓝绿部署/金丝雀发布/滚动更新）、配置 Prometheus/Grafana 监控告警规则。Use proactively when setting up CI/CD, containerizing apps, or designing deployment pipelines.
 tools:
   - Read
   - Grep

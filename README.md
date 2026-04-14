@@ -363,26 +363,164 @@ DECISION TRACE
 
 ---
 
-## 内置 Agents
+## 内置 Agents（10 个，自定义 Agent 分层架构）
 
-### 插件级（所有使用插件的项目可用）
+### 分层总览
 
-| Agent | 专长 |
-|-------|------|
-| `ui-designer` | UI/UX 设计架构，组件系统、设计决策 |
-| `backend-architect` | 后端架构，API 设计、数据模型、性能 |
-| `frontend-architect` | 前端架构，状态管理、构建优化 |
-| `api-tester` | API 测试，多语言（Python / JS / Go / Clojure） |
-| `devops-architect` | DevOps，CI/CD、容器化、基础设施 |
-| `performance-optimizer` | 性能优化，瓶颈分析、缓存策略 |
-| `legal-compliance` | 法律合规，隐私框架（GDPR/CCPA）、服务条款、知识产权、消费者保护 |
+#### 职责层（按工作流角色划分）
 
-### 项目级（/dinit 初始化时创建到 `.claude/agents/`）
+| 层级 | Agent 数量 | 定位 | 触发方式 |
+|------|-----------|------|---------|
+| **核心层** | 3 个 | 工作流主链角色：探索、实施、验收 | 自动委派 / 主代理调度 |
+| **领域层** | 7 个 | 按需可用的专家顾问，处理特定技术领域问题 | 自然语言描述 / @mention |
+
+#### 部署层（按 Claude Code 加载位置划分）
+
+| 层级 | Agent 数量 | 存放位置 | 说明 |
+|------|-----------|---------|------|
+| **项目级** | 3 个 | `.claude/agents/` | `explorer`、`implementer`、`verifier`，随项目上下文一起工作 |
+| **插件级** | 7 个 | `agents/` | 7 个领域专家，由插件提供通用顾问能力 |
+
+**选择指南**：日常任务流转走核心层（explorer → implementer → verifier）；遇到特定技术领域问题时召唤领域层专家。`verifier` 在职责上属于核心层，但在部署上属于项目级 Agent，因为它需要读取项目内的 `.claude/task.json`、acceptance 和状态机。
+
+---
+
+### 核心 Agent（工作流闭环的三个角色）
+
+#### explorer — 探索者（只读）
+
+| 属性 | 说明 |
+|------|------|
+| **定位** | 只读探索代码库，不修改文件，保护主对话上下文不被探索过程污染 |
+| **权限模式** | `plan`（只读） |
+| **工具集** | Read、Grep、Glob、LSP、WebSearch、WebFetch |
+| **最大轮次** | 20 |
+| **典型场景** | 代码库调查、架构分析、文件搜索、依赖追踪、技术调研、模块边界识别 |
+| **工作流衔接点** | InProgress 前的「先探索验证」路径；子代理策略中的只读探索角色 |
+
+#### implementer — 实施者（唯一可写角色）
+
+| 属性 | 说明 |
+|------|------|
+| **定位** | 代码修改、功能实现、bug 修复，核心层中唯一拥有写权限的角色 |
+| **权限模式** | `acceptEdits`（自动接受编辑） |
+| **工具集** | Read、Grep、Glob、Edit、Write、Bash、LSP |
+| **最大轮次** | 100 |
+| **典型场景** | 功能实现、bug 修复、重构执行、配置变更、测试编写 |
+| **工作流衔接点** | InSpec → InProgress 后的主实施者；并行子代理中的写操作执行者；交接清单的产出方 |
+
+#### verifier — 验证者（独立验收）
+
+| 属性 | 说明 |
+|------|------|
+| **定位** | 独立验收，从 acceptance 反推可观测事实并验证实现是否达标。核心理念：Task completion ≠ Goal achievement |
+| **权限模式** | `plan`（只读） |
+| **工具集** | Read、Grep、Glob、Bash |
+| **最大轮次** | 30 |
+| **典型场景** | 任务 InReview 后自动触发；独立于实施者运作，防止"自说自话"宣称完成 |
+| **工作流衔接点** | InReview → Done 的守门人；输出三档报告驱动状态转移决策 |
+
+**verifier 完整工作流**：
+
+```
+任务 InReview → verifier 被派发
+    ↓
+Step 1: 读 task.json 提取 acceptance（GWT 解析：Given/When/Then）
+    ↓
+Step 2: 从 Then 子句反推可观测事实
+        （文件存在？签名匹配？行为正确？测试通过？产物生成？）
+    ↓
+Step 3: 独立验证（文件级 Grep/Read/Glob → 脚本级 Bash 执行 → 请求级 curl/CLI）
+    ↓
+Step 4: Stub Pattern 扫描（6 类：TODO/FIXME、占位字符串、空实现、
+        硬编码数据、未实现异常、废弃标记）
+    ↓
+Step 5: 输出三档报告
+        ├─ PASSED     — 全部 L1-L3 证据 + Stub CLEAN
+        ├─ GAPS_FOUND — 部分缺乏证据或发现 stub → 给修复方向
+        └─ HUMAN_NEEDED — 超出工具判断能力 → 明确列出需人工确认项
+```
+
+**verifier 铁律**：
+1. 不读 `recording/` 目录（避免被实施者叙述影响）
+2. 不信任 implementer 自述（只信工具独立观测的事实）
+3. 不假设"代码改了 = 功能做了"（必须运行态验证）
+4. 遇不确定输出 `HUMAN_NEEDED`（绝不猜测）
+
+---
+
+### 领域 Agent（按需召唤的专家顾问）
+
+| Agent | 中文名 | 触发时机 | 典型场景 |
+|-------|--------|---------|---------|
+| `ui-designer` | UI 设计师 | 涉及 UI/UX 设计决策时 | 组件设计系统、无障碍合规、CSS/布局诊断、设计 token 规范 |
+| `backend-architect` | 后端架构师 | 涉及服务端架构时 | API 设计、数据库 schema、服务拆分、性能瓶颈、缓存策略 |
+| `frontend-architect` | 前端架构师 | 涉及前端架构时 | 状态管理选型、组件架构、构建优化、bundle 分析 |
+| `api-tester` | API 测试员 | 涉及测试策略时 | 契约测试、边界用例、多语言测试框架（Python/JS/Go/Clojure） |
+| `devops-architect` | DevOps 架构师 | 涉及运维部署时 | CI/CD 流水线、容器化策略、基础设施即代码、监控告警 |
+| `performance-optimizer` | 性能优化师 | 涉及性能问题时 | 瓶颈分析、前端加载优化、数据库查询优化、缓存策略设计 |
+| `legal-compliance` | 法律合规顾问 | 涉及法规要求时 | 隐私政策（GDPR/CCPA）、数据处理合规、用户权利、知识产权 |
+
+> 领域 Agent 通过自然语言描述或 `@agent-name` 方式触发，不参与自动任务流转。它们是独立开发者的「专家咨询台」，在需要专业领域知识时按需调用。
+
+---
+
+### 项目级 Agent（/dinit 初始化时创建）
 
 | Agent | permissionMode | maxTurns | 用途 |
 |-------|---------------|----------|------|
-| `explorer` | plan（只读） | 20 | 代码库调查、架构分析、文件搜索、技术调研 |
-| `implementer` | acceptEdits（自动接受编辑） | 100 | 代码修改、功能实现、bug 修复、重构执行 |
+| `explorer` | plan（只读） | 20 | 代码库调查、架构分析、文件搜索、技术调研（核心层：探索者） |
+| `implementer` | acceptEdits（自动接受编辑） | 100 | 代码修改、功能实现、bug 修复、重构执行（核心层：实施者） |
+| `verifier` | plan（只读） | 30 | 独立验收、从 acceptance 反推可观测事实并输出验证报告（核心层：验证者） |
+
+> 项目级 Agent 位于 `.claude/agents/` 目录，由 `/dinit` 从模板复制生成。每个初始化后的项目拥有独立副本，可按项目需求定制 description 和工具集。`verifier` 放在这里而不是插件根目录，是因为它必须读取项目内的 `.claude/task.json` 和当前任务状态。
+
+---
+
+### Agent 使用指南
+
+#### 如何触发 Agent
+
+| 方式 | 说明 | 示例 |
+|------|------|------|
+| **自然语言描述** | 在对话中描述需要某类专家协助 | "帮我分析一下这个 API 的性能瓶颈" → 自动匹配合适的领域 Agent |
+| **@mention** | 直接指定 Agent 名称 | "@backend-architect 帮我设计用户认证的 API schema" |
+| **自动委派** | 核心层 Agent 由工作流自动调度 | InProgress → implementer；InReview → verifier；探索阶段 → explorer |
+
+#### 核心 vs 领域选择指南
+
+```
+问题类型判断：
+├─ 是代码修改/实现？       → implementer（核心层）
+├─ 是代码库探索/调查？     → explorer（核心层）
+├─ 是任务完成后的验收？   → verifier（核心层）
+├─ 是 UI/UX 相关？         → ui-designer（领域层）
+├─ 是后端/API/数据库？     → backend-architect（领域层）
+├─ 是前端/状态管理/构建？  → frontend-architect（领域层）
+├─ 是测试策略/契约测试？   → api-tester（领域层）
+├─ 是 CI/CD/部署/运维？    → devops-architect（领域层）
+├─ 是性能优化？            → performance-optimizer（领域层）
+└─ 是法律/合规/隐私？      → legal-compliance（领域层）
+```
+
+#### verifier 典型工作流示例
+
+```
+1. implementer 完成 Task#12（用户注册功能），标记 InReview
+2. 主代理调度 verifier 验证 Task#12
+3. verifier 读 task.json → 提取 3 条 GWT acceptance
+4. 反推可观测事实：
+   - GWT-1: Given 用户邮箱 When POST /api/register Then 返回 201 + user ID
+     → 反推: curl -X POST http://localhost:3000/api/register 断言 HTTP 201 + body 含 id
+   - GWT-2: Given 重复邮箱 When 注册 Then 返回 409
+     → 反推: 相同邮箱二次注册断言 HTTP 409
+   - GWT-3: Given 无效邮箱格式 When 注册 Then 返回 400 + 错误信息
+     → 反推: 非法格式断言 HTTP 400 + body 含 error 字段
+5. Bash 执行请求验证 → Glob/Grep 检查路由定义 → Read 检查字段签名
+6. Stub 扫描 → 发现 0 个非测试 stub
+7. 输出: VERIFICATION REPORT Task#12 Status: PASSED
+8. 主代理判定: 小幅度修改 + PASSED → 自审 Done
+```
 
 ---
 
@@ -433,13 +571,21 @@ InDraft（草稿）→ InSpec（已锁定）→ InProgress（实施中）→ InR
 ```
 diwu-workflow/
 ├── .claude-plugin/
-│   ├── plugin.json          # 插件描述（v0.7.5）
-│   ├── marketplace.json     # 市场索引
-│   └── agents/              # 内置专家 agents（7 个）
-│       ├── ui-designer.md
-│       ├── backend-architect.md
-│       └── ...
-├── commands/                # 用户主动触发的命令（7 个）
+│   ├── plugin.json          # 插件描述（v0.7.7）
+│   └── marketplace.json     # 市场索引
+├── .claude/
+│   └── agents/              # 项目级 agents（3 个：explorer / implementer / verifier）
+│       ├── explorer.md
+│       ├── implementer.md
+│       └── verifier.md      # 核心层：独立验证者
+├── agents/                  # 插件级领域 agents（7 个）
+│   ├── ui-designer.md
+│   ├── backend-architect.md
+│   ├── frontend-architect.md
+│   ├── api-tester.md
+│   ├── devops-architect.md
+│   ├── performance-optimizer.md
+│   └── legal-compliance.md
 │   ├── dinit.md             # 初始化工作流结构（13 rules + 迁移检测）
 │   ├── dprd.md              # 生成产品需求文档（PRD）
 │   ├── dadr.md              # 记录架构决策（ADR）
@@ -458,7 +604,7 @@ diwu-workflow/
     └── dinit/               # /dinit 依赖的模板与规则
         ├── assets/
         │   ├── *.template       # CLAUDE.md / task.json / dsettings.json 等模板
-        │   ├── agents/          # 项目级 agents 模板（explorer / implementer）
+        │   ├── agents/          # 项目级 agents 模板（explorer / implementer / verifier）
         │   ├── env.example      # 环境变量示例文件
         │   ├── rules/            # 规则源文件（13 文件，含 README.md）
         │   │   ├── mindset.md      # 上位心智层（独立注入）
