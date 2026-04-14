@@ -1,4 +1,5 @@
 ---
+name: verifier
 description: "独立验证专家。在任务标记 InReview 后启动，从 acceptance 反推可观测事实，独立验证实现是否达标。不信任实现者的自述。"
 permissionMode: plan
 memory: project
