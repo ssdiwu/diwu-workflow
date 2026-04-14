@@ -56,13 +56,13 @@
 - [约定2：例如 函数式组件 + hooks]
 - [约定3：例如 遵循项目既有命名风格]
 
-## Compact Instructions
+## 压缩指令
 
-When compacting conversation history, always preserve:
-- Current InProgress task ID, title, and full acceptance criteria
-- Blocked status with specific blocking reasons and blocked_by task IDs
-- Pending Change Requests (CR number, status, and proposed changes)
-- Current session's uncommitted work and verification results
+当压缩对话历史时，必须保留以下关键信息：
+- 当前 InProgress 任务 ID、标题及完整 acceptance 条件
+- Blocked 状态及具体阻塞原因和 blocked_by 任务 ID
+- 待处理的变更请求（CR 编号、状态及建议方案）
+- 当前 session 的未提交工作及验证结果
 
 ## 项目特定约束（可选）
 
