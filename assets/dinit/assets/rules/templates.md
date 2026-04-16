@@ -64,6 +64,12 @@ DECISION TRACE
 | 时间戳 | 工具 | 错误摘要 | 尝试 | 解决方式 | 类别 |
 ```
 
+**禁止 YAML front matter**：Session 文件**禁止**以 `---` 开头或包含 `---...---` 包裹。`---` 在 Markdown 中是 front matter 语法，渲染器会将包裹内容当作元数据隐藏。Session 文件必须直接以 `## Session` 开头。
+
+- **正例**：文件第一行就是 `## Session 2026-04-14 18:44:09`
+- **反例**：文件开头写 `---` 再跟 `## Session ...`（整篇内容被渲染器隐藏）
+- **反例**：文件末尾加闭合 `---`（中间内容被当作 front matter 元数据）
+
 ## CONTINUOUS_MODE_COMPLETE
 
 ```
