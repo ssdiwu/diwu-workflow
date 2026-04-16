@@ -86,6 +86,7 @@ effort: medium
 - 不覆盖用户在 CLAUDE.md 中的自定义章节（只增补标准章节）
 - 不修改 `.claude/task.json` 中的任务数据
 - 不重新生成 `init.sh` 或 `smoke.sh`
+- 不要求用户手动清理旧版本规则文件；刷新时应自动识别并覆盖标准资产
 
 ---
 
@@ -139,12 +140,12 @@ effort: medium
 
 ## Step 3：同步可分发资产
 
-按以下类别，从模板目录复制到项目目录（**覆盖旧版本**，确保用户拿到最新定义）：
+按以下类别，从模板目录同步到项目目录（先比较内容，再按需写入/覆盖；rules 仍保留孤立文件清理）：
 
 | 资产类型 | 源目录 | 目标目录 | 清单来源 | 冲突策略 |
 |---------|--------|---------|---------|---------|
-| rules | `${PLUGIN}/assets/dinit/assets/rules/` | `.claude/rules/` | `rules-manifest.json` 的 `rules` 数组 | 覆盖 |
-| agents | `${PLUGIN}/assets/dinit/assets/agents/` | `.claude/agents/` | 动态扫描 `*.md` | 覆盖 |
+| rules | `${PLUGIN}/assets/dinit/assets/rules/` | `.claude/rules/` | `rules-manifest.json` 的 `rules` 数组 | 按需写入/覆盖 |
+| agents | `${PLUGIN}/assets/dinit/assets/agents/` | `.claude/agents/` | 动态扫描 `*.md` | 按需写入/覆盖 |
 
 其中 `${PLUGIN}` = `${CLAUDE_PLUGIN_ROOT}` 或插件根目录绝对路径。
 
@@ -152,8 +153,11 @@ effort: medium
 
 1. 清理孤立文件：删除 `.claude/rules/` 下不在 `rules-manifest.json` `rules` 数组中的文件（如旧的 `states.md`）
 2. 读取 `${PLUGIN}/assets/dinit/assets/rules-manifest.json`
-3. 按 `rules` 数组逐一复制到 `.claude/rules/`
-4. 输出：已同步的规则文件数量和名称
+3. 按 `rules` 数组逐一比较源文件与目标文件内容：
+   - 目标不存在 → 写入，标记 `NEW`
+   - 目标存在且内容一致 → 跳过，标记 `SAME`
+   - 目标存在且内容不同 → 用源文件覆盖，标记 `UPDATED`
+4. 输出：已同步的规则文件数量、名称和状态（`NEW` / `SAME` / `UPDATED`）
 
 **为什么 rules 用 manifest 而非动态扫描？** — Rules 有严格排序语义和版本字段，需要显式清单保证一致性。
 
@@ -161,8 +165,11 @@ effort: medium
 
 1. 创建 `.claude/agents/` 目录（如不存在）
 2. 动态扫描 `${PLUGIN}/assets/dinit/assets/agents/` 下所有 `.md` 文件
-3. 逐一复制到 `.claude/agents/`（覆盖旧版本）
-4. 输出：已复制的 agent 文件名及数量
+3. 逐一比较源文件与目标文件内容：
+   - 目标不存在 → 写入，标记 `NEW`
+   - 目标存在且内容一致 → 跳过，标记 `SAME`
+   - 目标存在且内容不同 → 用源文件覆盖，标记 `UPDATED`
+4. 输出：已复制的 agent 文件名、数量和状态
 
 **为什么 agents 用动态扫描？** — Agents 是扁平列表无排序依赖，目录即清单。新增 agent 只需放一个 `.md` 文件，零配置成本。
 
@@ -230,9 +237,11 @@ effort: medium
 - [ ] `.claude/rules/` 下有 N 个 rules 文件
 - [ ] `.claude/rules/` 下不存在 `states.md`（已替换为新版规则集）
 - [ ] `.claude/rules/states.md.backup` 仅在检测到旧版时存在
+- [ ] 刷新时能识别并覆盖内容变化的标准 rules 文件（例如 `templates.md`）
 
 **Agents（M = agents/ 目录下 *.md 数量）**：
 - [ ] `.claude/agents/` 目录存在且包含 M 个 agent 文件
+- [ ] 刷新时能识别并覆盖内容变化的标准 agent 文件
 
 **可选文件**：
 - [ ] `.claude/lessons.md` 存在
