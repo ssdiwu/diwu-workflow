@@ -571,7 +571,7 @@ InDraft（草稿）→ InSpec（已锁定）→ InProgress（实施中）→ InR
 ```
 diwu-workflow/
 ├── .claude-plugin/
-│   ├── plugin.json          # 插件描述（v0.7.7）
+│   ├── plugin.json          # 插件描述（v0.8.0）
 │   └── marketplace.json     # 市场索引
 ├── .claude/
 │   └── agents/              # 项目级 agents（3 个：explorer / implementer / verifier）
