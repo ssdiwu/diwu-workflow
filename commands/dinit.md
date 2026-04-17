@@ -131,7 +131,7 @@ effort: medium
    - 两个条件同时满足 → 检测到旧版
 
 2. **检测旧运行时目录迁移需求**：
-   - 检查 `.claude/task.json`、`.claude/recording/`、`.claude/decisions.md`、`.claude/dsettings.json`、`.claude/project-pitfalls.md`、`.claude/archive/`、`.claude/continue-here.md` 是否存在任一旧运行时文件
+   - 检查 `.claude/task.json`、`.claude/recording/`、`.claude/decisions.md`、`.claude/dsettings.json`、`.claude/project-pitfalls.md`、`.claude/archive/`、`.claude/continue-here.md`、`.claude/checks/` 是否存在任一旧运行时文件
    - 检查 `.diwu/` 是否**不存在**
    - 两个条件同时满足 → 输出迁移指引或执行自动迁移：将上述旧运行时文件迁移到 `.diwu/`，保留 `.claude/CLAUDE.md`、`rules/`、`agents/`、`skills/` 等 Claude 原生机制目录不动
 
