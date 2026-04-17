@@ -2,6 +2,7 @@
 AGENTS.md
 *.local.json
 .claude/
+.diwu/
 .doc/
 sync-rules.sh
 __pycache__/
