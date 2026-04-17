@@ -26,7 +26,7 @@
 
 [1-2 句话描述项目是什么、做什么]
 
-> 详细的任务定义见 task.json
+> 详细功能说明见项目根目录 README.md。详细的任务定义见 .diwu/task.json
 
 ## 技术栈
 
@@ -59,13 +59,17 @@
 /
 ├── .claude/
 │   ├── CLAUDE.md          # 本文件
+│   └── rules/
+│       └── constraints.md # 架构约束（可选）
+├── .diwu/
 │   ├── task.json          # 任务定义（source of truth）
 │   ├── recording/         # Session 进度记录目录
 │   │   └── session-YYYY-MM-DD-HHMMSS.md
 │   ├── checks/
 │   │   └── smoke.sh       # 基线验证脚本
-│   └── rules/
-│       └── constraints.md # 架构约束（可选）
+│   ├── archive/           # 归档目录
+│   ├── continue-here.md   # 会话续接（可选）
+│   └── decisions.md       # 设计决策记录（可选）
 ├── AGENTS.md              # 跨 AI 工具入口
 ├── init.sh                # 环境初始化脚本
 └── [项目目录]/

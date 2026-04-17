@@ -1,6 +1,6 @@
 ---
 name: dinit
-description: 初始化项目的 Claude Code Agent 工作流结构，创建 CLAUDE.md、task.json、recording/ 目录、init.sh、smoke.sh，同步 rules 与 agents
+description: 初始化项目的 Claude Code Agent 工作流结构，创建 CLAUDE.md、.diwu/task.json、.diwu/recording/、init.sh、.diwu/checks/smoke.sh，同步 rules 与 agents
 argument-hint: [项目描述（可选）]
 allowed-tools: Read, Write, Edit, Bash, Glob
 effort: medium
@@ -69,7 +69,7 @@ effort: medium
 
 检查 `.claude/recording.md` 是否存在。如果存在：
 - 读取内容，按 `## Session YYYY-MM-DD HH:MM:SS` 分隔符识别所有 session
-- 创建 `.claude/recording/` 目录（如不存在）
+- 创建 `.diwu/recording/` 目录（如不存在）
 - 将每个 session 写入独立文件 `recording/session-YYYY-MM-DD-HHMMSS.md`
 - 迁移完成后将原 `recording.md` 重命名为 `recording.md.backup`
 
@@ -84,7 +84,7 @@ effort: medium
 **刷新模式不做的事**：
 - 不重新收集项目信息（除非用户主动要求更新）
 - 不覆盖用户在 CLAUDE.md 中的自定义章节（只增补标准章节）
-- 不修改 `.claude/task.json` 中的任务数据
+- 不修改 `.diwu/task.json` 中的任务数据
 - 不重新生成 `init.sh` 或 `smoke.sh`
 - 不要求用户手动清理旧版本规则文件；刷新时应自动识别并覆盖标准资产
 
@@ -109,7 +109,7 @@ effort: medium
 
 ## Step 1.5：代码库扫描
 
-从 `.claude/dsettings.json` 读取 `subagent_concurrency` 参数（默认 3），使用子代理并行扫描代码库：
+从 `.diwu/dsettings.json` 读取 `subagent_concurrency` 参数（默认 3），使用子代理并行扫描代码库：
 
 **扫描任务**（并行执行）：
 1. **目录结构扫描**：识别主要目录层级、文件分布、模块组织方式
@@ -123,20 +123,25 @@ effort: medium
 
 ## Step 2：旧版迁移检测（复制资产之前执行）
 
-检测项目是否使用旧版 diwu-workflow（v0.x）：
+检测项目是否使用旧版 diwu-workflow（v0.x）或旧运行时目录结构：
 
 1. **检测旧版标志**：
    - 检查 `.claude/rules/states.md` 是否存在
    - 检查 `.claude/rules/task.md` 是否**不存在**
    - 两个条件同时满足 → 检测到旧版
 
-2. **如检测到旧版，执行迁移**：
+2. **检测旧运行时目录迁移需求**：
+   - 检查 `.claude/task.json`、`.claude/recording/`、`.claude/decisions.md`、`.claude/dsettings.json`、`.claude/project-pitfalls.md`、`.claude/archive/`、`.claude/continue-here.md` 是否存在任一旧运行时文件
+   - 检查 `.diwu/` 是否**不存在**
+   - 两个条件同时满足 → 输出迁移指引或执行自动迁移：将上述旧运行时文件迁移到 `.diwu/`，保留 `.claude/CLAUDE.md`、`rules/`、`agents/`、`skills/` 等 Claude 原生机制目录不动
+
+3. **如检测到旧版，执行迁移**：
    a. **更新 CLAUDE.md 引用**：搜索所有 `@rules/states.md` → 替换为 `@rules/task.md`
-   b. **合并 dsettings 新字段**：读取 `dsettings.json.template`，合并到用户项目的 `.claude/dsettings.json`（不覆盖已有值，只追加缺失字段）
+   b. **合并 dsettings 新字段**：读取 `dsettings.json.template`，合并到用户项目的 `.diwu/dsettings.json`（不覆盖已有值，只追加缺失字段）
    c. **备份旧 states.md**：重命名为 `states.md.backup`
    d. 输出迁移报告（引用更新数、合并字段数、备份状态）
 
-3. **如未检测到旧版**：跳过此步骤，直接进入 Step 3
+4. **如未检测到旧版和旧运行时结构**：跳过此步骤，直接进入 Step 3
 
 ## Step 3：同步可分发资产
 
@@ -186,27 +191,33 @@ effort: medium
 ### 4.2 AGENTS.md（项目根目录）
 读取 `${PLUGIN}/assets/dinit/assets/agents-md.template` 写入项目根目录。
 
-### 4.3 .claude/task.json
+### 4.3 .diwu/task.json
 读取 `${PLUGIN}/assets/dinit/assets/task.json.template`。若用户已有需求，填充初始任务（status: InDraft）；否则保持 tasks 数组为空。
 字段语义：`title` = 一句话任务标题，`description` = 背景与关键约束。
 
 ### 4.4 init.sh（项目根目录）
 读取 `${PLUGIN}/assets/dinit/assets/init.sh.template`，根据技术栈定制安装命令和 dev server 命令，执行 `chmod +x init.sh`。
 
-### 4.5 .claude/recording/
-创建 `.claude/recording/` 目录（用于存储 session 记录文件）。
+### 4.5 .diwu/recording/
+创建 `.diwu/recording/` 目录（用于存储 session 记录文件）。
 
-### 4.7 .claude/dsettings.json
+### 4.6 .diwu/archive/
+创建 `.diwu/archive/` 目录，用于 task 与 recording 归档产物存放。
+
+### 4.7 .diwu/continue-here.md（可选）
+创建 `.diwu/continue-here.md` 作为会话续接文件。默认不预填内容；仅在需要跨 session 交接时由 Agent 写入。
+
+### 4.7 .diwu/dsettings.json
 读取 `${PLUGIN}/assets/dinit/assets/dsettings.json.template` 写入。若已存在则跳过（不覆盖用户已有配置）。
 
-### 4.8 .claude/project-pitfalls.md
+### 4.8 .diwu/project-pitfalls.md
 读取 `${PLUGIN}/assets/dinit/assets/project-pitfalls.md.template` 写入。若已存在则跳过（不覆盖用户已有内容）。由 Stop hook 归档聚合逻辑持续填充。
 
-### 4.9 .claude/decisions.md（可选）
+### 4.9 .diwu/decisions.md（可选）
 询问用户是否需要创建决策记录文件（有明确设计方向或技术选型的项目推荐）。如需要，读取模板写入。
 
-### 4.10 .claude/checks/smoke.sh
-读取 `${PLUGIN}/assets/dinit/assets/smoke.sh.template`，根据技术栈定制，执行 `chmod +x .claude/checks/smoke.sh`。
+### 4.10 .diwu/checks/smoke.sh
+读取 `${PLUGIN}/assets/dinit/assets/smoke.sh.template`，根据技术栈定制，执行 `chmod +x .diwu/checks/smoke.sh`。
 
 ## Step 5：可选 — 架构约束
 
@@ -225,9 +236,9 @@ effort: medium
 - [ ] `.claude/CLAUDE.md` 已填充项目信息，包含「工作流规则」章节
 - [ ] `.claude/CLAUDE.md` 的「项目结构」章节包含扫描结果（非默认占位符）
 - [ ] 项目根目录有 `AGENTS.md`
-- [ ] `.claude/task.json` 是有效 JSON
+- [ ] `.diwu/task.json` 是有效 JSON
 - [ ] `init.sh` 可执行
-- [ ] `.claude/recording/` 目录存在
+- [ ] `.diwu/recording/` 目录存在
 - [ ] `.claude/recording.md` 不存在（已迁移为 recording/ 目录）或已重命名为 `.recording.md.backup`
 
 **Rules（N = rules-manifest.json.rules.length）**：
@@ -241,7 +252,9 @@ effort: medium
 - [ ] 刷新时能识别并覆盖内容变化的标准 agent 文件
 
 **可选文件**：
-- [ ] `.claude/dsettings.json` 存在且 JSON 合法
-- [ ] `.claude/project-pitfalls.md` 存在
-- [ ] `.claude/checks/smoke.sh` 可执行
-- [ ] （可选）`.claude/decisions.md`
+- [ ] `.diwu/dsettings.json` 存在且 JSON 合法
+- [ ] `.diwu/project-pitfalls.md` 存在
+- [ ] `.diwu/checks/smoke.sh` 可执行
+- [ ] `.diwu/archive/` 目录存在
+- [ ] （可选）`.diwu/continue-here.md`
+- [ ] （可选）`.diwu/decisions.md`

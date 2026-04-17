@@ -8,7 +8,7 @@
 
 ### 1. Preflight 检查（增强版）
 
-**基线验证**：运行 `.claude/checks/smoke.sh`（如存在），验证基线环境。
+**基线验证**：运行 `.diwu/checks/smoke.sh`（如存在），验证基线环境。
 
 **三唯一确认**（开工检查前必须明确）：
 - 唯一主线目录：本轮任务唯一允许承接主要实现和验收的目录
@@ -27,9 +27,9 @@
 **其他检查**：`git status` 确认工作区状态；recording/ 最新 session 中是否有未解决阻塞记录。
 
 ### 2. 上下文恢复
-- **优先**读取 `.claude/continue-here.md`（如存在），读完后删除
-- 否则用 `ls -t .claude/recording/ | head -2` 读取最新 1-2 个 session 文件
-- 读取 `.claude/decisions.md`（如存在）
+- **优先**读取 `.diwu/continue-here.md`（如存在），读完后删除
+- 否则用 `ls -t .diwu/recording/ | head -2` 读取最新 1-2 个 session 文件
+- 读取 `.diwu/decisions.md`（如存在）
 - 运行 `git log --oneline -20`
 
 ### 3. 归档检查（增强版）
@@ -75,10 +75,10 @@
 在 session 结束前（含 context window 接近上限时）：
 
 1. 确保所有代码变更已提交
-2. 写入 `.claude/recording/session-YYYY-MM-DD-HHMMSS.md`（必须运行 `date '+%Y-%m-%d %H:%M:%S'` 获取真实时间戳），记录：
+2. 写入 `.diwu/recording/session-YYYY-MM-DD-HHMMSS.md`（必须运行 `date '+%Y-%m-%d %H:%M:%S'` 获取真实时间戳），记录：
    - Session 标题、处理的任务及状态、验收验证结果、下次应该做什么
    - **必填字段**：本次踩坑/经验（见下方格式规范）、遗留风险点
-3. 如有重大设计决策，追加到 `.claude/decisions.md`
+3. 如有重大设计决策，追加到 `.diwu/decisions.md`
 4. 确保 task.json 反映最新状态
 
 ### 本次踩坑/经验（必填）
@@ -115,7 +115,7 @@
 
 > **注意**：最低合法答案仅用于确实无踩坑的 session。如果存在任何判断偏差、意外阻塞、返工或环境问题，必须按四段式格式记录。
 
-**归档聚合指引**：归档时（recording/ 文件数超阈值），Stop hook 扫描所有即将归档的 session 文件中的 `### 本次踩坑/经验` 段落，按类别聚类后追加到 `.claude/project-pitfalls.md`（详见 pitfalls.md §Layer 2）。
+**归档聚合指引**：归档时（recording/ 文件数超阈值），Stop hook 扫描所有即将归档的 session 文件中的 `### 本次踩坑/经验` 段落，按类别聚类后追加到 `.diwu/project-pitfalls.md`（详见 pitfalls.md §Layer 2）。
 
 **Stop hook 检测正则**（供 Task#130 完整性检查使用）：
 

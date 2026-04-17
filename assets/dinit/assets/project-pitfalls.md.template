@@ -1,7 +1,7 @@
 <!-- project-pitfalls.md.template -->
 <!--
   自动生成标注：此文件由 /dinit 从模板初始化生成。
-  初始化后复制到用户项目的 .claude/project-pitfalls.md。
+  初始化后复制到用户项目的 .diwu/project-pitfalls.md。
   用户可在生成的文件中追加本项目特有的高频误判条目。
 
   格式要求：
