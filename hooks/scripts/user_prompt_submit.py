@@ -33,6 +33,7 @@ rfs = [
     ('verification.md', '证据优先级体系（L1-L5）'),
     ('correction.md', '纠偏体系（退化信号→止损动作）'),
     ('pitfalls.md', '误判防护（三层：泛化/项目/接口）'),
+    ('project-pitfalls.md', '项目高频误判表（Layer 2）'),
     ('exceptions.md', '异常处理与 BLOCKED 判定'),
     ('templates.md', '格式模板与可调参数'),
     ('file-layout.md', '.claude/ 目录结构与归档规则'),
@@ -40,8 +41,13 @@ rfs = [
 rd = os.path.join(cwd, '.claude', 'rules')
 
 # 检查 rfs 文件是否存在
-existing_rfs = [(name, desc) for name, desc in rfs if os.path.exists(os.path.join(rd, name))]
-missing_rfs = [name for name, _ in rfs if not os.path.exists(os.path.join(rd, name))]
+def _rfs_exists(name):
+    if name == 'project-pitfalls.md':
+        return os.path.exists(os.path.join(cwd, '.diwu', name))
+    return os.path.exists(os.path.join(rd, name))
+
+existing_rfs = [(name, desc) for name, desc in rfs if _rfs_exists(name)]
+missing_rfs = [name for name, _ in rfs if not _rfs_exists(name)]
 
 if existing_rfs:
     index_lines = ['# 规则文件速查索引', '']
