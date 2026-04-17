@@ -196,9 +196,6 @@ effort: medium
 ### 4.5 .claude/recording/
 创建 `.claude/recording/` 目录（用于存储 session 记录文件）。
 
-### 4.6 .claude/lessons.md
-读取 `${PLUGIN}/assets/dinit/assets/lessons.md.template` 写入。
-
 ### 4.7 .claude/dsettings.json
 读取 `${PLUGIN}/assets/dinit/assets/dsettings.json.template` 写入。若已存在则跳过（不覆盖用户已有配置）。
 
@@ -244,7 +241,6 @@ effort: medium
 - [ ] 刷新时能识别并覆盖内容变化的标准 agent 文件
 
 **可选文件**：
-- [ ] `.claude/lessons.md` 存在
 - [ ] `.claude/dsettings.json` 存在且 JSON 合法
 - [ ] `.claude/project-pitfalls.md` 存在
 - [ ] `.claude/checks/smoke.sh` 可执行

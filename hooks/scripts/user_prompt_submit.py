@@ -15,12 +15,6 @@ cwd = d.get('cwd', '.')
 
 # --- 独立注入层：全量加载的高优先级文件 ---
 
-# lessons.md — Agent 错误模式记录
-lp = os.path.join(cwd, '.claude', 'lessons.md')
-lc = open(lp).read().strip() if os.path.exists(lp) else ''
-if lc:
-    content += '\n\n# Agent 错误模式记录\n\n' + lc
-
 # constraints.md — 架构约束（独立注入，不在 rfs 循环中重复加载）
 cp = os.path.join(cwd, '.claude', 'rules', 'constraints.md')
 cc = open(cp).read().strip() if os.path.exists(cp) else ''
