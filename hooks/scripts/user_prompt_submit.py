@@ -15,12 +15,6 @@ cwd = d.get('cwd', '.')
 
 # --- 独立注入层：全量加载的高优先级文件 ---
 
-# constraints.md — 架构约束（独立注入，不在 rfs 循环中重复加载）
-cp = os.path.join(cwd, '.claude', 'rules', 'constraints.md')
-cc = open(cp).read().strip() if os.path.exists(cp) else ''
-if cc:
-    content += '\n\n# 架构约束\n\n' + cc
-
 # mindset.md — 上位心智层（独立注入，控制 token 并支持按需加载）
 mp = os.path.join(cwd, '.claude', 'rules', 'mindset.md')
 mc = open(mp).read().strip() if os.path.exists(mp) else ''
@@ -28,9 +22,10 @@ if mc:
     content += '\n\n# 上位心智层\n\n' + mc
 
 # --- rfs 批量注入层：精简索引模式（仅注入速查摘要，不全量加载） ---
-# mindset.md 和 constraints.md 已在上方独立注入，此处不重复
+# mindset.md 已在上方独立注入，此处不重复
 rfs = [
     ('README.md', '规则速查索引'),
+    ('constraints.md', '架构约束（五维约束设计）'),
     ('judgments.md', '判断锚点（四段式：启动/实施/验收/纠偏）'),
     ('task.md', '任务状态机、acceptance 格式、task.json 结构'),
     ('workflow.md', '任务规划、实施、验证'),
