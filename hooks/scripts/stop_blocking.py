@@ -38,10 +38,7 @@ def integrity_check(settings, tasks, additional_prompts):
     追加提示到 additional_prompts 列表。
     策略：有 InProgress/InReview 任务 → block 提示；纯问答/无任务 → warning。
     """
-    rec_dir = os.path.join(os.path.dirname('.claude/task.json' if os.path.exists('.claude/task.json') else '.'), 'recording') \
-        if os.path.exists('.claude') else '.claude/recording'
-    # 规范化路径
-    rec_dir = '.claude/recording'
+    rec_dir = '.diwu/recording'
 
     if not os.path.isdir(rec_dir):
         return
@@ -93,8 +90,8 @@ def archive_aggregate(settings, tasks):
 
     返回 (should_warn, message) 元组。
     """
-    rec_dir = '.claude/recording'
-    pitfalls_path = '.claude/project-pitfalls.md'
+    rec_dir = '.diwu/recording'
+    pitfalls_path = '.diwu/project-pitfalls.md'
 
     threshold = settings.get('recording_archive_threshold', 50)
 
@@ -183,10 +180,10 @@ def archive_aggregate(settings, tasks):
 # 主逻辑
 # ============================================================
 
-f = '.claude/task.json'
+f = '.diwu/task.json'
 data = json.load(open(f)) if os.path.exists(f) else {}
 
-sf = '.claude/dsettings.json'
+sf = '.diwu/dsettings.json'
 settings = json.load(open(sf)) if os.path.exists(sf) else {}
 continuous_mode = settings.get('continuous_mode', True)
 

@@ -3,7 +3,7 @@ import json, sys, os, subprocess
 d = json.load(sys.stdin)
 cwd = d.get('cwd', '.')
 
-tf = os.path.join(cwd, '.claude/task.json')
+tf = os.path.join(cwd, '.diwu/task.json')
 if not os.path.exists(tf):
     sys.exit(0)
 
@@ -13,7 +13,7 @@ ip = [t for t in data.get('tasks', []) if t['status'] == 'InProgress']
 if not ip:
     sys.exit(0)
 
-recording_dir = os.path.join(cwd, '.claude/recording')
+recording_dir = os.path.join(cwd, '.diwu/recording')
 if not os.path.isdir(os.path.dirname(recording_dir)):
     sys.exit(0)
 

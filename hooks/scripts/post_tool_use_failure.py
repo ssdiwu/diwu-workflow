@@ -17,7 +17,7 @@ Non-blocking: uses additionalSystemPrompt only, never decision:block.
 import json, os, sys, time
 
 ERRTRACK_PREFIX = '/tmp/diwu_errtrack_'
-SETTINGS_FILE = '.claude/dsettings.json'
+SETTINGS_FILE = '.diwu/dsettings.json'
 STRIKE_LIMIT = 3
 COOLDOWN_SEC = 60
 

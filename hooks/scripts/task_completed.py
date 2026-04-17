@@ -10,8 +10,8 @@ Does NOT write files — recording is handled by Stop hook.
 
 import json, os, sys
 
-SETTINGS_FILE = '.claude/dsettings.json'
-TASK_JSON_PATH = '.claude/task.json'
+SETTINGS_FILE = '.diwu/dsettings.json'
+TASK_JSON_PATH = '.diwu/task.json'
 
 
 def _load(p):
@@ -76,8 +76,8 @@ def main():
         reminder_parts.append("[TASK-DONE] 任务已完成。")
 
     reminder_parts.append(
-        "请确认：1) 本次 session 记录已写入 .claude/recording/  "
-        "2) 如有设计决策已追加到 .claude/decisions.md"
+        "请确认：1) 本次 session 记录已写入 .diwu/recording/  "
+        "2) 如有设计决策已追加到 .diwu/decisions.md"
     )
 
     message = " ".join(reminder_parts)

@@ -2,7 +2,7 @@ import json, sys, os, subprocess, time
 
 d = json.load(sys.stdin)
 cwd = d.get('cwd', '.')
-recording_dir = os.path.join(cwd, '.claude/recording')
+recording_dir = os.path.join(cwd, '.diwu/recording')
 
 if not os.path.exists(os.path.dirname(recording_dir)):
     sys.exit(0)
@@ -11,7 +11,7 @@ if not os.path.isdir(os.path.join(cwd, '.git')):
     sys.exit(0)
 
 # Dedup: skip if any session file was modified within session window
-sf = os.path.join(cwd, '.claude/dsettings.json')
+sf = os.path.join(cwd, '.diwu/dsettings.json')
 settings = json.load(open(sf)) if os.path.exists(sf) else {}
 window = settings.get('recording_session_window', 600)
 

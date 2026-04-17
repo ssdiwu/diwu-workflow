@@ -13,9 +13,9 @@ Inspired by planning-with-files (OthmanAdi) PreToolUse attention manipulation:
 import json, os, sys, re
 
 CTX_PREFIX = '/tmp/diwu_ctx_'
-RECORDING_DIR = '.claude/recording'
-DECISIONS_FILE = '.claude/decisions.md'
-SETTINGS_FILE = '.claude/dsettings.json'
+RECORDING_DIR = '.diwu/recording'
+DECISIONS_FILE = '.diwu/decisions.md'
+SETTINGS_FILE = '.diwu/dsettings.json'
 MAX_SESSIONS = 3
 MAX_DECISIONS = 3
 MAX_CHARS_PER_SECTION = 800

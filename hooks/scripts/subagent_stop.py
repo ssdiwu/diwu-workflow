@@ -7,7 +7,7 @@ main = open('/tmp/.claude_main_session').read().strip() if os.path.exists('/tmp/
 if sid != main or not sid:
     sys.exit(0)
 
-tf = '.claude/task.json'
+tf = '.diwu/task.json'
 if not os.path.exists(tf):
     sys.exit(0)
 

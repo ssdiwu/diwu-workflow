@@ -1,6 +1,6 @@
 import json, sys, os
 
-f = '.claude/task.json'
+f = '.diwu/task.json'
 if not os.path.exists(f):
     sys.exit(0)
 

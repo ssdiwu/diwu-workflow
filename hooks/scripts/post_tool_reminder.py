@@ -12,7 +12,7 @@ Uses sessionId from event data for cross-process state sharing.
 import json, os, sys
 
 ERRTRACK_PREFIX = '/tmp/diwu_errtrack_'
-SETTINGS_FILE = '.claude/dsettings.json'
+SETTINGS_FILE = '.diwu/dsettings.json'
 
 
 def _errtrack_path(session_id):
@@ -69,7 +69,7 @@ def main():
     # Always append lightweight hint
     reminders.append(
         '[RECORDING-HINT] 如做了设计决策或发现踩坑，请记录：'
-        '决策 → .claude/decisions.md，踩坑 → session ### 本次踩坑/经验'
+        '决策 → .diwu/decisions.md，踩坑 → session ### 本次踩坑/经验'
     )
 
     print(json.dumps({

@@ -1,6 +1,6 @@
 import json, sys
 
-TASK_JSON_PATH = "/Users/diwu/Documents/codes/Githubs/diwu-workflow/.claude/task.json"
+TASK_JSON_PATH = ".diwu/task.json"
 REQUIRED_FIELDS = ["id", "title", "description", "acceptance", "steps", "category", "status"]
 GWT_KEYWORDS = ["Given", "When", "Then"]
 GWT_CATEGORIES = ["functional", "ui", "bugfix"]

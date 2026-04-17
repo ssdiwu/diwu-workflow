@@ -257,8 +257,8 @@
                 "hooks/scripts/user_prompt_submit.py",
                 "assets/dinit/assets/rules/constraints.md"
             ],
-            "status": "InDraft"
-        },
+            "status": "Done"
+        },,
         {
             "id": 164,
             "title": "注入策略优化——mindset.md 追加 project-pitfalls 必读指令 + 速查索引补全",
@@ -278,7 +278,7 @@
                 ".claude/rules/mindset.md",
                 "hooks/scripts/user_prompt_submit.py"
             ],
-            "status": "InDraft"
+            "status": "Done"
         },
         {
             "id": 165,
@@ -323,7 +323,7 @@
                 "hooks/scripts/task_created_validate.py"
             ],
             "blocked_by": [162],
-            "status": "InDraft"
+            "status": "Done"
         },
         {
             "id": 166,

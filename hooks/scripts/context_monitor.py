@@ -27,7 +27,7 @@ config_cache_file = f'/tmp/diwu_ctx_{sid}_config_cache'
 
 # 配置读取（带 mtime 缓存）
 def load_config():
-    settings_path = '.claude/dsettings.json'
+    settings_path = '.diwu/dsettings.json'
     if not os.path.exists(settings_path):
         return {'warning': 30, 'critical': 50, 'delay': 10, 'session_window': 600}
 
@@ -106,7 +106,7 @@ if readonly_count >= 15 and not os.path.exists(readonly_warn_file):
 if count >= CRITICAL_THRESHOLD + DELAY_THRESHOLD and os.path.exists(crit_ts_file):
     try:
         critical_ts = float(open(crit_ts_file).read().strip())
-        recording_dir = '.claude/recording'
+        recording_dir = '.diwu/recording'
         latest_mtime = 0
         if os.path.exists(recording_dir):
             for f in os.listdir(recording_dir):
@@ -119,7 +119,7 @@ if count >= CRITICAL_THRESHOLD + DELAY_THRESHOLD and os.path.exists(crit_ts_file
             def write_checkpoint():
                 try:
                     # 读取 InProgress 任务
-                    task_json = json.load(open('.claude/task.json'))
+                    task_json = json.load(open('.diwu/task.json'))
                     in_progress = [t for t in task_json.get('tasks', []) if t.get('status') == 'InProgress']
 
                     # git diff --stat
@@ -130,7 +130,7 @@ if count >= CRITICAL_THRESHOLD + DELAY_THRESHOLD and os.path.exists(crit_ts_file
                     current_time = datetime.fromtimestamp(now).strftime('%Y-%m-%d %H:%M:%S')
                     filename = datetime.fromtimestamp(now).strftime('%Y-%m-%d-%H%M%S')
 
-                    recording_dir = '.claude/recording'
+                    recording_dir = '.diwu/recording'
                     os.makedirs(recording_dir, exist_ok=True)
                     session_file = os.path.join(recording_dir, f'session-{filename}.md')
 
