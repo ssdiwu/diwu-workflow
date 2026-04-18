@@ -65,6 +65,10 @@ effort: medium
 
 详见下方 Step 3b（初始化模式和刷新模式共用同一套同步逻辑）。
 
+#### 7. 同步 Skills
+
+详见下方 Step 3c（初始化模式和刷新模式共用同一套同步逻辑）。
+
 **刷新模式不做的事**：
 - 不重新收集项目信息（除非用户主动要求更新）
 - 不覆盖用户在 CLAUDE.md 中的自定义章节（只增补标准章节）
@@ -135,6 +139,7 @@ effort: medium
 |---------|--------|---------|---------|---------|
 | rules | `${PLUGIN}/assets/dinit/assets/rules/` | `.claude/rules/` | `rules-manifest.json` 的 `rules` 数组 | 按需写入/覆盖 |
 | agents | `${PLUGIN}/assets/dinit/assets/agents/` | `.claude/agents/` | 动态扫描 `*.md` | 按需写入/覆盖 |
+| skills | `${PLUGIN}/skills/` | `.agents/skills/` | 动态扫描 `*/SKILL.md` | 按需写入/覆盖 |
 
 其中 `${PLUGIN}` = `${CLAUDE_PLUGIN_ROOT}` 或插件根目录绝对路径。
 
@@ -161,6 +166,20 @@ effort: medium
 4. 输出：已复制的 agent 文件名、数量和状态
 
 **为什么 agents 用动态扫描？** — Agents 是扁平列表无排序依赖，目录即清单。新增 agent 只需放一个 `.md` 文件，零配置成本。
+
+### 3c. 同步 Skills
+
+将 Skills 分发到 `.agents/skills/`，供非 Claude Code 的 AI IDE（Cursor/Windsurf/Copilot 等）通过 `.agents/` 约定自动发现和消费。
+
+1. 创建 `.agents/skills/` 目录（如不存在）
+2. 动态扫描 `${PLUGIN}/skills/` 下所有 `*/SKILL.md` 文件
+3. 逐一比较源文件与目标文件内容：
+   - 目标不存在 → 写入，标记 `NEW`
+   - 目标存在且内容一致 → 跳过，标记 `SAME`
+   - 目标存在且内容不同 → 用源文件覆盖，标记 `UPDATED`
+4. 输出：已同步的 skill 文件名、数量和状态
+
+**为什么 skills 也用动态扫描？** — Skills 与 agents 同理：扁平列表、无排序依赖、目录即清单。新增 skill 只需在 `skills/` 下新建子目录 + SKILL.md。
 
 ## Step 4：创建项目配置文件
 
@@ -237,6 +256,10 @@ effort: medium
 **Agents（M = agents/ 目录下 *.md 数量）**：
 - [ ] `.claude/agents/` 目录存在且包含 M 个 agent 文件
 - [ ] 刷新时能识别并覆盖内容变化的标准 agent 文件
+
+**Skills（K = skills/ 下 */SKILL.md 数量）**：
+- [ ] `.agents/skills/` 目录存在且包含 K 个 skill 文件（文件名格式 `{name}_SKILL.md`）
+- [ ] 刷新时能识别并覆盖内容变化的标准 skill 文件
 
 **可选文件**：
 - [ ] `.diwu/dsettings.json` 存在且 JSON 合法
