@@ -660,7 +660,7 @@ diwu-workflow/
         └── sync-rules.sh    # 同步规则文件到 assets/dinit/assets/rules/
 ├── hooks/
 │   ├── hooks.json           # hook 配置（引用 scripts/ 下的外部脚本）
-│   └── scripts/             # hook 脚本（16 个独立 .py 文件）
+│   └── scripts/             # hook 脚本（20+ 个独立 .py 文件）
 │       ├── user_prompt_submit.py   # 核心不变量 + Skill 索引注入（v2 精简版）
 │       ├── session_start.py
 │       ├── task_created_validate.py # TaskCreated 任务格式合法性验证

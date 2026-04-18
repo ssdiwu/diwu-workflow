@@ -130,7 +130,7 @@ InSpec → InProgress → InReview → Done 完整流程：
 **核心原则**：未验证 = 未完成。所有 acceptance 逐条验证通过后才标记 InReview。
 
 **验证方式**：
-1. 自动化（推荐）：`.diwu/checks/task_<id>_verify.sh`
+1. 自动化（推荐）：`.claude/checks/task_<id>_verify.sh`
 2. 手动：Agent 提供步骤清单 → 人工反馈 PASS/FAIL
 3. 人工审查：大幅度修改输出 REVIEW 请求
 4. 独立验证（可选）：verifier agent
