@@ -46,7 +46,7 @@ def write_inprogress_snapshot(tasks, recording_dir='.diwu/recording', diff_stat=
                 f.write('\n')
 
             if diff_stat:
-                f.write('\n**未提交变更**:\n```\n{diff_stat}\n```\n')
+                f.write(f'\n**未提交变更**:\n```\n{diff_stat}\n```\n')
 
         return session_file
     except Exception:
