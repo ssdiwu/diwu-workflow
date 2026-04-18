@@ -1,45 +1,56 @@
-import json, sys, os, subprocess, time
+"""Stop hook (background): lightweight InProgress snapshot via shared module.
 
-d = json.load(sys.stdin)
-cwd = d.get('cwd', '.')
-recording_dir = os.path.join(cwd, '.diwu/recording')
+Delegates snapshot writing to stop_snapshot.py (shared with stop_blocking.py).
+Deduplicates session window logic to avoid redundant writes.
+"""
+import json
+import os
+import subprocess
+import sys
+import time
 
-if not os.path.exists(os.path.dirname(recording_dir)):
-    sys.exit(0)
+from stop_snapshot import write_inprogress_snapshot, get_git_diff_stat
 
-if not os.path.isdir(os.path.join(cwd, '.git')):
-    sys.exit(0)
 
-# Dedup: skip if any session file was modified within session window
-sf = os.path.join(cwd, '.diwu/dsettings.json')
-settings = json.load(open(sf)) if os.path.exists(sf) else {}
-window = settings.get('recording_session_window', 600)
+def main():
+    d = json.load(sys.stdin)
+    cwd = d.get('cwd', '.')
+    rec_dir = os.path.join(cwd, '.diwu/recording')
 
-latest_mtime = 0
-if os.path.exists(recording_dir):
-    for f in os.listdir(recording_dir):
-        if f.startswith('session-') and f.endswith('.md'):
-            fpath = os.path.join(recording_dir, f)
-            latest_mtime = max(latest_mtime, os.path.getmtime(fpath))
+    if not os.path.exists(os.path.dirname(rec_dir)):
+        sys.exit(0)
+    if not os.path.isdir(os.path.join(cwd, '.git')):
+        sys.exit(0)
 
-if latest_mtime > 0 and time.time() - latest_mtime < window:
-    sys.exit(0)
+    # Dedup: skip if recent session exists within window
+    sf = os.path.join(cwd, '.diwu/dsettings.json')
+    settings = json.load(open(sf)) if os.path.exists(sf) else {}
+    window = settings.get('recording_session_window', 600)
 
-# git diff --stat HEAD: only tracked file changes (no untracked/pid/log noise)
-try:
-    diff = subprocess.check_output(
-        ['git', 'diff', '--stat', 'HEAD'], cwd=cwd, stderr=subprocess.DEVNULL
-    ).decode().strip()
-except subprocess.CalledProcessError:
-    diff = subprocess.check_output(
-        ['git', 'diff', '--stat'], cwd=cwd, stderr=subprocess.DEVNULL
-    ).decode().strip()
+    latest_mtime = 0
+    if os.path.exists(rec_dir):
+        for f in os.listdir(rec_dir):
+            if f.startswith('session-') and f.endswith('.md'):
+                fpath = os.path.join(rec_dir, f)
+                latest_mtime = max(latest_mtime, os.path.getmtime(fpath))
 
-if not diff:
-    sys.exit(0)
+    if latest_mtime > 0 and time.time() - latest_mtime < window:
+        sys.exit(0)
 
-now = subprocess.check_output(['date', '+%Y-%m-%d %H:%M:%S']).decode().strip()
-filename = now.replace(' ', '-').replace(':', '')
-os.makedirs(recording_dir, exist_ok=True)
-session_file = os.path.join(recording_dir, f'session-{filename}.md')
-open(session_file, 'w').write(f'## Session {now}\n\n[auto] 变更快照\n```\n{diff}\n```\n')
+    # Load tasks and filter InProgress
+    tf = os.path.join(cwd, '.diwu/task.json')
+    try:
+        data = json.load(open(tf))
+    except Exception:
+        sys.exit(0)
+
+    ip = [t for t in data.get('tasks', []) if t['status'] == 'InProgress']
+    if not ip:
+        sys.exit(0)
+
+    diff = get_git_diff_stat()
+    write_inprogress_snapshot(ip, recording_dir=rec_dir, diff_stat=diff)
+
+
+if __name__ == '__main__':
+    main()
