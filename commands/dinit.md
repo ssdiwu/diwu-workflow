@@ -26,40 +26,24 @@ effort: medium
 
 当 `.claude/CLAUDE.md` 已存在时，按以下步骤增量更新：
 
-#### 1. 检测并插入「工作流规则」章节
+#### 1. 检测并升级为 v2 格式
 
-搜索 CLAUDE.md 中是否存在 `## 工作流规则` 标题。如果不存在，在 `## 核心原则` 之前插入：
+搜索 CLAUDE.md 中是否存在 `@rules/` 引用或旧版「工作流规则」章节（含 `@rules/` 列表）。如果存在：
 
-```markdown
-## 工作流规则
+**执行 v2 升级**：将整个 CLAUDE.md 替换为 v2 精简格式，包含：
+- 核心原则段（5 条元规则）
+- 上位心智层精简版（三唯一框架 + 不确定性门控 + P-J-A 骨架 + 证据摘要）
+- Skill/文件索引表（6 个 skill + 4 个参考文件）
+- 行为铁律段（recording 更新 + 时间戳 + 禁止推送目录）
+- 项目上下文和项目结构（保留用户自定义内容）
 
-详细规则见 @rules/ 目录：
-- @rules/README.md - 规则速查索引
-- @rules/mindset.md - 上位心智层（三唯一框架、五问开工、不确定性门控）【独立注入】
-- @rules/judgments.md - 判断锚点集中管理（四段式：启动/实施/验收/纠偏）
-- @rules/task.md - 任务状态机与 acceptance 格式、blocked_by、提交规范
-- @rules/workflow.md - 任务规划、实施、验证
-- @rules/session.md - Session 生命周期管理
-- @rules/verification.md - 证据优先级体系（L1-L5）
-- @rules/correction.md - 纠偏体系（退化信号→四行重写→止损序列）
-- @rules/pitfalls.md - 误判防护（三层：泛化/项目/接口）
-- @rules/exceptions.md - 异常处理与 BLOCKED 判定
-- @rules/templates.md - 格式模板与可调参数
-- @rules/constraints.md - 架构约束（五维约束设计）
-```
+> **v2 格式特征**：无任何 `@rules/` 引用、总行数 ≤ 120 行、包含 Skill 索引表。
 
-**注意**：上述列表中的规则文件名和数量应来自 `rules-manifest.json` 的 `rules` 数组，不应硬编码。
+如已是 v2 格式（无 `@rules/` 且含 Skill 索引），跳过此步。
 
-#### 2. 检测并插入「规则引用说明」章节
+#### 2. 检测并插入/更新 Skill 索引表
 
-搜索是否存在 `## 规则引用说明` 标题。如果不存在，在文件末尾追加：
-
-```markdown
-
-## 规则引用说明
-
-本项目使用 @rules/ 引用自动加载工作流规则。规则文件位于 `.claude/rules/` 目录，由 UserPromptSubmit hook 在每次对话开始时注入。
-```
+搜索是否存在 `## Skill 索引` 标题。如不存在或格式不完整，插入/更新为标准 v2 索引表。
 
 #### 3. 更新「项目结构」章节
 
@@ -232,8 +216,11 @@ effort: medium
 
 确认以下文件均已创建（数量来自运行时扫描，非硬编码）：
 
-**基础文件**：
-- [ ] `.claude/CLAUDE.md` 已填充项目信息，包含「工作流规则」章节
+**基础文件（v2 格式验证）**：
+- [ ] `.claude/CLAUDE.md` 已填充项目信息，包含核心原则 + Skill 索引表
+- [ ] `.claude/CLAUDE.md` **不包含任何 `@rules/` 引用**（grep 零匹配）
+- [ ] `.claude/CLAUDE.md` 总行数 ≤ 120 行
+- [ ] `.claude/CLAUDE.md` 包含 `## Skill 索引` 或等效 skill 列表
 - [ ] `.claude/CLAUDE.md` 的「项目结构」章节包含扫描结果（非默认占位符）
 - [ ] 项目根目录有 `AGENTS.md`
 - [ ] `.diwu/task.json` 是有效 JSON

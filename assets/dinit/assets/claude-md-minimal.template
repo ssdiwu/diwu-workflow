@@ -1,91 +1,48 @@
 # [项目名称]
 
-## 工作流
-遵循全局 `~/.claude/rules/` 中定义的 diwu 工作流:
+## 核心原则
 
-| 规则文件 | 职责 |
-|---------|------|
-| `README.md` | 规则速查索引 |
-| `mindset.md` | 上位心智层：三唯一框架、五问开工检查、不确定性门控 |
-| `judgments.md` | 判断锚点集中管理（四段式：启动/实施/验收/纠偏） |
-| `task.md` | 任务状态机、acceptance 格式、task.json 结构、blocked_by 规范 |
-| `workflow.md` | 任务规划、任务实施、验证要求（Session 见 session.md） |
-| `session.md` | Session 生命周期管理（启动/结束/continuous_mode） |
-| `verification.md` | 证据优先级体系（L1-L5）、Done 判定门槛 |
-| `correction.md` | 纠偏体系：退化信号检测、四行重写、止损序列 |
-| `pitfalls.md` | 误判防护：Layer 1 泛化模式 / Layer 2 项目高频 / Layer 3 接口预留 |
-| `exceptions.md` | 异常处理与 BLOCKED 判定、阻塞恢复流程 |
-| `templates.md` | 格式模板与可调参数（BLOCKED/REVIEW/DECISION TRACE 等） |
-| `file-layout.md` | .claude/ 目录结构、归档规则、查找历史 |
-| `constraints.md` | 架构约束（五维约束设计） |
+- 少即是多，克制且清晰
+- 关注点分离原则
+- 具体胜于抽象；判断性规则必须提供示例锚点
+
+## 上位心智层
+
+**三唯一框架**：进入任务前确认唯一主线目录、唯一运行入口、canonical。
+
+**不确定性门控**：
+- 直接做 = 改动小 + 结果可预期 + 差异一句话说清
+- 先写最小规格 = 结果不能说清 / 依赖外部 / 需稳定格式
+- 先探索验证 = 外部依赖多 / 落点不清 / 回滚成本高
+
+**证据优先级**：L1-L3 主判，仅 L5 不可宣称完成。
+
+## Skill 索引
+
+需任务管理→dtask | Session管理→dsess | 纠偏→dcorr | 验收→dverify | 决策→djudge | 记录→drecord
+
+参考文件 Read on demand：rules/exceptions.md、templates.md、constraints.md
+
+---
 
 ## 项目上下文
 
 [1-2 句话描述项目是什么、做什么]
 
-> 详细的任务定义见 .diwu/task.json
-
 ## 技术栈
 
-- 语言：[TypeScript / Python / ...]
-- 框架：[Next.js / FastAPI / ...]
-- 样式：[Tailwind CSS / ...]
-- 数据库：[PostgreSQL / Supabase / ...]
+- 语言：[...]
+- 框架：[...]
 
 ## 常用命令
 
 ```bash
-# 开发
-[npm run dev / python manage.py runserver / ...]
-
-# 构建
-[npm run build / ...]
-
-# 检查
-[npm run lint / ...]
-
-# 测试
-[npm run test / pytest / ...]
+# 开发 / 构建 / 检查 / 测试
+[...]
 ```
 
-## 项目结构
+## 行为铁律
 
-```
-/
-├── .claude/
-│   ├── CLAUDE.md          # 本文件
-│   ├── task.json          # 任务定义（source of truth）
-│   ├── recording/         # Session 进度记录目录
-│   │   └── session-YYYY-MM-DD-HHMMSS.md
-│   ├── checks/
-│   │   └── smoke.sh       # 基线验证脚本
-│   └── rules/
-│       └── constraints.md # 架构约束（可选）
-├── AGENTS.md              # 跨 AI 工具入口
-├── init.sh                # 环境初始化脚本
-└── [项目目录]/
-    ├── src/
-    └── ...
-```
-
-## 编码约定
-
-- [约定1：例如 TypeScript strict mode]
-- [约定2：例如 函数式组件 + hooks]
-- [约定3：例如 遵循项目既有命名风格]
-
-## 子代理配置（可选，覆盖全局默认）
-
-<!-- 子代理并发数: 3 -->
-
-## 压缩指令
-
-当压缩对话历史时，必须保留以下关键信息：
-- 当前 InProgress 任务 ID、标题及完整 acceptance 条件
-- Blocked 状态及具体阻塞原因和 blocked_by 任务 ID
-- 待处理的变更请求（CR 编号、状态及建议方案）
-- 当前 session 的未提交工作及验证结果
-
-## 项目特定约束（可选）
-
-(仅在需要覆盖全局规则时填写)
+- recording 更新：session 结束前必须写入 `.diwu/recording/`
+- 时间戳：必须 `date '+%Y-%m-%d %H:%M:%S'` 获取真实时间戳
+- 禁止推送：`.claude/` `.diwu/` 禁止 commit/push
