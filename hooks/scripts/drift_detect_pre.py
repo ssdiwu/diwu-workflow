@@ -143,6 +143,8 @@ def main():
 
     _save(_ctx_path(), ctx)
     if prompts:
+        # Append skill pointer to drift warnings
+        prompts.append('> 退化信号处理：/dcorr 或 Read .claude/rules/pitfalls.md（Layer 1 六类泛化模式）')
         print(json.dumps({'continue': True, 'additionalSystemPrompt': '\n'.join(prompts)}))
     sys.exit(0)
 
