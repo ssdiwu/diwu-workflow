@@ -33,7 +33,8 @@ STRIKE_MESSAGES = {
 
     3: "[ERROR-TRACK] Tool '{tool}' failed ({strike}/{limit} strikes). "
        "Stop and rethink broadly. Consider: fundamental misunderstanding? "
-       "Wrong file? Wrong approach? Escalate to user if stuck.",
+       "Wrong file? Wrong approach? Escalate to user if stuck. "
+       "(→ /dcorr 纠偏协议)",
 }
 
 
