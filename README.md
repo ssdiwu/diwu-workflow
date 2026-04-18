@@ -615,6 +615,7 @@ diwu-workflow/
 │   ├── dtask.md             # 将功能描述拆解为任务列表
 │   └── dcorr.md          # 纠偏恢复协议（五步流程）
 ├── skills/                  # 9 个 Skill（3 产品 + 6 规则，按需加载）
+├── .agents/skills/          # 9 个 Skill symlink（AI IDE 快捷入口：Cursor/Windsurf/Copilot）
 │   ├── ddoc/
 │   │   └── SKILL.md         # /ddoc 框架知识（正向六步法 + 逆向还原）
 │   ├── dprd/
