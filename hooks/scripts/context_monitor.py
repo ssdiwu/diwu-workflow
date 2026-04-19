@@ -1,5 +1,5 @@
 """Context Monitor: tool call counting, readonly detection, threshold gating → checkpoint."""
-import json, sys, os, subprocess, time
+import json, os, subprocess, sys, time
 from datetime import datetime
 
 SID_FILE = '/tmp/.claude_main_session'
@@ -55,6 +55,34 @@ def checkpoint():
         pass
 
 
+# --- Threshold guards dict (replaces if-elif chain) ---
+# key -> (threshold, flag_path_suffix, delay_ok, message_template, skill_hint)
+def _build_guards(sid, cf, cnt):
+    return {
+        'CRITICAL+DELAY': {
+            'threshold': cf['critical'] + cf['delay'],
+            'flag': f'/tmp/diwu_ctx{sid}_critical_ts',
+            'delay_ok': True,
+            'msg': f'⚠️ CRITICAL: Context 使用量已达临界值（工具调用 {cnt} 次）。\n\n立即更新 recording/（→ dverify skill），然后评估是否需要结束 session。',
+            'skill': 'dverify',
+        },
+        'CRITICAL': {
+            'threshold': cf['critical'],
+            'flag': f'/tmp/diwu_ctx{sid}_critical',
+            'delay_ok': False,
+            'msg': f'⚠️ CRITICAL: Context 使用量已达临界值（工具调用 {cnt} 次）。\n\n立即更新 recording/（→ dverify skill），然后评估是否需要结束 session。',
+            'skill': 'dverify',
+        },
+        'WARNING': {
+            'threshold': cf['warning'],
+            'flag': f'/tmp/diwu_ctx{sid}_warned',
+            'delay_ok': False,
+            'msg': f'⚡ WARNING: Context 使用量较高（工具调用 {cnt} 次）。\n\n1. 确认 recording/ 已记录（→ drecord）\n2. 当前任务能否在本轮完成？不能则拆分\n3. 避免大量只读探索，优先实施',
+            'skill': 'drecord',
+        },
+    }
+
+
 # --- Main ---
 try:
     ev = json.load(sys.stdin); tool = ev.get('toolName', '')
@@ -90,28 +118,15 @@ if rc >= 15 and not os.path.exists(ro_wf):
         'reason': f'🔍 Analysis Paralysis Guard: 连续只读操作已达 {rc} 次。\n\n建议：\n1. 停止探索，基于已有信息做决策\n2. 如需更多信息，明确下一步要验证什么\n3. 优先实施而非继续调研（→ /dcorr）'}))
     sys.exit(0)
 
-# Threshold checks (priority order)
-crit_f = f'/tmp/diwu_ctx{sid}_critical'
-crit_ts = f'/tmp/diwu_ctx{sid}_critical_ts'
-warn_f = f'/tmp/diwu_ctx{sid}_warned'
-
-if cnt >= cf['critical'] + cf['delay'] and os.path.exists(crit_ts):
-    try:
-        if datetime.fromtimestamp(os.path.getmtime('.diwu/recording')) < datetime.fromtimestamp(float(open(crit_ts).read())):
-            checkpoint()
-    except Exception:
-        pass
-
-if cnt >= cf['critical'] and not os.path.exists(crit_f):
-    open(crit_f, 'w').write('1'); open(crit_ts, 'w').write(str(time.time()))
-    print(json.dumps({'decision': 'block',
-        'reason': f'⚠️ CRITICAL: Context 使用量已达临界值（工具调用 {cnt} 次）。\n\n立即更新 recording/（→ drecord skill），然后评估是否需要结束 session。'}))
-    sys.exit(0)
-
-if cnt >= cf['warning'] and not os.path.exists(warn_f):
-    open(warn_f, 'w').write('1')
-    print(json.dumps({'decision': 'block',
-        'reason': f'⚡ WARNING: Context 使用量较高（工具调用 {cnt} 次）。\n\n1. 确认 recording/ 已记录（→ drecord）\n2. 当前任务能否在本轮完成？不能则拆分\n3. 避免大量只读探索，优先实施'}))
-    sys.exit(0)
+# Threshold checks via dict
+for key, guard in _build_guards(sid, cf, cnt).items():
+    thr = guard['threshold']
+    flag = guard['flag']
+    if cnt >= thr and not os.path.exists(flag):
+        open(flag, 'w').write('1')
+        if key == 'CRITICAL':
+            open(f'/tmp/diwu_ctx{sid}_critical_ts', 'w').write(str(time.time()))
+        print(json.dumps({'decision': 'block', 'reason': guard['msg']}))
+        sys.exit(0)
 
 sys.exit(0)
