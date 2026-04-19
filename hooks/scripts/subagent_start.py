@@ -69,5 +69,5 @@ if os.path.exists(settings_path):
 if parts:
     prompt = '\n\n'.join(parts)
     # Append skill index hint for subagent context
-    prompt += '\n\n[diwu-ctx] Skill 索引：需任务管理→dtask | 需纠偏→dcorr | 需验证→dverify | 写记录→drecord | 阶段决策→djudge'
+    prompt += '\n\n[diwu-ctx] Skill 索引：需任务管理→dtask | 需纠偏→dcorr | 需验证→dvfy | 写记录→drec | 阶段决策→djug'
     print(json.dumps({'additionalSystemPrompt': prompt}))

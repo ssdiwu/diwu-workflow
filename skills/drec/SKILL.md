@@ -108,7 +108,7 @@ PITFALL_MINIMAL_PATTERN = re.compile(
 
 ## 归档聚合指引
 
-归档时（recording/ 文件数超阈值），扫描所有即将归档的 session 文件中的 `### 本次踩坑/经验` 段落，按类别聚类后追加到 project-pitfalls.md。
+归档时（recording/ 文件数超阈值），扫描所有即将归档的 session 文件中的 `### 本次踩坑/经验` 段落，按类别聚类后追加到 project-pitfalls.md。**每条必须标注具体 session 文件名作为来源**（如 `session-2026-04-18-213522.md`），禁止写归档文件名或占位符；归档文件内按 `## Source:` 分隔符追踪所属 session。
 
 ---
 

@@ -40,13 +40,21 @@ description: 归档管理——Task 归档与 Recording 物理归档的双轨机
    c. 从 dtask 中移除已归档任务（保留活跃任务）
 3. Recording 归档：
    a. 列出 .diwu/recording/ 所有 session 文件
-   b. 按日期分组，将旧文件内容追加到 .diwu/archive/recording_YYYY-MM-DD.md
-   c. 删除已归档的源文件（或移动到 archive/）
-4. 验证清单：
+   b. 按时间排序，将最旧的 N-threshold 个文件内容追加到 .diwu/archive/recording_YYYY-MM-DD.md
+   c. 删除已归档的源文件（保留最新 threshold 个）
+4. 踩坑聚合（必做）：
+   a. 扫描本次归档的 recording + 剩余 recording 中所有 `### 本次踩坑/经验` 段落
+   b. 归档文件内按 `## Source: session-xxx.md` 分隔符追踪每条踩坑所属的具体 session
+   c. 按 Layer 2 类别标签聚类（验证误读/分层未拆清/环境漂移/路由护栏契约等）
+   d. 追加写入 .diwu/project-pitfalls.md（不覆盖已有条目，追加新条目）
+   e. **来源列必须写具体 session 文件名**（如 `session-2026-04-18-213522.md`），禁止写占位符如"聚合来源"
+   f. 如无踩坑数据则跳过，在 summary 中标注 "0 new pitfalls"
+5. 验证清单：
    [ ] dtask 中无残留的 Done/Cancelled 任务（超出保留阈值的部分）
    [ ] recording/ 文件数 < threshold
    [ ] archive/ 目录下产物可读且 JSON/MD 合法
    [ ] .last_archive_summary.json 已更新（含归档时间、数量、文件列表）
+   [ ] project-pitfalls.md 已更新（如有踩坑数据）或确认无新踩坑
 ```
 
 ## 归档产物格式
@@ -114,7 +122,8 @@ Date range: 2026-03-01 ~ 2026-03-31
 
 ## 不做的事
 
-- **不自动删除**任何文件（归档是显式操作）
+- **不自动删除**任何文件（归档是显式操作，由 /darc 手动触发）
 - **不压缩**归档产物（保持原始格式可读）
 - **不归档活跃任务**（InProgress/InSpec/InReview/InDraft 保留在 dtask）
 - **不修改任务 ID**（归档后 ID 不复用，dtask 新任务继续递增）
+- **不自动聚合踩坑**（Stop hook 的 `stop_archive_agg.py` 只做完整性检查；踩坑聚合由 /darc 手动步骤第 4 步执行）

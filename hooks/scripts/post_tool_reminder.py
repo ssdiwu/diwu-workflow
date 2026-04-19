@@ -69,7 +69,7 @@ def main():
     # Always append lightweight hint
     reminders.append(
         '[RECORDING-HINT] 如做了设计决策或发现踩坑，请记录：'
-        '决策 → .diwu/decisions.md，踩坑 → session ### 本次踩坑/经验（→ drecord skill）'
+        '决策 → .diwu/decisions.md，踩坑 → session ### 本次踩坑/经验（→ drec skill）'
     )
 
     print(json.dumps({

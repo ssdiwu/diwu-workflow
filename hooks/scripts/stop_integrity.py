@@ -54,7 +54,7 @@ def check(settings, tasks):
         results.append(('block',
             f'[INTEGRITY_CHECK] 最近 session 缺少「### 本次踩坑」字段。'
             f'当前有 {len(active_tasks)} 个活跃任务（{hints}），'
-            f'请在 recording 中补充本次踩坑经验后再继续。（→ drecord skill）'))
+            f'请在 recording 中补充本次踩坑经验后再继续。（→ drec skill）'))
     elif not has_pitfall and not active_tasks:
         results.append(('warning',
             '[INTEGRITY_CHECK] 最近 session 缺少「### 本次踩坑」字段。(warning)'))

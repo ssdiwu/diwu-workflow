@@ -36,7 +36,7 @@
 - 统计 dtask 中 Done/Cancelled 任务数量
 - 超过 `task_archive_threshold`（默认 20）时触发归档：
   - 移至 `archive/task_archive_YYYY-MM.json`
-  - **聚合 project-pitfalls.md**：归档时将本次踩坑经验追加到 .diwu/project-pitfalls 文件（如存在）
+  - **聚合 project-pitfalls.md**：归档时将本次踩坑经验追加到 .diwu/project-pitfalls 文件（如存在），**每条必须标注具体 session 文件名作为来源**（如 `session-2026-04-18-213522.md`），禁止写归档文件名或占位符
 - 更新 dtask 只保留活跃任务
 
 ### 4. 任务选择策略
@@ -115,7 +115,7 @@
 
 > **注意**：最低合法答案仅用于确实无踩坑的 session。如果存在任何判断偏差、意外阻塞、返工或环境问题，必须按四段式格式记录。
 
-**归档聚合指引**：归档时（recording/ 文件数超阈值），Stop hook 扫描所有即将归档的 session 文件中的 `### 本次踩坑/经验` 段落，按类别聚类后追加到 `.diwu/project-pitfalls.md`（详见 pitfalls.md §Layer 2）。
+**归档聚合指引**：归档时（recording/ 文件数超阈值），扫描所有即将归档的 session 文件中的 `### 本次踩坑/经验` 段落，按类别聚类后追加到 `.diwu/project-pitfalls.md`。**来源列必须写具体 session 文件名**（如 `session-2026-04-18-213522.md`）；归档文件内按 `## Source:` 分隔符追踪所属 session；更新记录中不写伪文件来源（下面已有具体 session 来源时，更新记录只写批次信息）。详见 pitfalls.md §Layer 2。
 
 **Stop hook 检测正则**（供 Task#130 完整性检查使用）：
 

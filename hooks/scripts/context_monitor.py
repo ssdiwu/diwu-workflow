@@ -63,22 +63,22 @@ def _build_guards(sid, cf, cnt):
             'threshold': cf['critical'] + cf['delay'],
             'flag': f'/tmp/diwu_ctx{sid}_critical_ts',
             'delay_ok': True,
-            'msg': f'⚠️ CRITICAL: Context 使用量已达临界值（工具调用 {cnt} 次）。\n\n立即更新 recording/（→ dverify skill），然后评估是否需要结束 session。',
-            'skill': 'dverify',
+            'msg': f'⚠️ CRITICAL: Context 使用量已达临界值（工具调用 {cnt} 次）。\n\n立即更新 recording/（→ dvfy skill），然后评估是否需要结束 session。',
+            'skill': 'dvfy',
         },
         'CRITICAL': {
             'threshold': cf['critical'],
             'flag': f'/tmp/diwu_ctx{sid}_critical',
             'delay_ok': False,
-            'msg': f'⚠️ CRITICAL: Context 使用量已达临界值（工具调用 {cnt} 次）。\n\n立即更新 recording/（→ dverify skill），然后评估是否需要结束 session。',
-            'skill': 'dverify',
+            'msg': f'⚠️ CRITICAL: Context 使用量已达临界值（工具调用 {cnt} 次）。\n\n立即更新 recording/（→ dvfy skill），然后评估是否需要结束 session。',
+            'skill': 'dvfy',
         },
         'WARNING': {
             'threshold': cf['warning'],
             'flag': f'/tmp/diwu_ctx{sid}_warned',
             'delay_ok': False,
-            'msg': f'⚡ WARNING: Context 使用量较高（工具调用 {cnt} 次）。\n\n1. 确认 recording/ 已记录（→ drecord）\n2. 当前任务能否在本轮完成？不能则拆分\n3. 避免大量只读探索，优先实施',
-            'skill': 'drecord',
+            'msg': f'⚡ WARNING: Context 使用量较高（工具调用 {cnt} 次）。\n\n1. 确认 recording/ 已记录（→ drec）\n2. 当前任务能否在本轮完成？不能则拆分\n3. 避免大量只读探索，优先实施',
+            'skill': 'drec',
         },
     }
 
