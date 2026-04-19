@@ -4,7 +4,7 @@
 [![GitHub License](https://img.shields.io/github/license/ssdiwu/diwu-workflow)](https://github.com/ssdiwu/diwu-workflow/blob/main/LICENSE)
 [![Claude Code Plugin](https://img.shields.io/badge/Claude%20Code-Plugin-orange)](https://github.com/ssdiwu/diwu-workflow)
 
-diwu 编码工作流套件 — Claude Code 插件。让 AI 按确认的需求执行开发任务，而非自行发挥。
+diwu 编码工作流套件 — Claude Code 插件（v0.9.0）。让 AI 按确认的需求执行开发任务，而非自行发挥。
 
 ---
 
@@ -451,7 +451,11 @@ DECISION TRACE
 | `PostToolUse` (Write/Edit) | 写入文件后 | JSON 格式校验 + 记录提醒（含失败检测） |
 | `PostToolUse` (通用) | 每次工具调用后 | Context Rot 监控（WARNING@30 / CRITICAL@50）+ 只读连击检测 |
 | `Stop` (background) | 回合结束（后台） | git diff --stat 变更快照（session 窗口内去重） |
-| `Stop` (blocking) | 回合结束（前台） | 调度器：完整性检查 → 归档聚合 → continuous_mode 决策 → 快照 |
+| `Stop` (blocking) | 回合结束（前台） | **调度器**：依次调用完整性检查 → 归档聚合 → continuous_mode 决策 |
+| `stop_integrity` | Stop 子模块 | Session 格式校验（踩坑字段正则 + 时间戳合法性） |
+| `stop_archive_agg` | Stop 子模块 | 归档时扫描 recording 踩坑 → 聚合写入 project-pitfalls |
+| `stop_decision` | Stop 子模块 | continuous_mode 决策树 + checkpoint 写入 + OS 通知 |
+| `stop_snapshot` | Stop 子模块（后台） | InProgress 任务 git diff --stat 快照（去重写入） |
 | `PostToolUseFailure` | 工具执行失败时 | 3-Strike 错误协议（诊断→换方法→停手重想） |
 | `TaskCompleted` | 任务完成时 | 确认 recording 已写入 + decisions 已更新 |
 
@@ -496,6 +500,7 @@ diwu-workflow/
 │   └── dtask / dsess / dcorr / dverify / djudge / drecord  # 6 个规则类 Skill
 ├── agents/                      # 7 个插件级领域 Agent
 ├── .claude/agents/              # 3 个项目级核心 Agent（/dinit 初始化时创建）
+├── .agents/skills/              # Skill 快捷入口（symlink → skills/，供 AI IDE 发现）
 ├── hooks/                       # Hook 配置 + 脚本（20+ .py）
 └── assets/dinit/                # /dinit 模板资源（模板 + 规则源文件 + agent 模板）
 ```
