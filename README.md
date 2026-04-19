@@ -168,9 +168,9 @@ flowchart TD
 
 ---
 
-## Skills 体系（v0.9.0 渐进式披露）
+## 规则体系（v2.0：渐进式披露架构）
 
-> 核心变化：从「13 文件全量注入 ~1500 行」重构为「~80 行基线 CLAUDE.md + 9 个按需加载 Skill + 4 个参考文件」。
+> 核心变化：从旧版全量注入 ~1500 行重构为 v2 架构：「~80 行基线 CLAUDE.md + 9 个按需加载 Skill + 4 个参考文件」。
 
 **三层加载策略**：
 
@@ -213,20 +213,18 @@ flowchart TD
 | `task_archive_threshold` | 20 | Done/Cancelled 超此数触发 task 归档 |
 | `recording_archive_threshold` | 50 | session 文件超此数触发 recording 归档 |
 | `recording_retention_days` | 30 | 归档时保留最近 N 天的 session 文件 |
-| `subagent_concurrency` | 3 | 子代理并发数（0=禁用，1=串行） |
-| `subagent_explore_model` | `haiku` | 探索类子代理模型（只读操作降成本） |
-| `subagent_implement_model` | `inherit` | 实施类子代理模型（继承主模型） |
-| `recording_session_window` | 600 | Session 记录时间窗口（秒） |
+| `snapshot_dedup_sec` | 600 | 快照去重时间窗口秒数（stop_background.py 读） |
 | `context_monitor_warning` | 30 | WARNING 阈值：工具调用次数 |
 | `context_monitor_critical` | 50 | CRITICAL 阈值：触发阻塞提醒 |
 | `context_monitor_delay` | 10 | CRITICAL+DELAY 延迟阈值 |
-| `continuous_mode` | `true` | 持续运行模式（任务完成后自动选下一个） |
+| `continuous_mode` | `true` | 持续运行模式开关（stop_decision.py 读） |
 | `drift_detection.enabled` | `true` | 退化检测开关 |
-| `pitfalls.auto_extract` | `true` | 误判自动提取模式 |
-| `commit_enhanced` | `true` | 结构化 commit message 开关 |
-| `checkpoint_min_steps` | 5 | 大任务 checkpoint 触发步数门槛 |
-| `checkpoint_min_lines` | 500 | 大任务 checkpoin 触发行数门槛 |
+| `subagent_concurrency` | 3 | 子代理最大并行数（subagent_start.py 读） |
+| `subagent_explore_model` | `haiku` | 探索类子代理模型（subagent_start.py 读） |
+| `subagent_implement_model` | `inherit` | 实施类子代理模型（subagent_start.py 读） |
+| `pitfalls.archive_aggregate` | `true` | 归档时聚合踩坑到 pitfalls（stop_archive_agg.py 读） |
 | `error_injection.enabled` | `true` | PreToolUse 错误/决策注入开关 |
+| `error_injection.max_sessions` | 3 | 注入时扫描的最近 session 数量 |
 | `error_tracking.enabled` | `true` | PostToolUseFailure 3-Strike 协议开关 |
 | `recording_reminder.enabled` | `true` | PostToolUse 写后记录提醒开关 |
 
