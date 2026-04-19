@@ -3,7 +3,7 @@ import json, sys, os, subprocess
 d = json.load(sys.stdin)
 cwd = d.get('cwd', '.')
 
-tf = os.path.join(cwd, '.diwu/task.json')
+tf = os.path.join(cwd, '.diwu/dtask.json')
 if not os.path.exists(tf):
     sys.exit(0)
 

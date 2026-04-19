@@ -7,7 +7,7 @@ import json
 import os
 import sys
 
-TASK_JSON_PATH = ".diwu/task.json"
+TASK_JSON_PATH = ".diwu/dtask.json"
 REQUIRED_FIELDS = ["id", "title", "description", "acceptance", "steps", "category", "status"]
 GWT_CATEGORIES = ["functional", "ui", "bugfix"]
 

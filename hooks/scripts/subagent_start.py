@@ -18,7 +18,7 @@ if os.path.exists(recording_dir):
         parts.append('# 最近 Session 记录\n' + text)
 
 # 2. task.json: InProgress tasks
-tp = os.path.join(cwd, '.diwu', 'task.json')
+tp = os.path.join(cwd, '.diwu', 'dtask.json')
 if os.path.exists(tp):
     tasks = json.load(open(tp)).get('tasks', [])
     for t in tasks:

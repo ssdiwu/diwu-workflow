@@ -12,7 +12,7 @@
 
 **Then 子句自检**：能否写成 `expect(actual).toBe(expected)`？不能则细化。
 
-## task.json 结构
+## dtask 结构
 
 | 键名 | 类型 | 说明 |
 |------|------|------|

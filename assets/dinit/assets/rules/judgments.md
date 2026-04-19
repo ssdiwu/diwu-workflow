@@ -68,7 +68,7 @@
 - **正例**：Task#21 为 InSpec，`blocked_by=[20]`；Task#20 为 InReview，当前超前计数 2/5。结论：可超前实施 Task#21，完成后标记 InReview 并提交，计数更新为 3/5。
 - **反例**：Task#21 为 InSpec，`blocked_by=[20]`；Task#20 为 InProgress，或当前已超前 5/5。结论：跳过 Task#21，选择下一个可执行任务。
 - **边界例**：`blocked_by=[18,20]`，其中 Task#18 已 Done、Task#20 为 InReview，当前超前 4/5。结论：先清理已 Done 依赖，再允许超前至 5/5；达到上限后输出 PENDING REVIEW。
-- **结论输出**：使用 `DECISION TRACE` 记录 task.json 状态、blocked_by 明细和超前计数。
+- **结论输出**：使用 `DECISION TRACE` 记录 dtask 状态、blocked_by 明细和超前计数。
 
 ---
 

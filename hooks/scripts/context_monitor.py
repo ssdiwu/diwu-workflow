@@ -41,7 +41,7 @@ def _wc(path):
 
 def checkpoint():
     try:
-        ip = [t for t in json.load(open('.diwu/task.json')).get('tasks', []) if t.get('status') == 'InProgress']
+        ip = [t for t in json.load(open('.diwu/dtask.json')).get('tasks', []) if t.get('status') == 'InProgress']
         ds = subprocess.run(['git', 'diff', '--stat'], capture_output=True, text=True).stdout.strip()
         dt = datetime.fromtimestamp(time.time())
         rd = '.diwu/recording'; os.makedirs(rd, exist_ok=True)

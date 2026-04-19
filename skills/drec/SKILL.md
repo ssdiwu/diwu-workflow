@@ -1,5 +1,5 @@
 ---
-name: drecord
+name: drec
 description: Session 记录写入方法论——文件格式模板、踩坑经验四段式记录、时间戳获取规则、最低合法答案、归档聚合指引、Stop hook 检测正则。触发场景：(1) 写 session 记录，(2) 记录踩坑经验，(3) Session 结束前整理，(4) 用户说"记录"、"recording"、"踩坑"、"session"、"写一下"。
 ---
 

@@ -4,7 +4,7 @@ hooks.json registers THIS file only; sub-modules are internal imports."""
 import json
 import sys
 
-TASK_JSON = '.diwu/task.json'
+TASK_JSON = '.diwu/dtask.json'
 SETTINGS_PATH = '.diwu/dsettings.json'
 
 
@@ -32,6 +32,14 @@ def main():
     archived, archive_msg = archive_agg(settings)
     if archived and archive_msg:
         additional.append(('info', archive_msg))
+
+    # Sub-module 2b: Archive detection (pure detection, no execution)
+    try:
+        from stop_archive import check as archive_check
+        archive_results = archive_check(settings, tasks)
+        additional.extend(archive_results)
+    except Exception:
+        pass  # archive module optional, skip on import failure
 
     # Sub-module 3: Decision tree + notification
     from stop_decision import decide as run_decision

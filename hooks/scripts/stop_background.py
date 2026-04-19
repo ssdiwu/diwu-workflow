@@ -38,7 +38,7 @@ def main():
         sys.exit(0)
 
     # Load tasks and filter InProgress
-    tf = os.path.join(cwd, '.diwu/task.json')
+    tf = os.path.join(cwd, '.diwu/dtask.json')
     try:
         data = json.load(open(tf))
     except Exception:

@@ -20,7 +20,7 @@
 
 ### 触发条件
 - 用户讨论想法/需求/功能设计
-- task.json 为空或用户要求分解
+- dtask 为空或用户要求分解
 - 用户描述较大功能需拆分步骤
 
 ### 分解流程
@@ -36,14 +36,14 @@
 
 **需求精炼** `[建议]`：每次只问一个问题；提出 2-3 方案并推荐。
 
-**InDraft 阶段**：提炼功能点 → 拆分为可描述任务 → 定义验收条件 → 识别依赖排序 → 展示结果 → 写入 task.json（状态 InDraft）。
+**InDraft 阶段**：提炼功能点 → 拆分为可描述任务 → 定义验收条件 → 识别依赖排序 → 展示结果 → 写入 dtask（状态 InDraft）。
 
 **InSpec 阶段**：人工确认后 Agent 改为 InSpec；此后只能修改 status 字段；需改需求则退回 InDraft。
 
 ### 任务粒度标准
 代码 < 2000 行；有明确 acceptance（GWT）；有清晰 steps（绝对路径）；不依赖未完成任务或在 blocked_by 标注。
 
-### task.json 写入规则
+### dtask 写入规则
 状态一律 InDraft；ID 递增不复用；category: functional/ui/bugfix/refactor/infra；追加到列表末尾；必须含 acceptance（GWT）；steps 必须自包含。
 
 ---
@@ -92,7 +92,7 @@ InSpec → InProgress → InReview → Done 完整流程：
 
 **时机**：常规=Done 时提交；超前=InReview 时立即提交。
 **message**：常规 `[Task#N] 标题 - completed`；超前 `(超前 X/5, blocked_by Task#M)`。
-**内容**：代码 + task.json + session 文件，同一 commit。
+**内容**：代码 + dtask + session 文件，同一 commit。
 
 #### 提交粒度
 
@@ -100,7 +100,7 @@ InSpec → InProgress → InReview → Done 完整流程：
 
 **内容清单**：
 - 代码变更（仅当前 task 涉及的文件）
-- task.json（状态更新）
+- dtask（状态更新）
 - session 文件（记录）
 
 #### 禁止行为
@@ -118,7 +118,7 @@ InSpec → InProgress → InReview → Done 完整流程：
 
 **专业化分工** `[可选]`：探索类 haiku 只读；验证类跑测试；实施类主模型写代码。
 **Worktree 隔离** `[建议]`：并行实施可用 worktree 隔离。
-**Coordinator Pattern**：task.json 状态由主代理维护。
+**Coordinator Pattern**：dtask 状态由主代理维护。
 **超前计数器**：主代理内存维护，session 重启后统计 InReview+blocked_by 恢复。
 **启动仪式**（强约束）：SubagentStart Hook 自动注入最新 session 摘要 + InProgress 任务 title/acceptance/steps + decisions.md 最近 3 条。
 **交接清单**（实施子代理必须返回）：acceptance PASS/FAIL 逐条 + 代码变更摘要 + 遗留阻塞点 + 下一步前置条件。

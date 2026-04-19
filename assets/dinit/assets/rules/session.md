@@ -4,7 +4,7 @@
 
 ## Session 启动（必须按顺序执行）
 
-**执行顺序约束**：Step 1-4 串行（Preflight 失败则停止）；Step 5 可选；Step 2/3 的 task.json 读取可合并。
+**执行顺序约束**：Step 1-4 串行（Preflight 失败则停止）；Step 5 可选；Step 2/3 的 dtask 读取可合并。
 
 ### 1. Preflight 检查（增强版）
 
@@ -33,11 +33,11 @@
 - 运行 `git log --oneline -20`
 
 ### 3. 归档检查（增强版）
-- 统计 task.json 中 Done/Cancelled 任务数量
+- 统计 dtask 中 Done/Cancelled 任务数量
 - 超过 `task_archive_threshold`（默认 20）时触发归档：
   - 移至 `archive/task_archive_YYYY-MM.json`
   - **聚合 project-pitfalls.md**：归档时将本次踩坑经验追加到 .diwu/project-pitfalls 文件（如存在）
-- 更新 task.json 只保留活跃任务
+- 更新 dtask 只保留活跃任务
 
 ### 4. 任务选择策略
 - **优先恢复** InProgress 任务
@@ -79,7 +79,7 @@
    - Session 标题、处理的任务及状态、验收验证结果、下次应该做什么
    - **必填字段**：本次踩坑/经验（见下方格式规范）、遗留风险点
 3. 如有重大设计决策，追加到 `.diwu/decisions.md`
-4. 确保 task.json 反映最新状态
+4. 确保 dtask 反映最新状态
 
 ### 本次踩坑/经验（必填）
 

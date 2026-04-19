@@ -11,7 +11,7 @@ Does NOT write files — recording is handled by Stop hook.
 import json, os, sys
 
 SETTINGS_FILE = '.diwu/dsettings.json'
-TASK_JSON_PATH = '.diwu/task.json'
+TASK_JSON_PATH = '.diwu/dtask.json'
 
 
 def _load(p):

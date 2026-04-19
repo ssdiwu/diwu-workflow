@@ -117,9 +117,9 @@ flowchart LR
 - 待探索的源文件总数 > 50
 - 已有 `.doc/` 目录且存在未完成的草稿
 
-**小范围**：直接进入阶段 1 执行，不写 task.json。
+**小范围**：直接进入阶段 1 执行，不写 dtask。
 
-**大范围**：将探索+写作任务拆入 `.claude/task.json`（status: InDraft），提示用户确认后，按工作流执行。任务结构：
+**大范围**：将探索+写作任务拆入 `.claude/dtask`（status: InDraft），提示用户确认后，按工作流执行。任务结构：
 - 每个域一个探索任务（category: infra，无 blocked_by）
 - 每个域一个写作任务（category: infra，blocked_by 对应探索任务）
 

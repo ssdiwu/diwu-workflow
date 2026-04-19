@@ -8,7 +8,7 @@
 .diu/
 ├── CLAUDE.md                      # 全局 Agent 配置入口
 ├── dsettings.json                  # 可调参数配置
-├── task.json                      # 当前任务列表
+├── dtask                      # 当前任务列表
 ├── recording/                     # Session 进度记录目录
 │   └── session-YYYY-MM-DD-HHMMSS.md
 ├── decisions.md                   # 设计决策记录（可选）
@@ -24,7 +24,7 @@
     ├── README.md                  # 规则速查索引
     ├── mindset.md                 # 上位心智层（独立注入，非自动加载）
     ├── judgments.md               # 判断锚点（四段式：启动/实施/验收/纠偏）
-    ├── task.md                    # 任务状态机、acceptance、task.json 结构
+    ├── task.md                    # 任务状态机、acceptance、dtask 结构
     ├── workflow.md                # 任务规划、实施、验证（Session 见 session.md）
     ├── session.md                 # Session 生命周期管理
     ├── verification.md            # 证据优先级体系（L1-L5）
@@ -53,7 +53,7 @@
 |------|------|--------|
 | `rules/mindset.md` | 上位心智层：三唯一框架、五问开工、不确定性门控、三层工程论 | Agent 读（hook 独立注入） |
 | `rules/judgments.md` | 全部判断锚点：按阶段索引（启动/实施/验收/纠偏）+ 入口门控 | Agent 读 |
-| `rules/task.md` | 任务状态机、GWT acceptance 格式、task.json 结构、blocked_by 规范 | Agent 读写 |
+| `rules/task.md` | 任务状态机、GWT acceptance 格式、dtask 结构、blocked_by 规范 | Agent 读写 |
 | `rules/workflow.md` | 任务规划、任务实施、验证要求（不含 Session 生命周期） | Agent 读 |
 | `rules/session.md` | Session 启动（Step 1-5）、任务选择、continuous_mode、Session 结束 | Agent 读 |
 | `rules/verification.md` | L1-L5 证据优先级、Done 判定门槛、无法验证处理规范 | Agent 读 |
@@ -70,7 +70,7 @@
 |------|------|--------|
 | `.diwu/CLAUDE.md` | 全局配置、个人偏好、规则索引 | 共同维护 |
 | `.diwu/dsettings.json` | 可调参数配置 | 人工设置，Agent 读取 |
-| `.diwu/task.json` | 当前所有任务的状态和内容 | Agent 读写 |
+| `.diwu/dtask.json` | 当前所有任务的状态和内容 | Agent 读写 |
 | `.diwu/recording/` | Session 进度记录，每个 session 一个文件 | Agent 写 |
 | `.diwu/decisions.md` | 重大设计决策记录（影响范围 ≥2 模块） | Agent 写 |
 | `.diwu/archive/` | 归档目录（tasks + recordings + summary） | Agent 写 |

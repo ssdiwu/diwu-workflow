@@ -9,7 +9,7 @@
 |------|------|-----------|---------|
 | **mindset.md** | 上位心智层：三唯一框架、五问开工检查、不确定性门控 | *核心层内嵌* | Session 启动、开工检查时 |
 | **judgments.md** | 所有判断锚点集中管理（四段式：启动/实施/验收/纠偏） | djudge | 需要做判断决策时 |
-| **task.md** | 任务状态机、acceptance 格式、task.json 结构、blocked_by 规范 | dtask | 写任务、改状态、处理依赖时 |
+| **task.md** | 任务状态机、acceptance 格式、dtask 结构、blocked_by 规范 | dtask | 写任务、改状态、处理依赖时 |
 | **workflow.md** | 任务规划、任务实施、验证要求（Session 见 session.md） | dtask | 规划任务、实施任务、验证时 |
 | **session.md** | Session 生命周期管理（启动/结束/continuous_mode/checkpoint） | dsess + drecord | Session 开始、结束时 |
 | **verification.md** | 证据优先级体系（L1-L5）、Done 判定门槛、无法验证处理 | dverify | 选择证据等级、判定完成标准时 |

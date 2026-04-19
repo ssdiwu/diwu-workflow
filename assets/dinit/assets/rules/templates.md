@@ -134,5 +134,5 @@ CONTINUOUS MODE COMPLETE - 所有可执行任务已完成
 
 ## 验证脚本模板
 
-**smoke.sh**：JSON 合法性检查（task.json + dsettings.json），exit 0。
+**smoke.sh**：JSON 合法性检查（dtask + dsettings.json），exit 0。
 **task\_\<id\>\_verify.sh**：按 acceptance 编写验证逻辑，exit 0 成功。

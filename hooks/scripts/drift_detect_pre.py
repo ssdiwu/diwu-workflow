@@ -8,7 +8,7 @@ Tolerance: high (only obvious drift triggers a prompt).
 import json, os, sys, re
 
 CTX_PREFIX = '/tmp/diwu_ctx_'
-TASK_FILE = '.diwu/task.json'
+TASK_FILE = '.diwu/dtask.json'
 SETTINGS_FILE = '.diwu/dsettings.json'
 EDIT_STREAK_LIMIT = 5
 DISCUSSION_LIMIT = 8

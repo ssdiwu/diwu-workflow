@@ -245,4 +245,4 @@ demo/demo-{name}/
 - 不写产品 UX 文档（用户痛点、场景演示、UI 线框图）
 - 不写生产架构（数据库 DDL、多服务 API 契约、灰度策略）
 - 不写完整实现代码（demo/src/ 是执行阶段填写的）
-- 不写入 task.json（由 `/dtask` 负责）
+- 不写入 dtask（由 `/dtask` 负责）

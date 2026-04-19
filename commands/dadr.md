@@ -93,7 +93,7 @@ ADR 格式参考以下示例的思维粒度：
 ## Step 6：写入后提示
 
 - 显示生成的文件路径
-- 提示：如需关联到某个任务，可在 task.json 对应任务的 steps 中注明 "参见 .doc/adr/ADR-NNN"
+- 提示：如需关联到某个任务，可在 dtask 对应任务的 steps 中注明 "参见 .doc/adr/ADR-NNN"
 
 ## 边界情况
 

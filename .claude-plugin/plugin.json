@@ -3,7 +3,7 @@
   "version": "0.9.0",
   "description": "diwu 编码工作流套件：项目初始化、任务规划、产品需求文档、架构决策记录、产品文档、纠偏恢复。内置规则体系重构、纠偏机制、证据优先级与误判防护",
   "commands": ["./commands/dinit.md", "./commands/dtask.md", "./commands/dprd.md", "./commands/dadr.md", "./commands/ddoc.md", "./commands/ddemo.md", "./commands/dcorr.md"],
-  "skills": ["./skills/ddoc", "./skills/dprd", "./skills/ddemo", "./skills/dtask", "./skills/dsess", "./skills/dcorr", "./skills/dverify", "./skills/djudge", "./skills/drecord"],
+  "skills": ["./skills/ddoc", "./skills/dprd", "./skills/ddemo", "./skills/dtask", "./skills/dsess", "./skills/dcorr", "./skills/dvfy", "./skills/djug", "./skills/drec", "./skills/darc"],
   "author": {
     "name": "ssdiwu"
   },

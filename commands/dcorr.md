@@ -210,7 +210,7 @@ effort: low
 
 当 `/dcorr` 在有 InProgress 任务的环境中触发时：
 
-1. **不改变 task.json 状态**：纠偏是过程修正，不是状态转移。InProgress 任务保持 InProgress。
+1. **不改变 dtask 状态**：纠偏是过程修正，不是状态转移。InProgress 任务保持 InProgress。
 2. **记录到 session 文件**：将纠偏过程（触发原因、四行重写结果、误判排除结论）写入当前 session 文件。
 3. **与 Stop hook checkpoint 的关系**：Stop hook 的 checkpoint 机制检测的是 InProgress 任务是否存在，`/dcorr` 不影响该检测。纠偏完成后正常继续实施，Stop hook 仍会按 continuous_mode 配置决定是否续跑。
 4. **恢复失败处理**：若经五步仍无法回到主线，按止损顺序操作：

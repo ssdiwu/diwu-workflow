@@ -1,6 +1,6 @@
 ---
 name: dinit
-description: 初始化项目的 Claude Code Agent 工作流结构，创建 CLAUDE.md、.diwu/task.json、.diwu/recording/、init.sh、.diwu/checks/smoke.sh，同步 rules 与 agents
+description: 初始化项目的 Claude Code Agent 工作流结构，创建 CLAUDE.md、.diwu/dtask.json、.diwu/recording/、init.sh、.diwu/checks/smoke.sh，同步 rules 与 agents
 argument-hint: [项目描述（可选）]
 allowed-tools: Read, Write, Edit, Bash, Glob
 effort: medium
@@ -72,7 +72,7 @@ effort: medium
 **刷新模式不做的事**：
 - 不重新收集项目信息（除非用户主动要求更新）
 - 不覆盖用户在 CLAUDE.md 中的自定义章节（只增补标准章节）
-- 不修改 `.diwu/task.json` 中的任务数据
+- 不修改 `.diwu/dtask.json` 中的任务数据
 - 不重新生成 `init.sh` 或 `smoke.sh`
 - 不要求用户手动清理旧版本规则文件；刷新时应自动识别并覆盖标准资产
 
@@ -119,7 +119,7 @@ effort: medium
    - 两个条件同时满足 → 检测到旧版
 
 2. **检测旧运行时目录迁移需求**：
-   - 检查 `.claude/task.json`、`.claude/recording/`、`.claude/decisions.md`、`.claude/dsettings.json`、`.claude/project-pitfalls.md`、`.claude/archive/`、`.claude/continue-here.md`、`.claude/checks/` 是否存在任一旧运行时文件
+   - 检查 `.diwu/dtask.json`、`.claude/recording/`、`.claude/decisions.md`、`.claude/dsettings.json`、`.claude/project-pitfalls.md`、`.claude/archive/`、`.claude/continue-here.md`、`.claude/checks/` 是否存在任一旧运行时文件
    - 检查 `.diwu/` 是否**不存在**
    - 两个条件同时满足 → 输出迁移指引或执行自动迁移：将上述旧运行时文件迁移到 `.diwu/`，保留 `.claude/CLAUDE.md`、`rules/`、`agents/`、`skills/` 等 Claude 原生机制目录不动
 
@@ -193,7 +193,7 @@ effort: medium
 ### 4.2 AGENTS.md（项目根目录）
 读取 `${PLUGIN}/assets/dinit/assets/agents-md.template` 写入项目根目录。
 
-### 4.3 .diwu/task.json
+### 4.3 .diwu/dtask.json
 读取 `${PLUGIN}/assets/dinit/assets/task.json.template`。若用户已有需求，填充初始任务（status: InDraft）；否则保持 tasks 数组为空。
 字段语义：`title` = 一句话任务标题，`description` = 背景与关键约束。
 
@@ -241,7 +241,7 @@ effort: medium
 - [ ] `.claude/CLAUDE.md` 包含 `## Skill 索引` 或等效 skill 列表
 - [ ] `.claude/CLAUDE.md` 的「项目结构」章节包含扫描结果（非默认占位符）
 - [ ] 项目根目录有 `AGENTS.md`
-- [ ] `.diwu/task.json` 是有效 JSON
+- [ ] `.diwu/dtask.json` 是有效 JSON
 - [ ] `init.sh` 可执行
 - [ ] `.diwu/recording/` 目录存在
 - [ ] `.claude/recording.md` 不存在（已迁移为 recording/ 目录）或已重命名为 `.recording.md.backup`
@@ -264,6 +264,7 @@ effort: medium
 - [ ] `.diwu/dsettings.json` 存在且 JSON 合法
 - [ ] `.diwu/project-pitfalls.md` 存在
 - [ ] `.diwu/checks/smoke.sh` 可执行
+- [ ] `.diwu/archive/` 目录存在（归档产物存放位置）
 - [ ] `.diwu/archive/` 目录存在
 - [ ] （可选）`.diwu/continue-here.md`
 - [ ] （可选）`.diwu/decisions.md`
