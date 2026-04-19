@@ -172,14 +172,13 @@ effort: medium
 将 Skills 分发到 `.agents/skills/`，供非 Claude Code 的 AI IDE（Cursor/Windsurf/Copilot 等）通过 `.agents/` 约定自动发现和消费。
 
 1. 创建 `.agents/skills/` 目录（如不存在）
-2. 动态扫描 `${PLUGIN}/skills/` 下所有 `*/SKILL.md` 文件
-3. 逐一比较源文件与目标文件内容：
-   - 目标不存在 → 写入，标记 `NEW`
-   - 目标存在且内容一致 → 跳过，标记 `SAME`
-   - 目标存在且内容不同 → 用源文件覆盖，标记 `UPDATED`
-4. 输出：已同步的 skill 文件名、数量和状态
+2. 检测 `.agents/skills/` 是否已为指向 `skills/` 的目录级 symlink：
+   - 已是 symlink 且目标正确 → 跳过（幂等）
+   - 不是 symlink 或目标错误 → 删除旧文件/目录，重新创建
+3. 用 `os.symlink('../../skills/', '.agents/skills/')` 创建**目录级 symlink**
+4. 输出：symlink 目标路径、skills/ 下 SKILL.md 数量
 
-**为什么 skills 也用动态扫描？** — Skills 与 agents 同理：扁平列表、无排序依赖、目录即清单。新增 skill 只需在 `skills/` 下新建子目录 + SKILL.md。
+**为什么用目录级 symlink？** — 整个 skills/ 目录一次映射，新增 skill 自动可见、插件更新后用户端自动同步。无需逐文件维护。
 
 ## Step 4：创建项目配置文件
 

@@ -19,6 +19,10 @@ def aggregate(settings):
     Returns:
         (performed: bool, message: str) tuple
     """
+    # Check switch: skip aggregation if disabled
+    if not settings.get('pitfalls', {}).get('archive_aggregate', True):
+        return 0, ''
+
     rec_dir = '.diwu/recording'
     pitfalls_path = '.diwu/project-pitfalls.md'
     threshold = settings.get('recording_archive_threshold', 50)

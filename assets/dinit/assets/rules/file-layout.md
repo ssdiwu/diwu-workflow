@@ -2,10 +2,10 @@
 
 > **规则约束级别说明**：本文件定义文件组织的核心规则。除非特别标注 `[建议]`，否则都是必须遵守的约束。
 
-## .claude/ 目录结构
+## .diwu/ 目录结构
 
 ```
-.claude/
+.diu/
 ├── CLAUDE.md                      # 全局 Agent 配置入口
 ├── dsettings.json                  # 可调参数配置
 ├── task.json                      # 当前任务列表
@@ -68,15 +68,15 @@
 
 | 路径 | 用途 | 读写方 |
 |------|------|--------|
-| `.claude/CLAUDE.md` | 全局配置、个人偏好、规则索引 | 共同维护 |
-| `.claude/dsettings.json` | 可调参数配置 | 人工设置，Agent 读取 |
-| `.claude/task.json` | 当前所有任务的状态和内容 | Agent 读写 |
-| `.claude/recording/` | Session 进度记录，每个 session 一个文件 | Agent 写 |
-| `.claude/decisions.md` | 重大设计决策记录（影响范围 ≥2 模块） | Agent 写 |
-| `.claude/archive/` | 归档目录（tasks + recordings + summary） | Agent 写 |
-| `.claude/checks/smoke.sh` | 基线环境验证 | Agent 提供，人工确认 |
-| `.claude/checks/task_<id>_verify.sh` | 任务专属验证脚本 | Agent 创建执行 |
-| `.claude/init.sh` | 开发环境初始化 | 讨论后 Agent 实施 |
+| `.diwu/CLAUDE.md` | 全局配置、个人偏好、规则索引 | 共同维护 |
+| `.diwu/dsettings.json` | 可调参数配置 | 人工设置，Agent 读取 |
+| `.diwu/task.json` | 当前所有任务的状态和内容 | Agent 读写 |
+| `.diwu/recording/` | Session 进度记录，每个 session 一个文件 | Agent 写 |
+| `.diwu/decisions.md` | 重大设计决策记录（影响范围 ≥2 模块） | Agent 写 |
+| `.diwu/archive/` | 归档目录（tasks + recordings + summary） | Agent 写 |
+| `.diwu/checks/smoke.sh` | 基线环境验证 | Agent 提供，人工确认 |
+| `.diwu/checks/task_<id>_verify.sh` | 任务专属验证脚本 | Agent 创建执行 |
+| `.diwu/init.sh` | 开发环境初始化 | 讨论后 Agent 实施 |
 
 ## 归档触发条件
 

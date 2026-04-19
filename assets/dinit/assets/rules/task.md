@@ -106,7 +106,7 @@
 
 ### 结构化 commit message 格式
 
-当 `commit_enhanced=true`（默认，见 templates.md 可调参数）时使用 5 行固定格式：
+推荐使用 5 行固定格式（commit message 最佳实践）：
 
 ```
 [Task#N] 标题 - completed

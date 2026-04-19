@@ -53,6 +53,10 @@ def decide(tasks, settings, data, task_json_path, additional_prompts):
     Returns:
         (should_continue: bool, output_dict) for json print + sys.exit
     """
+    # Anti-loop: if stop_hook_active is already set, skip injection
+    if data.get('stop_hook_active'):
+        return True, {}
+
     continuous_mode = settings.get('continuous_mode', True)
     done_ids = {t['id'] for t in tasks if t['status'] == 'Done'}
     is_unblocked = lambda t: all(bid in done_ids for bid in t.get('blocked_by', []))
@@ -73,7 +77,7 @@ def decide(tasks, settings, data, task_json_path, additional_prompts):
     if ip:
         t = ip[0]
         base = format_task('继续完成当前任务：', t) + extra
-        return True, {'continue': True, 'additionalSystemPrompt': base}
+        return True, {'decision': 'block', 'reason': base}
 
     # --- InReview: review buffer ---
     if rev:
@@ -94,7 +98,7 @@ def decide(tasks, settings, data, task_json_path, additional_prompts):
                         f'#{t["id"]}({t["status"]})' for t in remaining
                     )
                 )
-                return True, {'continue': True, 'additionalSystemPrompt': summary}
+                return True, {'decision': 'block', 'reason': summary}
 
             data['review_used'] = rused + 1
             open(task_json_path, 'w').write(json.dumps(data, indent=2, ensure_ascii=False))
@@ -102,7 +106,7 @@ def decide(tasks, settings, data, task_json_path, additional_prompts):
             base = format_task(
                 f'继续执行下一个任务 (review buffer {rused + 1}/{rlim}):', nx[0]
             ) + extra
-            return True, {'continue': True, 'additionalSystemPrompt': base}
+            return True, {'decision': 'block', 'reason': base}
 
     # --- No InProgress/InReview: final state ---
     if 'review_used' in data and data['review_used'] > 0:
@@ -121,10 +125,10 @@ def decide(tasks, settings, data, task_json_path, additional_prompts):
                     f'#{t["id"]}({t["status"]})' for t in remaining
                 )
             )
-            return True, {'continue': True, 'additionalSystemPrompt': summary}
+            return True, {'decision': 'block', 'reason': summary}
 
         base = format_task('继续执行下一个任务：', nx[0]) + extra
-        return True, {'continue': True, 'additionalSystemPrompt': base}
+        return True, {'decision': 'block', 'reason': base}
 
     # Truly nothing to do
     return False, {}

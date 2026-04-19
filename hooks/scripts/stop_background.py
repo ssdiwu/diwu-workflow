@@ -25,7 +25,7 @@ def main():
     # Dedup: skip if recent session exists within window
     sf = os.path.join(cwd, '.diwu/dsettings.json')
     settings = json.load(open(sf)) if os.path.exists(sf) else {}
-    window = settings.get('recording_session_window', 600)
+    window = settings.get('snapshot_dedup_sec', 600)
 
     latest_mtime = 0
     if os.path.exists(rec_dir):

@@ -1,4 +1,5 @@
 ---
+name: implementer
 description: "代码修改、功能实现、bug 修复、重构执行专家。当需要编辑代码、创建文件、运行命令来实现具体功能时使用此代理。"
 permissionMode: acceptEdits
 memory: project

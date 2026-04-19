@@ -39,13 +39,7 @@ def main():
         tasks, settings, data, TASK_JSON, additional
     )
 
-    # Sub-module 4: Snapshot (only if InProgress and continuing)
-    if should_continue:
-        ip_tasks = [t for t in tasks if t['status'] == 'InProgress']
-        if ip_tasks:
-            from stop_snapshot import write_inprogress_snapshot, get_git_diff_stat
-            diff = get_git_diff_stat()
-            write_inprogress_snapshot(ip_tasks, diff_stat=diff)
+    # (Snapshot removed: now handled by stop_background.py hook)
 
     print(json.dumps(output))
     sys.exit(0 if should_continue else 1)
