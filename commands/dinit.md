@@ -172,14 +172,17 @@ effort: medium
 将 Skills 分发到 `.agents/skills/`，供非 Claude Code 的 AI IDE（Cursor/Windsurf/Copilot 等）通过 `.agents/` 约定自动发现和消费。
 
 1. 创建 `.agents/skills/` **普通目录**（如不存在）
-2. 动态扫描 `${PLUGIN}/skills/` 下所有子目录中的 `SKILL.md` 文件
-3. 为每个 skill 创建**独立文件级 symlink**：`ln -s ../../skills/{name}/SKILL.md .agents/skills/{name}_SKILL.md`
-   - 目标已存在且指向正确 → 跳过
-   - 不存在或目标错误 → 删除旧文件后重新创建
-4. 冲突策略：用户在 `.agents/skills/` 放置的自定义 skill 文件不会被覆盖（仅管理 `{name}_SKILL.md` 格式的插件 symlink）
-5. 输出：已同步的 skill 数量、新增/跳过/更新的数量
+2. 动态扫描 `${PLUGIN}/skills/` 下所有含 `SKILL.md` 的子目录
+3. 为每个 skill 创建**独立目录级 symlink**：`ln -s ../../skills/{name} .agents/skills/{name}`
+   - 目标已存在且指向正确 → 跳过（幂等）
+   - 不是 symlink 或目标错误 → 删除后重新创建
+4. 冲突策略：用户在 `.agents/skills/` 中放置的自定义 skill 目录（非 symlink）不会被覆盖；仅管理插件拥有的 `{name}` 目录级 symlink
+5. 输出：已同步的 skill 目录数、新增/跳过/更新的数量
 
-**为什么用文件级 symlink？** — 用户可在 `.agents/skills/` 中自由添加自定义 skill（不污染插件目录），插件 skill 通过 symlink 只读引用。
+**为什么用目录级 per-skill symlink？**
+- 用户可在 `.agents/skills/` 中自由添加自定义 skill 目录（不污染插件 `skills/` 目录）
+- 插件 skill 通过 symlink 只读引用，skill 目录内所有文件（SKILL.md + 未来扩展）均自动可见
+- 新增插件 skill 需重新执行 `/dinit` 同步（显式操作，避免意外注入）
 
 ## Step 4：创建项目配置文件
 
@@ -257,9 +260,10 @@ effort: medium
 - [ ] `.claude/agents/` 目录存在且包含 M 个 agent 文件
 - [ ] 刷新时能识别并覆盖内容变化的标准 agent 文件
 
-**Skills（K = skills/ 下 */SKILL.md 数量）**：
-- [ ] `.agents/skills/` 目录存在且包含 K 个 skill 文件（文件名格式 `{name}_SKILL.md`）
-- [ ] 刷新时能识别并覆盖内容变化的标准 skill 文件
+**Skills（K = skills/ 下含 SKILL.md 的子目录数）**：
+- [ ] `.agents/skills/` 目录存在且包含 K 个目录级 symlink（名称 `{name}`）
+- [ ] 每个 symlink 目标为 `../../skills/{name}` 且目标内含 `SKILL.md`
+- [ ] 刷新时能识别并更新指向错误的 symlink
 
 **可选文件**：
 - [ ] `.diwu/dsettings.json` 存在且 JSON 合法
