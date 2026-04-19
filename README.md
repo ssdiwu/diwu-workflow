@@ -4,7 +4,7 @@
 [![GitHub License](https://img.shields.io/github/license/ssdiwu/diwu-workflow)](https://github.com/ssdiwu/diwu-workflow/blob/main/LICENSE)
 [![Claude Code Plugin](https://img.shields.io/badge/Claude%20Code-Plugin-orange)](https://github.com/ssdiwu/diwu-workflow)
 
-diwu 编码工作流套件 — Claude Code 插件（v0.9.0）。让 AI 按确认的需求执行开发任务，而非自行发挥。
+diwu 编码工作流套件 — Claude Code 插件（v0.10.0）。让 AI 按确认的需求执行开发任务，而非自行发挥。
 
 ---
 
