@@ -1,6 +1,6 @@
 ---
 name: verifier
-description: "独立验证专家。在任务标记 InReview 后启动，从 acceptance 反推可观测事实，独立验证实现是否达标。不信任实现者的自述。"
+description: "独立验证专家。当需要从 acceptance 反推可观测事实进行独立验收时使用。不信任实现者的自述，遇不确定输出 HUMAN_NEEDED。Use proactively when task marked InReview."
 permissionMode: plan
 memory: project
 maxTurns: 30

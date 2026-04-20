@@ -4,7 +4,7 @@
 [![GitHub License](https://img.shields.io/github/license/ssdiwu/diwu-workflow)](https://github.com/ssdiwu/diwu-workflow/blob/main/LICENSE)
 [![Claude Code Plugin](https://img.shields.io/badge/Claude%20Code-Plugin-orange)](https://github.com/ssdiwu/diwu-workflow)
 
-diwu 编码工作流套件 — Claude Code 插件（v0.10.1）。让 AI 按确认的需求执行开发任务，而非自行发挥。
+diwu 编码工作流套件 — Claude Code 插件（v0.10.2）。让 AI 按确认的需求执行开发任务，而非自行发挥。
 
 ---
 
@@ -385,13 +385,11 @@ DECISION TRACE
 
 | 层级 | 数量 | 定位 | 触发方式 |
 |------|------|------|---------|
-| **核心层** | 3 | 工作流闭环角色：探索、实施、验收 | 自动委派 / 主代理调度 |
-| **领域层** | 7 | 按需专家顾问，处理特定技术领域 | 自然语言 / @mention |
+| **统一** | 10 | 核心(3) + 领域(7)，安装即激活 | plugin.json 声明自动发现 / 自然语言 / @mention |
 
-| 层级 | 存放位置 | 说明 |
-|------|---------|------|
-| **项目级**（核心层） | `.claude/agents/` | explorer / implementer / verifier，随项目上下文工作 |
-| **插件级**（领域层） | `agents/` | 7 个领域专家，由插件提供通用顾问能力 |
+| 存放位置 | 说明 |
+|---------|------|
+| **`agents/`（插件声明） | 10 个 Agent（3 核心 + 7 领域），用户安装插件后立即可用 |
 
 ### 核心 Agent（3 个）
 
@@ -499,8 +497,7 @@ diwu-workflow/
 ├── skills/                      # 10 个 Skill（按需加载）
 │   ├── ddoc / dprd / ddemo      # 3 个工具类 Skill
 │   └── dtask / dsess / dcorr / dvfy / djug / drec / darc  # 7 个规则类 Skill
-├── agents/                      # 7 个插件级领域 Agent
-├── .claude/agents/              # 3 个项目级核心 Agent（/dinit 初始化时创建）
+├── agents/                      # 10 个 Agent（3 核心 + 7 领域），plugin.json 声明
 ├── .agents/skills/              # Skill 快捷入口（symlink → skills/，供 AI IDE 发现）
 ├── hooks/                       # Hook 配置 + 脚本（20+ .py）
 └── assets/dinit/                # /dinit 模板资源（模板 + 规则源文件 + agent 模板）

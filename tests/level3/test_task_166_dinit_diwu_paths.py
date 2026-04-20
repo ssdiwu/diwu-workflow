@@ -66,12 +66,6 @@ def test_templates_use_diwu_for_runtime_paths():
     assert ".diwu/" in joined  # 至少有运行时路径前缀
 
 
-def test_verifier_template_reads_diwu_task_json():
-    text = (AGENTS_DIR / "verifier.md").read_text(encoding="utf-8")
-    assert ".diwu/dtask.json" in text
-    assert ".claude/dtask.json" not in text
-
-
 def test_rules_manifest_stays_valid_json():
     data = json.loads(MANIFEST_PATH.read_text(encoding="utf-8"))
     assert isinstance(data.get("rules"), list)

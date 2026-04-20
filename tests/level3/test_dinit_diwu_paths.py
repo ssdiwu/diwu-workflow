@@ -51,12 +51,6 @@ def test_rules_readme_describes_split_layout():
     assert ".claude/" in text and "目录结构" in text
 
 
-def test_verifier_template_uses_diwu_task_path():
-    text = _read(ASSETS / "agents" / "verifier.md")
-    assert ".diwu/dtask.json" in text
-    assert ".claude/dtask.json" not in text
-
-
 def test_no_lessons_template_exists():
     assert not (ASSETS / "lessons.md.template").exists()
 

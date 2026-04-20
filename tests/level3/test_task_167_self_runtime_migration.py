@@ -16,7 +16,6 @@ RUNTIME_FILES = [
 NATIVE_CLAUDE_FILES = [
     "CLAUDE.md",
     "rules",
-    "agents",
     "skills",
     "examples",
 ]
