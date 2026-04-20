@@ -12,7 +12,7 @@ effort: high
 
 ## 核心原则
 
-- **Source of Truth 是文件系统**：`rules-manifest.json` 决定 rules 列表，agents 由插件 `plugin.json` 声明自动发现（不再通过 /dinit 分发）。不硬编码任何文件名。
+- **Source of Truth 是文件系统**：`rules-manifest.json` 决定 rules 列表，agents 由插件默认路径 `agents/` 自动发现（不再通过 /dinit 分发）。不硬编码任何文件名。
 - **刷新优先于重建**：已有项目的刷新是增量操作，不破坏用户自定义内容。
 - **幂等性**：重复执行 `/dinit` 不应产生副作用（模板资产覆盖，用户跳过的文件不覆盖）。
 

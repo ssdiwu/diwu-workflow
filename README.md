@@ -389,7 +389,7 @@ DECISION TRACE
 
 | 存放位置 | 说明 |
 |---------|------|
-| **`agents/`（插件声明） | 10 个 Agent（3 核心 + 7 领域），用户安装插件后立即可用 |
+| **`agents/`（默认路径自动发现） | 10 个 Agent（3 核心 + 7 领域），用户安装插件后立即可用 |
 
 ### 核心 Agent（3 个）
 
@@ -497,7 +497,7 @@ diwu-workflow/
 ├── skills/                      # 10 个 Skill（按需加载）
 │   ├── ddoc / dprd / ddemo      # 3 个工具类 Skill
 │   └── dtask / dsess / dcorr / dvfy / djug / drec / darc  # 7 个规则类 Skill
-├── agents/                      # 10 个 Agent（3 核心 + 7 领域），plugin.json 声明
+├── agents/                      # 10 个 Agent（3 核心 + 7 领域），默认路径自动发现
 ├── .agents/skills/              # Skill 快捷入口（symlink → skills/，供 AI IDE 发现）
 ├── hooks/                       # Hook 配置 + 脚本（20+ .py）
 └── assets/dinit/                # /dinit 模板资源（模板 + 规则源文件 + agent 模板）

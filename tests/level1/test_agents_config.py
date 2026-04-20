@@ -1,14 +1,14 @@
 """Layer 1: Agents 配置完整性测试 — 防止 regression 导致 agents 不加载
 
 覆盖范围：
-1. 统一 Agent（agents/）：全部 10 个 Agent（3 核心 + 7 领域）通过 plugin.json 声明自动发现
+1. 统一 Agent（agents/）：全部 10 个 Agent（3 核心 + 7 领域）通过默认路径自动发现
 2. Verifier 专项：frontmatter 完整性（tools/model/maxTurns/memory）
 3. Model 合理性：每个 Agent 的 model 字段是否匹配其职责
 4. Description 触发词：每个 description 是否包含触发词
-5. plugin.json 声明：包含 agents 字段指向根目录 agents/、commands/skills 合法
+5. plugin.json 声明：不声明 agents 字段（使用默认路径）、commands/skills 合法
 
 > v0.10.2 架构变更：全部 Agent 统一到插件 `agents/` 目录，
-> 通过 plugin.json 的 "agents" 字段声明。不再区分项目级/插件级。
+> 使用默认路径自动发现，plugin.json 不声明 agents 字段。
 """
 import json
 import yaml
@@ -248,16 +248,16 @@ class TestVerifierAgentCompleteness:
 
 
 class TestPluginJsonAgentsDeclaration:
-    """plugin.json 必须正确声明 agents 字段"""
+    """plugin.json 的 agents 策略：使用默认路径，不声明 agents 字段"""
 
-    def test_agents_field_exists_in_plugin_json(self, project_root):
-        """plugin.json 必须包含 agents 字段指向根目录 agents/"""
+    def test_agents_field_not_declared_uses_default(self, project_root):
+        """plugin.json 不应声明 agents 字段（使用默认 agents/ 目录自动发现）"""
         plugin_json_path = project_root / ".claude-plugin" / "plugin.json"
         with open(plugin_json_path, encoding="utf-8") as f:
             data = json.load(f)
-        assert "agents" in data, "plugin.json 缺少 'agents' 字段"
-        assert data["agents"] == "./agents/", (
-            f"plugin.json 的 agents='{data['agents']}'，预期 './agents/'"
+        assert "agents" not in data, (
+            f"plugin.json 不应声明 agents 字段（使用默认路径自动发现），"
+            f"当前值='{data.get('agents')}'"
         )
 
     def test_agents_dir_at_plugin_root(self, project_root):
@@ -304,7 +304,7 @@ class TestPluginJsonAgentsDeclaration:
             data = json.load(f)
 
         known_top_level_fields = {
-            "name", "version", "description", "commands", "skills", "agents",
+            "name", "version", "description", "commands", "skills",
             "author", "license", "keywords",
         }
         unknown = set(data.keys()) - known_top_level_fields
