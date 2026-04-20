@@ -288,7 +288,7 @@ Hooks 配置在 `hooks/hooks.json`，通过 Claude Code settings.json 的 `hooks
 ```
 
 **命令数量**：7 个（dinit / dtask / dprd / dadr / ddoc / ddemo / dcorr）
-**Skill 数量**：9 个（dtask / dsess / dcorr / dverify / djudge / drecord / ddemo / dprd / ddoc）
+**Skill 数量**：10 个（dtask / dsess / dcorr / dvfy / djug / drec / ddemo / dprd / ddoc / darc）
 **Hook 事件数量**：11 个
 
 ---

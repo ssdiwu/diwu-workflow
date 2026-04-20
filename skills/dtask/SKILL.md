@@ -1,6 +1,14 @@
 ---
 name: dtask
-description: 任务管理核心方法论——状态机、GWT 验收、task.json 结构、规划分解、实施流程、提交规范、子代理策略。触发场景：(1) 创建或管理任务，(2) 写 acceptance 验收条件，(3) 规划任务分解，(4) 判断任务状态转移，(5) 管理 blocked_by 依赖，(6) 写 commit message，(7) 用户说"任务"、"task"、"规划"、"分解"、"验收"。
+description: 任务管理核心方法论——状态机、GWT 验收、task.json 结构、规划分解、实施流程、提交规范、子代理策略。触发场景：(1) 创建或管理任务，(2) 写 acceptance 验收条件，(3) 规划任务分解，(4) 判断任务状态转移，(5) 管理 blocked_by 依赖，(6) 写 commit message，(7) 用户说"任务"、"task"、"规划"、"分解"、"验收"
+argument-hint: "[功能描述] [category] [blocked_by]"
+allowed-tools:
+  - Read
+  - Write
+  - Edit
+  - Bash
+  - Grep
+  - Glob
 ---
 
 # diwu-task

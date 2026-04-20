@@ -1,6 +1,21 @@
 ---
 name: drec
-description: Session 记录写入方法论——文件格式模板、踩坑经验四段式记录、时间戳获取规则、最低合法答案、归档聚合指引、Stop hook 检测正则。触发场景：(1) 写 session 记录，(2) 记录踩坑经验，(3) Session 结束前整理，(4) 用户说"记录"、"recording"、"踩坑"、"session"、"写一下"。
+description: Session 记录写入方法论——文件格式模板、踩坑经验四段式记录、时间戳获取规则、最低合法答案、归档聚合指引、Stop hook 检测正则。触发场景：(1) 写 session 记录，(2) 记录踩坑经验，(3) Session 结束前整理，(4) 用户说"记录"、"recording"、"踩坑"。铁律：必须 date 命令获取时间戳。
+allowed-tools:
+  - Bash
+  - Read
+  - Write
+  - Edit
+effort: low
+hooks:
+  Stop:
+    - hooks:
+        - type: command
+          command: "python3 ${CLAUDE_SKILL_DIR}/../hooks/scripts/stop_integrity.py 2>/dev/null || true"
+  SubagentStop:
+    - hooks:
+        - type: command
+          command: "python3 ${CLAUDE_SKILL_DIR}/../hooks/scripts/subagent_stop.py 2>/dev/null || true"
 ---
 
 # diwu-record

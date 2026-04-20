@@ -1,6 +1,19 @@
 ---
 name: dvfy
-description: 验证证据优先级体系——L1-L5 五级证据、Done 判定门槛矩阵、完成前四问、无法验证处理规范、运行态验证方法指引。触发场景：(1) 标记 InReview 或 Done，(2) 选择证据等级，(3) 判断是否验证充分，(4) 处理无法验证的项，(5) 用户说"验证"、"证据"、"Done"、"验收"、"L1"、"L3"。
+description: 验证证据优先级体系——L1-L5 五级证据、Done 判定门槛矩阵、完成前四问、无法验证处理规范、运行态验证方法指引。触发场景：(1) 标记 InReview 或 Done，(2) 选择证据等级，(3) 判断是否验证充分，(4) 处理无法验证的项，(5) 用户说"验证"、"证据"、"Done"、"验收"
+argument-hint: "[任务ID] [证据等级]"
+context: fork
+agent: Explore
+model: haiku
+allowed-tools:
+  - Bash
+  - Read
+effort: low
+hooks:
+  TaskCompleted:
+    - hooks:
+        - type: command
+          command: "python3 ${CLAUDE_SKILL_DIR}/../hooks/scripts/task_completed.py 2>/dev/null || true"
 ---
 
 # diwu-verify

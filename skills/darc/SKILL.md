@@ -1,6 +1,24 @@
 ---
 name: darc
 description: 归档管理——Task 归档与 Recording 物理归档的双轨机制、触发条件、手动步骤、验证清单。触发场景：(1) 终态任务数超阈值，(2) session 文件数超阈值，(3) 用户说"归档"、"archive"、"清理"
+context: fork
+agent: general-purpose
+model: haiku
+allowed-tools:
+  - Read
+  - Write
+  - Edit
+  - Bash
+  - Grep
+  - Glob
+effort: low
+paths:
+  - ".diwu/**"
+hooks:
+  Stop:
+    - hooks:
+        - type: command
+          command: "python3 ${CLAUDE_SKILL_DIR}/../hooks/scripts/stop_archive.py 2>/dev/null || true"
 ---
 
 # darc — 归档管理

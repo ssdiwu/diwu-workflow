@@ -19,7 +19,6 @@ RUNTIME_PATHS = [
     ".diwu/checks/",
 ]
 OLD_RUNTIME_PATHS = [
-    ".claude/dtask.json",
     ".claude/recording/",
     ".claude/decisions.md",
     ".claude/dsettings.json",

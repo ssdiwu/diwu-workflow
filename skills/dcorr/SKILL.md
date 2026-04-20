@@ -1,6 +1,21 @@
 ---
 name: dcorr
-description: 纠偏与误判排查方法论——退化信号检测、四行重写模板、止损序列、六类泛化误判排查表、与 BLOCKED 的边界判定。触发场景：(1) 出现退化信号（反复纠偏/目标漂移/证据缺失等），(2) 需要纠偏恢复，(3) 排查误判，(4) 判断是 correction 还是 BLOCKED，(5) 用户说"纠偏"、"偏了"、"不对"、"重写"、"止损"、"误判"。
+description: 纠偏与误判排查方法论——退化信号检测、四行重写模板、止损序列、六类泛化误判排查表、与 BLOCKED 的边界判定。触发场景：(1) 出现退化信号（反复纠偏/目标漂移/证据缺失等），(2) 需要纠偏恢复，(3) 排查误判，(4) 判断是 correction 还是 BLOCKED，(5) 用户说"纠偏"、"偏了"、"不对"、"重写"、"止损"、"误判"
+argument-hint: "[退化信号类型]"
+context: fork
+agent: general-purpose
+allowed-tools:
+  - Read
+  - Grep
+  - Write
+  - Edit
+  - Bash
+hooks:
+  PreToolUse:
+    - matcher: "Edit|Write"
+      hooks:
+        - type: command
+          command: "python3 ${CLAUDE_SKILL_DIR}/../hooks/scripts/drift_detect_pre.py 2>/dev/null || true"
 ---
 
 # diwu-corr

@@ -1,6 +1,17 @@
 ---
-name: diwu-demo
-description: 积木式能力验证方法论——判断「直接做 vs 先验证」、将不确定性分层隔离、沉淀可复用能力资产。触发场景：(1) 讨论技术可行性或方案选型，(2) 评估某个实现的不确定性，(3) 决定直接集成 vs 先做 Demo 验证，(4) 分析能力复用或知识沉淀策略，(5) 用户说"积木"、"Demo"、"能力验证"、"不确定性"。
+name: ddemo
+description: 积木式能力验证方法论——判断「直接做 vs 先验证」、将不确定性分层隔离、沉淀可复用能力资产。触发场景：(1) 讨论技术可行性或方案选型，(2) 评估某个实现的不确定性，(3) 决定直接集成 vs 先做 Demo 验证，(4) 分析能力复用或知识沉淀策略，(5) 用户说"积木"、"Demo"、"能力验证"、"不确定性"
+argument-hint: "[Demo名称] [不确定性类型] [Layer1功能]"
+context: fork
+agent: general-purpose
+allowed-tools:
+  - Read
+  - Bash
+  - Write
+  - Edit
+  - WebSearch
+  - Grep
+  - Glob
 ---
 
 # diwu-demo

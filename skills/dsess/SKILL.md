@@ -1,6 +1,13 @@
 ---
 name: dsess
-description: Session 生命周期管理——启动（Preflight 5 步）、上下文恢复、归档检查、任务选择、持续运行模式、Session 结束协议。触发场景：(1) Session 启动或结束，(2) 选择下一个任务，(3) 判断是否续跑，(4) 归档旧任务，(5) 用户说"session"、"启动"、"下一步"、"续跑"、"归档"。注意：写 recording 记录用 drecord skill。
+description: Session 生命周期管理——启动（Preflight 5 步）、上下文恢复、归档检查、任务选择、持续运行模式、Session 结束协议。触发场景：(1) Session 启动或结束，(2) 选择下一个任务，(3) 判断是否续跑，(4) 归档旧任务，(5) 用户说"session"、"启动"、"下一步"、"续跑"、"归档"。注意：写 recording 记录用 drec skill。
+allowed-tools:
+  - Bash
+  - Read
+  - Write
+  - Edit
+  - Grep
+  - Glob
 ---
 
 # diwu-session

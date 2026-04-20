@@ -1,6 +1,22 @@
 ---
 name: ddoc
-description: 产品文档工具——正向（需求→文档）或逆向（代码→文档）两种模式。触发场景：(1) 为已有产品还原/补全文档，(2) 为新功能/模块编写产品文档，(3) 用户说"写文档"、"还原文档"、"doc"、"产品文档"、"document"。
+description: 产品文档工具——正向（需求→文档）或逆向（代码→文档）两种模式。触发场景：(1) 为已有产品还原/补全文档，(2) 为新功能/模块编写产品文档，(3) 用户说"写文档"、"还原文档"、"doc"、"产品文档"
+argument-hint: "[forward|reverse] [范围] [输入源]"
+allowed-tools:
+  - Read
+  - Grep
+  - Glob
+  - Write
+  - Edit
+  - Bash
+effort: high
+paths:
+  - "**/*.ts"
+  - "**/*.js"
+  - "**/*.py"
+  - "**/*.go"
+  - "**/*.rs"
+  - "**/*.md"
 ---
 
 # ddoc
