@@ -1,0 +1,173 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "model": "anthropic/claude-sonnet-4-5",
+  "plugin": ["./.opencode/plugins/diwu-workflow.ts"],
+  
+  "mcp": {},
+  
+  "command": {
+    "dinit": {
+      "template": "初始化 diwu-workflow 项目结构",
+      "description": "创建 AGENTS.md、.diwu/ 目录、.opencode/references/ 规则文件等完整工作流结构"
+    },
+    "dtask": {
+      "template": "任务规划：将功能描述转化为 dtask.json 任务列表",
+      "description": "支持澄清问题、质量检查、三视角审查"
+    },
+    "dprd": {
+      "template": "产品需求文档生成",
+      "description": "生成 PRD，支持产品模式和完整模式两种输出"
+    },
+    "dadr": {
+      "template": "架构决策记录",
+      "description": "记录 ADR 到 .doc/adr/ 目录"
+    },
+    "ddoc": {
+      "template": "产品文档生成",
+      "description": "正向（需求→文档）和逆向（代码→文档）两种模式"
+    },
+    "ddemo": {
+      "template": "Demo 能力规格",
+      "description": "将不确定性隔离为可复用的能力验证单元"
+    },
+    "dcorr": {
+      "template": "纠偏恢复协议",
+      "description": "当 AI 偏离主线时，按五步协议回到目标/主线/现象/验证四个锚点"
+    },
+    "drec": {
+      "template": "Session 记录",
+      "description": "快速记录 Session 踩坑经验或生成 recording 草稿，支持四段式格式"
+    },
+    "dsess": {
+      "template": "Session 启动",
+      "description": "手动触发 Session 启动流程（Preflight 检查、上下文恢复、归档检查、任务选择）"
+    },
+    "djug": {
+      "template": "判断决策",
+      "description": "阶段边界决策锚点——判断任务推进方式、幅度大小、并行串行、人工确认等"
+    },
+    "dvfy": {
+      "template": "验证规则",
+      "description": "验证证据优先级、Done 判定门槛、完成前四问、无法验证处理"
+    },
+    "darc": {
+      "template": "归档管理",
+      "description": "手动触发 Task 归档和 Recording 物理归档的双轨操作"
+    }
+  },
+  
+  "agent": {
+    "build": {
+      "mode": "primary",
+      "description": "全权限实施模式",
+      "permission": {
+        "edit": "allow",
+        "bash": "allow"
+      }
+    },
+    "plan": {
+      "mode": "primary",
+      "description": "受限规划模式，编辑需确认",
+      "permission": {
+        "edit": "ask",
+        "bash": "ask"
+      }
+    },
+    "diwu-expert": {
+      "mode": "subagent",
+      "description": "diwu-workflow 工作流专家",
+      "permission": {
+        "edit": "deny",
+        "bash": "ask"
+      }
+    },
+    "verifier": {
+      "mode": "subagent",
+      "description": "独立验收验证专家，从 acceptance 反推可观测事实",
+      "permission": {
+        "edit": "deny",
+        "bash": "ask"
+      }
+    },
+    "ui-designer": {
+      "mode": "subagent",
+      "description": "UI/UX 设计决策专家",
+      "permission": {
+        "edit": "deny",
+        "bash": "ask"
+      }
+    },
+    "backend-architect": {
+      "mode": "subagent",
+      "description": "后端架构专家",
+      "permission": {
+        "edit": "deny",
+        "bash": "ask"
+      }
+    },
+    "frontend-architect": {
+      "mode": "subagent",
+      "description": "前端架构专家",
+      "permission": {
+        "edit": "deny",
+        "bash": "ask"
+      }
+    },
+    "api-tester": {
+      "mode": "subagent",
+      "description": "测试策略专家",
+      "permission": {
+        "edit": "deny",
+        "bash": "ask"
+      }
+    },
+    "devops-architect": {
+      "mode": "subagent",
+      "description": "运维部署专家",
+      "permission": {
+        "edit": "deny",
+        "bash": "ask"
+      }
+    },
+    "performance-optimizer": {
+      "mode": "subagent",
+      "description": "性能优化专家",
+      "permission": {
+        "edit": "deny",
+        "bash": "ask"
+      }
+    },
+    "legal-compliance": {
+      "mode": "subagent",
+      "description": "法规合规专家",
+      "permission": {
+        "edit": "deny",
+        "bash": "ask"
+      }
+    }
+  },
+  
+  "permission": {
+    "edit": "ask",
+    "bash": {
+      "*": "ask",
+      "git status": "allow",
+      "git diff *": "allow",
+      "git log *": "allow",
+      "date *": "allow",
+      "wc *": "allow",
+      "python3 -m json.tool *": "allow"
+    },
+    "skill": {
+      "*": "allow"
+    }
+  },
+  
+  "tools": {},
+  
+  "instructions": [
+    "AGENTS.md",
+    ".opencode/references/*.md",
+    ".opencode/skills/*/SKILL.md"
+  ]
+}

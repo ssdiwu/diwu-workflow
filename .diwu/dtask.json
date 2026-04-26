@@ -1,0 +1,146 @@
+{
+  "tasks": [
+    {
+      "id": 1,
+      "title": "创建 /drec 命令（Session 记录快速触发）",
+      "description": "将 drec skill 封装为可 / 触发的 command，支持快速记录 session 踩坑经验和 checkpoint。",
+      "acceptance": [
+        "Given 用户在 opencode 输入 /drec When 命令执行 Then AI 按照 drec skill 的四段式格式输出 recording 草稿",
+        "Given /drec 命令文件存在 When 查看 .opencode/commands/drec.md Then 包含 front matter（description、allowed-tools）和 recording 格式模板",
+        "Given opencode.json 已更新 When 启动 opencode Then /drec 出现在 ctrl+p 命令列表中"
+      ],
+      "steps": [
+        "1. [锁定] 复制 skills/drec/SKILL.md 核心内容到 commands/drec.md",
+        "2. [建议] 添加 command front matter（description、argument-hint 可选）",
+        "3. [建议] 简化内容，保留时间戳规则、四段式格式、最低合法答案",
+        "4. 运行验证：opencode 中输入 /drec 可识别"
+      ],
+      "files_modified": [
+        "/Users/diwu/Documents/codes/Githubs/opencode-diwu-workflow/.opencode/commands/drec.md"
+      ],
+      "category": "functional",
+      "blocked_by": [],
+      "status": "Done"
+    },
+    {
+      "id": 2,
+      "title": "创建 /dsess 命令（Session 生命周期管理）",
+      "description": "将 dsess skill 封装为 command，支持手动触发 session 启动流程（上下文恢复、任务选择、归档检查）。",
+      "acceptance": [
+        "Given 用户输入 /dsess When 命令执行 Then AI 执行 Preflight 检查并报告任务状态",
+        "Given .diwu/ 存在 recording 文件 When /dsess 执行 Then 读取最新 session 摘要并注入上下文"
+      ],
+      "steps": [
+        "1. [锁定] 提取 skills/dsess/SKILL.md 的 Session 启动流程到 commands/dsess.md",
+        "2. [建议] 保留断点恢复、任务选择、归档检查等核心步骤",
+        "3. 验证 /dsess 在 opencode 命令列表中可见"
+      ],
+      "files_modified": [
+        "/Users/diwu/Documents/codes/Githubs/opencode-diwu-workflow/.opencode/commands/dsess.md"
+      ],
+      "category": "functional",
+      "blocked_by": [],
+      "status": "Done"
+    },
+    {
+      "id": 3,
+      "title": "创建 /djug 命令（判断决策方法论）",
+      "description": "将 djug skill 封装为 command，支持快速调用判断锚点进行决策。",
+      "acceptance": [
+        "Given 用户输入 /djug When 命令执行 Then AI 按照 djug skill 的判断框架输出 DECISION TRACE",
+        "Given 用户附带问题参数（如 /djug 是否拆分任务）When 执行 Then 直接应用判断锚点分析"
+      ],
+      "steps": [
+        "1. [锁定] 提取 skills/djug/SKILL.md 的判断锚点到 commands/djug.md",
+        "2. [建议] 保留 DECISION TRACE 格式和红旗信号检测"
+      ],
+      "files_modified": [
+        "/Users/diwu/Documents/codes/Githubs/opencode-diwu-workflow/.opencode/commands/djug.md"
+      ],
+      "category": "functional",
+      "blocked_by": [],
+      "status": "Done"
+    },
+    {
+      "id": 4,
+      "title": "创建 /dvfy 命令（验证规则快速查询）",
+      "description": "将 dvfy skill 封装为 command，支持快速查询验证规则和证据优先级。",
+      "acceptance": [
+        "Given 用户输入 /dvfy When 命令执行 Then AI 输出验证规则摘要和证据优先级表",
+        "Given 用户在参数中提供具体验收条件 When /dvfy 执行 Then 判断该条件是否符合 Done 标准"
+      ],
+      "steps": [
+        "1. [锁定] 提取 skills/dvfy/SKILL.md 的验证规则到 commands/dvfy.md",
+        "2. [建议] 保留证据优先级表和 Done 判定标准"
+      ],
+      "files_modified": [
+        "/Users/diwu/Documents/codes/Githubs/opencode-diwu-workflow/.opencode/commands/dvfy.md"
+      ],
+      "category": "functional",
+      "blocked_by": [],
+      "status": "Done"
+    },
+    {
+      "id": 5,
+      "title": "创建 /darc 命令（归档操作）",
+      "description": "将 darc skill 封装为 command，支持手动触发任务和 recording 归档。",
+      "acceptance": [
+        "Given 用户输入 /darc When 命令执行 Then AI 检查 dtask.json 和 recording/ 目录并执行归档",
+        "Given Done 任务数未达阈值 When /darc 执行 Then 提示无需归档并报告当前统计"
+      ],
+      "steps": [
+        "1. [锁定] 提取 skills/darc/SKILL.md 的归档规则到 commands/darc.md",
+        "2. [建议] 保留 task.json 归档和 recording 归档两种轨道",
+        "3. [建议] 添加手动归档确认（避免误触发）"
+      ],
+      "files_modified": [
+        "/Users/diwu/Documents/codes/Githubs/opencode-diwu-workflow/.opencode/commands/darc.md"
+      ],
+      "category": "functional",
+      "blocked_by": [],
+      "status": "Done"
+    },
+    {
+      "id": 6,
+      "title": "更新 opencode.json 注册新 commands",
+      "description": "在 opencode.json 的 command 字段中注册 drec/dsess/djug/dvfy/darc，确保 opencode 能识别。",
+      "acceptance": [
+        "Given opencode.json 已更新 When 启动 opencode Then ctrl+p 列表显示 12 个命令（原有 7 个 + 新增 5 个）",
+        "Given 全局 opencode.json 已更新 When 运行 install-global.sh 项目模式 Then 新项目自动获得所有 commands"
+      ],
+      "steps": [
+        "1. [锁定] 更新 opencode-diwu-workflow/opencode.json 的 command 字段",
+        "2. [锁定] 更新 install-global.sh 中的 diwuCommands 对象",
+        "3. 验证 JSON 合法性"
+      ],
+      "files_modified": [
+        "/Users/diwu/Documents/codes/Githubs/opencode-diwu-workflow/opencode.json",
+        "/Users/diwu/Documents/codes/Githubs/opencode-diwu-workflow/install-global.sh"
+      ],
+      "category": "functional",
+      "blocked_by": [1, 2, 3, 4, 5],
+      "status": "Done"
+    },
+    {
+      "id": 7,
+      "title": "测试验证所有新命令可触发",
+      "description": "在 opencode 中逐个测试 /drec /dsess /djug /dvfy /darc，确认 skills 内容正常加载。",
+      "acceptance": [
+        "Given opencode 已启动 When 输入 /drec Then AI 返回 drec skill 内容（非 unknown command）",
+        "Given 输入 /dsess /djug /dvfy /darc When 执行 Then 均正常返回对应 skill 内容",
+        "Given 输入 /drec 参数'记录本次 session' When 执行 Then AI 按四段式格式输出"
+      ],
+      "steps": [
+        "1. 启动 opencode",
+        "2. 逐个测试 5 个新命令",
+        "3. 记录测试结果到 dtask.json 对应任务"
+      ],
+      "files_modified": [
+        "/Users/diwu/Documents/codes/Githubs/opencode-diwu-workflow/.diwu/recording/"
+      ],
+      "category": "functional",
+      "blocked_by": [6],
+      "status": "InSpec"
+    }
+  ]
+}

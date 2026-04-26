@@ -1,0 +1,19 @@
+# macOS
+.DS_Store
+
+# Runtime artifacts
+.diwu/recording/
+.diwu/archive/
+
+# Dependencies
+node_modules/
+
+# Test caches
+.pytest_cache/
+__pycache__/
+
+# Local configs
+*.local.json
+
+# Plugin runtime state
+.opencode/state/
