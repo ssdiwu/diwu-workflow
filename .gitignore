@@ -4,6 +4,7 @@ AGENTS.md
 .claude/
 .diwu/
 .doc/
+.opencode/
 sync-rules.sh
 __pycache__/
 .agents/
